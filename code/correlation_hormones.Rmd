@@ -1,0 +1,69 @@
+---
+title: 'SNAG: Hormones'
+author: "Shuying Yu"
+date: "1/9/2022"
+output: html_document
+---
+
+```{r setup, include = TRUE, warning = FALSE, message = FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+
+#Attach libraries
+library(tidyverse)
+library(here)
+library(janitor)
+```
+
+
+# Read in the Data
+
+Data has been cleaned into tidy format prior to analysis
+
+```{r}
+```
+
+
+
+# Wrangling
+
+
+I want to keep participants that have 1) SNAG data *and* 2) hormones data. Men and women will be kept separate for analyses because they were tested for different sex steroid hormones.
+
+
+
+Notes about snag blood hormones: some only e and some e and T; solution: use Progestoerone/fsh levels from scan
+
+# Correlations
+
+Current sample sizes for behavior $\times$ sex hormones:
+
+*Male*
+- LOOP: 
+- MAZE: 
+- DSP
+
+*Female*
+- LOOP:
+- MAZE: 
+- DSP
+
+## Male
+
+### LOOP
+
+### MAZE
+
+### DSP
+
+## Female
+
+### LOOP
+
+### MAZE
+
+### DSP
+
+
+
+
+
