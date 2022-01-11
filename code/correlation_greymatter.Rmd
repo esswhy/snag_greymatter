@@ -1,0 +1,298 @@
+---
+title: "SNAG: T1 and T2 subfields"
+author: "Shuying Yu"
+date: "1/10/2022"
+output: 
+  html_document: 
+    toc: yes
+    toc_float: true
+---
+
+```{r setup, include = FALSE, warning = FALSE, message = FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE, fig.align = "center")
+
+#Attach libraries
+library(tidyverse)
+library(here)
+library(janitor)
+library(ggpubr)
+library(patchwork)
+```
+
+
+# Overview
+
+This report provides exploratory and preliminary analyses beween sex hormones and T1 and T2 hippocampal subfield data. No behavioral data included (see prior analysis or PowerPoint).
+
+I cleaned some of the data prior to analyses. I had to:
+
+1) Filter participants that have T1 or T2hipp data from scan
+2) Select sex hormone data from when scan was conducted
+3) Correct T1 and T2hipp volumes using TIV from VBM
+4) Average left and right volumes to get an average measure for each subfield and brain region
+
+
+```{r data_wrangling}
+########## Data 
+
+#Read in the data
+df <- read_csv(here("data", "snag_t1_t2hipp_hormones.csv"))
+
+
+
+#Filter for having T1 and scan hormone data
+df_t1 <- df %>% 
+  
+  #Filter
+  filter(t1_status == "yes") %>% 
+  
+  #Select certain columns
+  select(subject_id, sex, age_scan_years,
+         repo_status_scan, t1_vol_left_hipp:t1_csf_vbm,
+         estradiol_scan_pg_ml:testosterone_scan_ng_dl)
+
+
+  
+df_t2hipp <- df %>% 
+  
+  #Filter
+  filter(t2hipp_status == "yes") %>% 
+  
+  #Select certain columns
+  select(subject_id, sex, age_scan_years,
+         repo_status_scan, t1_tiv_vbm,
+         t2hipp_tiv_thick_cat12:t2hipp_thick_right_phg,
+         estradiol_scan_pg_ml:testosterone_scan_ng_dl)
+
+
+
+########## Correct using TIV, then average left and right
+
+##### T1
+df_t1_corrected <- df_t1 %>% 
+
+  #Correct using TIV from VBM
+  #(Total) hippocampus, MTL, parahippocampal gyrus
+  #Include total GMV from hippocampus 
+  mutate(t1_vol_left_hipp = t1_vol_left_hipp/t1_tiv_vbm,
+         t1_vol_right_hipp = t1_vol_left_hipp/t1_tiv_vbm,
+         t1_vol_left_mtl = t1_vol_left_mtl/t1_tiv_vbm,
+         t1_vol_right_mtl = t1_vol_right_mtl/t1_tiv_vbm,
+         t1_vol_left_parahipp = t1_vol_left_parahipp/t1_tiv_vbm,
+         t1_vol_right_parahipp = t1_vol_right_parahipp/t1_tiv_vbm,
+         t1_vol_gmv = t1_gmv_vbm/t1_tiv_vbm) %>% 
+  
+  #Average left and right regions
+  mutate(t1_vol_hipp = (t1_vol_left_hipp + t1_vol_right_hipp)/2,
+         t1_vol_mtl = (t1_vol_left_mtl + t1_vol_right_mtl)/2,
+         t1_vol_parahipp = (t1_vol_left_parahipp + t1_vol_right_parahipp)/2)
+
+
+
+##### T2hipp
+
+#Create function for apply to variables
+dividebyTIV <- function(x, na.rm = FALSE) (x/df_t2hipp$t1_tiv_vbm)
+
+#Apply function to variables
+df_t2hipp_corrected <- df_t2hipp %>% 
+  
+  #Correct using TIV from T1 VBM
+  #CA1, CA23, DG, ERC,PHC, PRC, SUB, PHG
+  mutate_at(vars(t2hipp_vol_left_ca1:t2hipp_vol_right_phg),
+            dividebyTIV) %>% 
+  
+  #Average left and right regions
+  mutate(t2hipp_vol_ca1 = (t2hipp_vol_left_ca1 + t2hipp_vol_right_ca1)/2,
+         t2hipp_vol_ca23 = (t2hipp_vol_left_ca23 + t2hipp_vol_right_ca23)/2,
+         t2hipp_vol_dg = (t2hipp_vol_left_dg + t2hipp_vol_right_dg)/2,
+         t2hipp_vol_erc = (t2hipp_vol_left_erc + t2hipp_vol_right_erc)/2,
+         t2hipp_vol_phc = (t2hipp_vol_left_phc + t2hipp_vol_right_phc)/2,
+         t2hipp_vol_sub = (t2hipp_vol_left_sub + t2hipp_vol_right_sub)/2,
+         t2hipp_vol_phg = (t2hipp_vol_left_phg + t2hipp_vol_right_phg)/2)
+```
+
+
+
+# T1 Volume
+
+## Total Hipp
+
+```{r}
+#Scatterplot
+t1hipp1 <- ggscatter(df_t1_corrected, x = "estradiol_scan_pg_ml", y = "t1_vol_hipp",
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Estradiol (pg/mL)", ylab = "Total Hippocampus")
+
+#Scatterplot
+t1hipp2 <- ggscatter(df_t1_corrected, x = "progesterone_scan_ng_ml", y = "t1_vol_hipp",
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Progesterone (ng/mL)", ylab = "Total Hippocampus")
+
+
+#Scatterplot
+t1hipp3 <- ggscatter(df_t1_corrected, x = "fsh_scan_miu_ml", y = "t1_vol_hipp",
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "FSH (mIU/mL)", ylab = "Total Hippocampus")
+
+
+#Scatterplot, facet by sex
+t1hipp4 <- ggscatter(df_t1_corrected, x = "shbg_scan_nmol_l", y = "t1_vol_hipp",
+          facet.by = "sex",
+          add = "reg.line", 
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "SHBG (nmol/L)", ylab = "Total Hippocampus")
+
+#Scatterplot, facet by sex
+t1hipp5 <- ggscatter(df_t1_corrected, x = "testosterone_scan_ng_dl", y = "t1_vol_hipp", facet.by = "sex",
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "Testosterone (ng/dL)", ylab = "Total Hippocampus")
+
+
+#Scatterplot, facet by sex
+t1hipp6 <- ggscatter(df_t1_corrected, x = "dheas_scan_ug_dl", y = "t1_vol_hipp", facet.by = "sex",
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "DHEAS (ug/dL)", ylab = "Total Hippocampus")
+
+
+#Present as patchwork
+#(t1hipp1 + t1hipp2 + t1hipp3)/(t1hipp4 + t1hipp5 + t1hipp6)
+(t1hipp1 + t1hipp2 + t1hipp3)
+t1hipp4
+t1hipp5
+t1hipp6
+```
+
+
+## Total GMV
+
+```{r}
+#Scatterplot
+t1gmv1 <- ggscatter(df_t1_corrected, x = "estradiol_scan_pg_ml", y = "t1_vol_gmv",
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Estradiol (pg/mL)", ylab = "Total Grey Matter")
+
+#Scatterplot
+t1gmv2 <- ggscatter(df_t1_corrected, x = "progesterone_scan_ng_ml", y = "t1_vol_gmv",
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Progesterone (ng/mL)", ylab = "Total Grey Matter")
+
+
+#Scatterplot
+t1gmv3 <- ggscatter(df_t1_corrected, x = "fsh_scan_miu_ml", y = "t1_vol_gmv",
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "FSH (mIU/mL)", ylab = "Total Grey Matter")
+
+
+#Scatterplot, facet by sex
+t1gmv4 <- ggscatter(df_t1_corrected, x = "shbg_scan_nmol_l", y = "t1_vol_gmv",
+          facet.by = "sex",
+          add = "reg.line", 
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "SHBG (nmol/L)", ylab = "Total Grey Matter")
+
+#Scatterplot, facet by sex
+t1gmv5 <- ggscatter(df_t1_corrected, x = "testosterone_scan_ng_dl", y = "t1_vol_gmv", facet.by = "sex",
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "Testosterone (ng/dL)", ylab = "Total Grey Matter")
+
+
+#Scatterplot, facet by sex
+t1gmv6 <- ggscatter(df_t1_corrected, x = "dheas_scan_ug_dl", y = "t1_vol_gmv", facet.by = "sex",
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "DHEAS (ug/dL)", ylab = "Total Grey Matter")
+
+
+#Present as patchwork
+(t1gmv1 + t1gmv2 + t1gmv3)
+t1gmv4
+t1gmv5
+t1gmv6
+```
+
+
+## MTL
+
+
+## Parahippocampus
+
+
+
+# T2hipp Volume
+
+## CA1
+
+## CA2/3
+
+## DG
+
+## ERC
+
+## PHC
+
+## SUB
+
+## PHG
+
+
+
+# Summary
+
+
+
+
+
+
+
