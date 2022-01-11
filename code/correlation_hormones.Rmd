@@ -2,68 +2,893 @@
 title: 'SNAG: Hormones'
 author: "Shuying Yu"
 date: "1/9/2022"
-output: html_document
+output: 
+  html_document: 
+    toc: yes
+    toc_float: true
 ---
 
-```{r setup, include = TRUE, warning = FALSE, message = FALSE}
-knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```{r setup, include = FALSE, warning = FALSE, message = FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE, fig.align = "center")
 
 #Attach libraries
 library(tidyverse)
 library(here)
 library(janitor)
+library(ggpubr)
+library(patchwork)
 ```
 
+# Overview
 
-# Read in the Data
-
-Data has been cleaned into tidy format prior to analysis
+Data has been cleaned into tidy format prior to analysis.
 
 ```{r}
+#Read in the data
+df <- read_csv(here("data", "snag_t1_t2hipp_hormones.csv"))
+
+#Check first 6 lines of data
+#head(df)
 ```
 
+For hormones and behavior correlations, I want to keep participants that have 1) SNAG data *and* 2) hormones data. Men and women will be kept separate for analyses because they were tested for different sex steroid hormones.
+
+Men were tested for SHBG, DHEAS, and testosterone if they had a scan. If they did a follow-up spatial session or had no scan, they were only tested for SHBG and testosterone, or just SHBG.
+
+Women were tested for SHBG, DHEAS, testosterone, *and* estradiol, progestoerone, and FSH if they also did scan. If they did a follow-up spatial session, they were only tested for estradiol and testosterone. Estradiol was only tested if they did not do a scan.
+
+```{r}
+########## Filter for SNAG, hormones by sex
+
+df_women <- df %>% 
+  
+  #Filter if did snag, female
+  filter(spatial_status == "yes",
+         sex == "Female") %>% 
+  
+  #Select specific columns
+  #Basic demo, snag, hormones
+  select(subject_id:repo_status_spatial,
+         loop_pe_rad1_m:testosterone_spatial_ng_dl) %>% 
+  
+  #Remove irrelevant columns
+  select(-c(age_scan_years)) 
 
 
-# Wrangling
 
-
-I want to keep participants that have 1) SNAG data *and* 2) hormones data. Men and women will be kept separate for analyses because they were tested for different sex steroid hormones.
-
-
-
-Notes about snag blood hormones: some only e and some e and T; solution: use Progestoerone/fsh levels from scan
+df_men <- df %>% 
+  
+  #Filter if did snag, male
+  filter(spatial_status == "yes",
+         sex == "Male") %>% 
+  
+  #Select specific columns
+  #Basic demo, snag, hormones
+  select(subject_id:repo_status_spatial,
+         loop_pe_rad1_m:testosterone_spatial_ng_dl) %>% 
+  
+  #Remove irrelevant columns
+  select(-c(age_scan_years, repo_status_scan, repo_status_spatial,
+         estradiol_scan_pg_ml:fsh_scan_miu_ml,
+         estradiol_spatial_pg_ml:fsh_spatial_miu_ml))
+```
 
 # Correlations
 
-Current sample sizes for behavior $\times$ sex hormones:
+Current sample sizes for behavior $\times$ sex hormones (participants with behavior for analysis):
 
 *Male*
-- LOOP: 
-- MAZE: 
-- DSP
+
+-   LOOP: 23
+-   MAZE: 14
+-   DSP: 21
 
 *Female*
-- LOOP:
-- MAZE: 
-- DSP
+
+-   LOOP: 32
+-   MAZE: 25
+-   DSP: 19
+
+The following figures and Pearson's *r* correlation analyses are preliminary and exploratory. The hormone data were taken from when the SNAG study coincided with the blood draws (i.e., if participants did a follow-up SNAG, hormone data was taken from that time point and not when scan was done). See summary section for future considerations. Thus, sample sizes differ not just by task, but also by sex hormone.
+
+The 95% confidence interval is drawn with the line of best fit. Data points with missing hormone data are not plotted (dropped automatically) so they do not skew the correlation analyses or the line of best fit.
 
 ## Male
 
 ### LOOP
 
+#### Position Error
+
+```{r}
+#Subset
+df_men_loop_pe <- df_men %>% 
+  
+  #Filter for loop position error
+  #Average is of the 3 radii values for variable
+  drop_na(loop_pe_avg_m)
+```
+
+```{r}
+#Scatterplot
+pe1 <- ggscatter(df_men_loop_pe, x = "shbg_spatial_nmol_l", y = "loop_pe_avg_m", 
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "SHBG (nmol/L)", ylab = "Average Position Error (m)")
+
+
+#Scatterplot
+pe2 <- ggscatter(df_men_loop_pe, x = "testosterone_spatial_ng_dl", y = "loop_pe_avg_m", 
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "Testosterone (ng/dL)", ylab = "Average Position Error (m)")
+
+
+#Scatterplot
+pe3 <- ggscatter(df_men_loop_pe, x = "dheas_spatial_ug_dl", y = "loop_pe_avg_m", 
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "DHEAS (ug/dL)", ylab = "Average Position Error (m)")
+
+#Present as patchwork
+pe1 + pe2 + pe3
+```
+
+
+For LOOP position error, DHEAS seems to be positively associated with behavior for men.
+
+#### Degrees Traveled
+
+```{r}
+#Subset
+df_men_loop_de <- df_men %>% 
+  
+  #Filter for loop degrees averaged
+  #Average is of the 3 radii values for variable
+  drop_na(loop_de_avg_degree)
+```
+
+```{r}
+#Scatterplot
+de1 <- ggscatter(df_men_loop_de, x = "shbg_spatial_nmol_l", y = "loop_de_avg_degree", 
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "SHBG (nmol/L)", ylab = "Average Degrees Traveled (degree)")
+
+
+#Scatterplot
+de2 <- ggscatter(df_men_loop_de, x = "testosterone_spatial_ng_dl", y = "loop_de_avg_degree", 
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "Testosterone (ng/dL)", ylab = "Average Degrees Traveled (degree)")
+
+
+#Scatterplot
+de3 <- ggscatter(df_men_loop_de, x = "dheas_spatial_ug_dl", y = "loop_de_avg_degree", 
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "DHEAS (ug/dL)", ylab = "Average Degrees Traveled (degree)")
+
+#Present as patchwork
+de1 + de2 + de3
+```
+
+
+
+For LOOP degrees traveled, it seems to have a negative trend with hormones overall in men. SHBG seems to be marginally and negatively correlated with degrees traveled.
+
 ### MAZE
 
+#### Accuracy
+
+```{r}
+#Subset
+df_men_maze_accuracy <- df_men %>% 
+  
+  #Filter for loop degrees averaged
+  #Average is of the 3 radii values for variable
+  drop_na(maze_accuracy_pct)
+```
+
+```{r}
+#Scatterplot
+acc1 <- ggscatter(df_men_maze_accuracy, x = "shbg_spatial_nmol_l", y = "maze_accuracy_pct", 
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "SHBG (nmol/L)", ylab = "Accuracy (%)")
+
+
+#Scatterplot
+acc2 <- ggscatter(df_men_maze_accuracy, x = "testosterone_spatial_ng_dl", y = "maze_accuracy_pct", 
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "Testosterone (ng/dL)", ylab = "Accuracy (%)")
+
+
+#Scatterplot
+acc3 <- ggscatter(df_men_maze_accuracy, x = "dheas_spatial_ug_dl", y = "maze_accuracy_pct", 
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "DHEAS (ug/dL)", ylab = "Accuracy (%)")
+
+#Present as patchwork
+acc1 + acc2 + acc3
+```
+
+
+No associations between MAZE accuracy and hormones for men.
+
+#### Moves
+
+```{r}
+#Subset
+df_men_maze_moves <- df_men %>% 
+  
+  #Filter for loop degrees averaged
+  #Average is of the 3 radii values for variable
+  drop_na(maze_moves)
+```
+
+```{r}
+#Scatterplot
+moves1 <- ggscatter(df_men_maze_moves, x = "shbg_spatial_nmol_l", y = "maze_moves", 
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "SHBG (nmol/L)", ylab = "Number of Moves")
+
+
+#Scatterplot
+moves2 <- ggscatter(df_men_maze_moves, x = "testosterone_spatial_ng_dl", y = "maze_moves", 
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "Testosterone (ng/dL)", ylab = "Number of Moves")
+
+
+#Scatterplot
+moves3 <- ggscatter(df_men_maze_moves, x = "dheas_spatial_ug_dl", y = "maze_moves", 
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "DHEAS (ug/dL)", ylab = "Number of Moves")
+
+
+#Present as patchwork
+moves1 + moves2 + moves3
+```
+
+
+Also no association between MAZE number of moves and hormones for men.
+
 ### DSP
+
+#### Wayfinding Success
+
+```{r}
+#Subset
+df_men_dsp_succ <- df_men %>% 
+  
+  #Filter for loop degrees averaged
+  #Average is of the 3 radii values for variable
+  drop_na(dsp_success_pct)
+```
+
+```{r}
+#Scatterplot
+succ1 <- ggscatter(df_men_dsp_succ, x = "shbg_spatial_nmol_l", y = "dsp_success_pct", 
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "SHBG (nmol/L)", ylab = "Wayfinding Success(%)")
+
+
+#Scatterplot
+succ2 <- ggscatter(df_men_dsp_succ, x = "testosterone_spatial_ng_dl", y = "dsp_success_pct", 
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "Testosterone (ng/dL)", ylab = "Wayfinding Success(%)")
+
+
+#Scatterplot
+succ3 <- ggscatter(df_men_dsp_succ, x = "dheas_spatial_ug_dl", y = "dsp_success_pct", 
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "DHEAS (ug/dL)", ylab = "Wayfinding Success(%)")
+
+#Present as patchwork
+succ1 + succ2 + succ3
+```
+
+
+Generally looks like a positive trend, but overall no associations between DSP wayfinding success and hormones for men.
+
+#### Solution Index
+
+```{r}
+#Subset
+df_men_dsp_si <- df_men %>% 
+  
+  drop_na(dsp_si_true_pct)
+```
+
+```{r}
+#Scatterplot
+si1 <- ggscatter(df_men_dsp_si, x = "shbg_spatial_nmol_l", y = "dsp_si_true_pct", 
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "SHBG (nmol/L)", ylab = "Solution Index (%)")
+
+
+#Scatterplot
+si2 <- ggscatter(df_men_dsp_si, x = "testosterone_spatial_ng_dl", y = "dsp_si_true_pct", 
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "Testosterone (ng/dL)", ylab = "Solution Index (%)")
+
+
+#Scatterplot
+si3 <- ggscatter(df_men_dsp_si, x = "dheas_spatial_ug_dl", y = "dsp_si_true_pct", 
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "DHEAS (ug/dL)", ylab = "Solution Index (%)")
+
+#Present as patchwork
+si1 + si2 + si3
+```
+
+
+No association between DSP solution index and hormones for men.
 
 ## Female
 
 ### LOOP
 
+#### Position Error
+
+```{r}
+#Subset
+df_women_loop_pe <- df_women %>% 
+  
+  drop_na(loop_pe_avg_m)
+```
+
+```{r}
+#Test to see if fig and values same if not dropping hormones with NA values
+test <- df_women %>% 
+  
+  drop_na(loop_pe_avg_m, estradiol_spatial_pg_ml)
+
+
+#Same correlation and p-values compared to not dropping
+#The points gathered near 0 for estradiol is just very low estradiol
+test_fig <- ggscatter(test, x = "estradiol_spatial_pg_ml", y = "loop_pe_avg_m", 
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          xlab = "Estradiol (pg/mL)", ylab = "Average Position Error (m)")
+#test_fig
+
+#Same with ggplot scatterplot (limits of x-axis makes it seen like it is close to 0)
+# ggplot(data = test, aes(x = estradiol_spatial_pg_ml,
+#                         y = loop_pe_avg_m)) +
+#   geom_point(size = 2, color = "darkgreen")
+```
+
+```{r}
+#Scatterplot
+pe1 <- ggscatter(df_women_loop_pe, x = "estradiol_spatial_pg_ml", y = "loop_pe_avg_m", 
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          xlab = "Estradiol (pg/mL)", ylab = "Average Position Error (m)")
+
+
+#Scatterplot
+pe2 <- ggscatter(df_women_loop_pe, x = "progesterone_spatial_ng_ml", y = "loop_pe_avg_m", 
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "Progesterone (ng/mL)", ylab = "Average Position Error (m)")
+
+
+#Scatterplot
+pe3 <- ggscatter(df_women_loop_pe, x = "fsh_spatial_miu_ml", y = "loop_pe_avg_m", 
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "FSH (mIU/mL)", ylab = "Average Position Error (m)")
+
+
+#Scatterplot
+pe4 <- ggscatter(df_women_loop_pe, x = "shbg_spatial_nmol_l", y = "loop_pe_avg_m", 
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "SHBG (nmol/L)", ylab = "Average Position Error (m)")
+
+
+#Scatterplot
+pe5 <- ggscatter(df_women_loop_pe, x = "testosterone_spatial_ng_dl", y = "loop_pe_avg_m", 
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "Testosterone (ng/dL)", ylab = "Average Position Error (m)")
+
+
+#Scatterplot
+pe6 <- ggscatter(df_women_loop_pe, x = "dheas_spatial_ug_dl", y = "loop_pe_avg_m", 
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "DHEAS (ug/dL)", ylab = "Average Position Error (m)")
+
+
+#Present as patchwork
+(pe1 + pe2 + pe3)/(pe4 + pe5 + pe6)
+```
+
+
+For LOOP position error, there is a positive trend with DHEAS for women.
+
+#### Degrees Traveled
+
+```{r}
+#Subset
+df_women_loop_de <- df_women %>% 
+  
+  drop_na(loop_de_avg_degree)
+```
+
+```{r}
+#Scatterplot
+de1 <- ggscatter(df_women_loop_de, x = "estradiol_spatial_pg_ml", y = "loop_de_avg_degree", 
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "Estradiol (pg/mL)", ylab = "Average Degrees Traveled")
+
+
+#Scatterplot
+de2 <- ggscatter(df_women_loop_de, x = "progesterone_spatial_ng_ml", y = "loop_de_avg_degree", 
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "Progesterone (ng/mL)", ylab = "Average Degrees Traveled")
+
+
+#Scatterplot
+de3 <- ggscatter(df_women_loop_de, x = "fsh_spatial_miu_ml", y = "loop_de_avg_degree", 
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "FSH (mIU/mL)", ylab = "Average Degrees Traveled")
+
+
+#Scatterplot
+de4 <- ggscatter(df_women_loop_de, x = "shbg_spatial_nmol_l", y = "loop_de_avg_degree", 
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "SHBG (nmol/L)", ylab = "Average Degrees Traveled")
+
+
+#Scatterplot
+de5 <- ggscatter(df_women_loop_de, x = "testosterone_spatial_ng_dl", y = "loop_de_avg_degree", 
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "Testosterone (ng/dL)", ylab = "Average Degrees Traveled")
+
+
+#Scatterplot
+de6 <- ggscatter(df_women_loop_de, x = "dheas_spatial_ug_dl", y = "loop_de_avg_degree", 
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "DHEAS (ug/dL)", ylab = "Average Degrees Traveled")
+
+
+#Present as patchwork
+(de1 + de2 + de3)/(de4 + de5 + de6)
+```
+
+
+No associations between LOOP degrees traveled and hormones for women.
+
 ### MAZE
+
+#### Accuracy
+
+```{r}
+#Subset
+df_women_maze_accuracy <- df_women %>% 
+  
+  drop_na(maze_accuracy_pct)
+```
+
+```{r}
+#Scatterplot
+acc1 <- ggscatter(df_women_maze_accuracy, x = "estradiol_spatial_pg_ml", y = "maze_accuracy_pct", 
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "Estradiol (pg/mL)", ylab = "Accuracy (%)")
+
+
+#Scatterplot
+acc2 <- ggscatter(df_women_maze_accuracy, x = "progesterone_spatial_ng_ml", y = "maze_accuracy_pct", 
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "Progesterone (ng/mL)", ylab = "Accuracy (%)")
+
+
+#Scatterplot
+acc3 <- ggscatter(df_women_maze_accuracy, x = "fsh_spatial_miu_ml", y = "maze_accuracy_pct", 
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "FSH (mIU/mL)", ylab = "Accuracy (%)")
+
+
+#Scatterplot
+acc4 <- ggscatter(df_women_maze_accuracy, x = "shbg_spatial_nmol_l", y = "maze_accuracy_pct", 
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "SHBG (nmol/L)", ylab = "Accuracy (%)")
+
+
+#Scatterplot
+acc5 <- ggscatter(df_women_maze_accuracy, x = "testosterone_spatial_ng_dl", y = "maze_accuracy_pct", 
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "Testosterone (ng/dL)", ylab = "Accuracy (%)")
+
+
+#Scatterplot
+acc6 <- ggscatter(df_women_maze_accuracy, x = "dheas_spatial_ug_dl", y = "maze_accuracy_pct", 
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "DHEAS (ug/dL)", ylab = "Accuracy (%)")
+
+#Present as patchwork
+(acc1 + acc2 + acc3)/(acc4 + acc5 + acc6)
+```
+
+
+No association between MAZE accuracy and hormones for women.
+
+#### Moves
+
+```{r}
+#Subset
+df_women_maze_moves <- df_women %>% 
+  
+  drop_na(maze_moves)
+```
+
+```{r}
+#Scatterplot
+moves1 <- ggscatter(df_women_maze_moves, x = "estradiol_spatial_pg_ml", y = "maze_moves", 
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "Estradiol (pg/mL)", ylab = "Number of Moves")
+
+
+#Scatterplot
+moves2 <- ggscatter(df_women_maze_moves, x = "progesterone_spatial_ng_ml", y = "maze_moves", 
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "Progesterone (ng/mL)", ylab = "Number of Moves")
+
+
+#Scatterplot
+moves3 <- ggscatter(df_women_maze_moves, x = "fsh_spatial_miu_ml", y = "maze_moves", 
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "FSH (mIU/mL)", ylab = "Number of Moves")
+
+
+#Scatterplot
+moves4 <- ggscatter(df_women_maze_moves, x = "shbg_spatial_nmol_l", y = "maze_moves", 
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "SHBG (nmol/L)", ylab = "Number of Moves")
+
+
+#Scatterplot
+moves5 <- ggscatter(df_women_maze_moves, x = "testosterone_spatial_ng_dl", y = "maze_moves", 
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "Testosterone (ng/dL)", ylab = "Number of Moves")
+
+
+#Scatterplot
+moves6 <- ggscatter(df_women_maze_moves, x = "dheas_spatial_ug_dl", y = "maze_moves", 
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "DHEAS (ug/dL)", ylab = "Number of Moves")
+
+#Present as patchwork
+(moves1 + moves2 + moves3)/(moves4 + moves5 + moves6) 
+```
+
+
+For MAZE moves, it seems to be positively associated with DHEAS and negatively associated with testosterone for women.
 
 ### DSP
 
+#### Wayfinding Success
+
+```{r}
+#Subset
+df_women_dsp_succ <- df_women %>% 
+  
+  drop_na(dsp_success_pct)
+```
+
+```{r}
+#Scatterplot
+succ1 <- ggscatter(df_women_dsp_succ, x = "estradiol_spatial_pg_ml", y = "dsp_success_pct", 
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "Estradiol (pg/mL)", ylab = "Wayfinding Success (%)")
 
 
+#Scatterplot
+succ2 <- ggscatter(df_women_dsp_succ, x = "progesterone_spatial_ng_ml", y = "dsp_success_pct", 
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "Progesterone (ng/mL)", ylab = "Wayfinding Success (%)")
 
 
+#Scatterplot
+succ3 <- ggscatter(df_women_dsp_succ, x = "fsh_spatial_miu_ml", y = "dsp_success_pct", 
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "FSH (mIU/mL)", ylab = "Wayfinding Success (%)")
+
+
+#Scatterplot
+succ4 <- ggscatter(df_women_dsp_succ, x = "shbg_spatial_nmol_l", y = "dsp_success_pct", 
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "SHBG (nmol/L)", ylab = "Wayfinding Success (%)")
+
+
+#Scatterplot
+succ5 <- ggscatter(df_women_dsp_succ, x = "testosterone_spatial_ng_dl", y = "dsp_success_pct", 
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "Testosterone (ng/dL)", ylab = "Wayfinding Success (%)")
+
+
+#Scatterplot
+succ6 <- ggscatter(df_women_dsp_succ, x = "dheas_spatial_ug_dl", y = "dsp_success_pct", 
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "DHEAS (ug/dL)", ylab = "Wayfinding Success (%)")
+
+
+#Present as patchwork
+(succ1 + succ2 + succ3)/(succ4 + succ5 + succ6)
+```
+
+
+No associations between DSP wayfinding success and hormones for women.
+
+#### Solution Index
+
+```{r}
+#Subset
+df_women_dsp_si <- df_women %>% 
+  
+  drop_na(dsp_si_true_pct)
+```
+
+```{r}
+#Scatterplot
+si1 <- ggscatter(df_women_dsp_si, x = "estradiol_spatial_pg_ml", y = "dsp_si_true_pct", 
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "Estradiol (pg/mL)", ylab = "Solution Index (%)")
+
+
+#Scatterplot
+si2 <- ggscatter(df_women_dsp_si, x = "progesterone_spatial_ng_ml", y = "dsp_si_true_pct", 
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "Progesterone (ng/mL)", ylab = "Solution Index (%)")
+
+
+#Scatterplot
+si3 <- ggscatter(df_women_dsp_si, x = "fsh_spatial_miu_ml", y = "dsp_si_true_pct", 
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "FSH (mIU/mL)", ylab = "Solution Index (%)")
+
+
+#Scatterplot
+si4 <- ggscatter(df_women_dsp_si, x = "shbg_spatial_nmol_l", y = "dsp_si_true_pct", 
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "SHBG (nmol/L)", ylab = "Solution Index (%)")
+
+
+#Scatterplot
+si5 <- ggscatter(df_women_dsp_si, x = "testosterone_spatial_ng_dl", y = "dsp_si_true_pct", 
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "Testosterone (ng/dL)", ylab = "Solution Index (%)")
+
+
+#Scatterplot
+si6 <- ggscatter(df_women_dsp_si, x = "dheas_spatial_ug_dl", y = "dsp_si_true_pct", 
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "DHEAS (ug/dL)", ylab = "Solution Index (%)")
+
+#Present as patchwork
+(si1 + si2 + si3)/(si4 + si5 + si6)
+```
+
+
+For DSP solution index, estradiol is positively associated and FSH is negatively associated in women.
+
+# Summary
+
+Some initial findings include the following: 
+
+- For LOOP, there is a ositive association between DHEAS and position error for men and for women, and marginal negative association between SHBG and degrees traveled for men 
+- For MAZE, there are no associations for men. For women, there is a negative correlation with moves made and testosterone, and a positive correlation for moves made with DHEAS 
+- For DSP, there are no associations for men. For women, there is a positive correlation with solution index and estradiol, and a negative association between solution index and FSH
+
+Future directions: 
+
+- Finish data collection and re-evaluate hormones with spatial navigation behaviors for men and women
+- Consider missing hormones data for earlier participants who did SNAG only or did SNAG follow-ups (due to number of missing data from hormones, moving forward should we use hormone data taken during scan if available to substitute for missing spatial hormone data? It will improve sample size.)
