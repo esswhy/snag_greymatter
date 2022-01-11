@@ -22,12 +22,12 @@ library(patchwork)
 
 # Overview
 
-This report provides exploratory and preliminary analyses beween sex hormones and T1 and T2 hippocampal subfield data. No behavioral data included (see prior analysis or PowerPoint).
+This report provides exploratory and preliminary correlation analyses between sex hormones and T1 and T2 hippocampal subfield data from the Healthy Aging Study sample (up to participant 383). No navigation behavioral data included (see prior analysis or PowerPoint).
 
 I cleaned some of the data prior to analyses. I had to:
 
-1) Filter participants that have T1 or T2 subfield data from scan
-2) Select sex hormone data from when scan was conducted
+1) Filter participants that have either T1 or T2 subfield data from scan
+2) Select sex hormone measures from when scan was conducted
 3) Correct T1 and T2 subfield volumes using TIV from VBM
 4) Average left and right volumes to get an average measure for each subfield and brain region
 
@@ -116,7 +116,7 @@ df_t2hipp_corrected <- df_t2hipp %>%
 
 # T1 Volume
 
-## Total Hipp
+## Total Hippocampus
 
 ```{r}
 #Scatterplot
@@ -188,7 +188,7 @@ t1hipp4
 t1hipp5
 t1hipp6
 ```
-
+Total hippocampal volume has a merginal negative association with FSH
 
 ## Total GMV
 
@@ -334,7 +334,7 @@ t1mtl4
 t1mtl5
 t1mtl6
 ```
-
+MTL volume as a somewhat negative association with FSH
 
 ## Parahippocampus
 
@@ -558,20 +558,381 @@ t2ca23_6
 
 ## DG
 
+```{r}
+#Scatterplot
+t2dg_1 <- ggscatter(df_t2hipp_corrected, x = "estradiol_scan_pg_ml", y = "t2hipp_vol_dg",
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Estradiol (pg/mL)", ylab = "Dendate Gyrus")
+
+#Scatterplot
+t2dg_2 <- ggscatter(df_t2hipp_corrected, x = "progesterone_scan_ng_ml", y = "t2hipp_vol_dg",
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Progesterone (ng/mL)", ylab = "Dendate Gyrus")
+
+
+#Scatterplot
+t2dg_3 <- ggscatter(df_t2hipp_corrected, x = "fsh_scan_miu_ml", y = "t2hipp_vol_dg",
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "FSH (mIU/mL)", ylab = "Dendate Gyrus")
+
+
+#Scatterplot, facet by sex
+t2dg_4 <- ggscatter(df_t2hipp_corrected, x = "shbg_scan_nmol_l", y = "t2hipp_vol_dg",
+          facet.by = "sex",
+          add = "reg.line", 
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "SHBG (nmol/L)", ylab = "Dendate Gyrus")
+
+#Scatterplot, facet by sex
+t2dg_5 <- ggscatter(df_t2hipp_corrected, x = "testosterone_scan_ng_dl", y = "t2hipp_vol_dg", facet.by = "sex",
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "Testosterone (ng/dL)", ylab = "Dendate Gyrus")
+
+
+#Scatterplot, facet by sex
+t2dg_6 <- ggscatter(df_t2hipp_corrected, x = "dheas_scan_ug_dl", y = "t2hipp_vol_dg", facet.by = "sex",
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "DHEAS (ug/dL)", ylab = "Dendate Gyrus")
+
+
+#Present as patchwork
+(t2dg_1 + t2dg_2 + t2dg_3)
+t2dg_4
+t2dg_5
+t2dg_6
+```
+
+
 ## ERC
+
+```{r}
+#Scatterplot
+t2erc_1 <- ggscatter(df_t2hipp_corrected, x = "estradiol_scan_pg_ml", y = "t2hipp_vol_erc",
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Estradiol (pg/mL)", ylab = "Entorhinal Cortex")
+
+#Scatterplot
+t2erc_2 <- ggscatter(df_t2hipp_corrected, x = "progesterone_scan_ng_ml", y = "t2hipp_vol_erc",
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Progesterone (ng/mL)", ylab = "Entorhinal Cortex")
+
+
+#Scatterplot
+t2erc_3 <- ggscatter(df_t2hipp_corrected, x = "fsh_scan_miu_ml", y = "t2hipp_vol_erc",
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "FSH (mIU/mL)", ylab = "Entorhinal Cortex")
+
+
+#Scatterplot, facet by sex
+t2erc_4 <- ggscatter(df_t2hipp_corrected, x = "shbg_scan_nmol_l", y = "t2hipp_vol_erc",
+          facet.by = "sex",
+          add = "reg.line", 
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "SHBG (nmol/L)", ylab = "Entorhinal Cortex")
+
+#Scatterplot, facet by sex
+t2erc_5 <- ggscatter(df_t2hipp_corrected, x = "testosterone_scan_ng_dl", y = "t2hipp_vol_erc", facet.by = "sex",
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "Testosterone (ng/dL)", ylab = "Entorhinal Cortex")
+
+
+#Scatterplot, facet by sex
+t2erc_6 <- ggscatter(df_t2hipp_corrected, x = "dheas_scan_ug_dl", y = "t2hipp_vol_erc", facet.by = "sex",
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "DHEAS (ug/dL)", ylab = "Entorhinal Cortex")
+
+
+#Present as patchwork
+(t2erc_1 + t2erc_2 + t2erc_3)
+t2erc_4
+t2erc_5
+t2erc_6
+```
+
 
 ## PHC
 
+```{r}
+#Scatterplot
+t2phc_1 <- ggscatter(df_t2hipp_corrected, x = "estradiol_scan_pg_ml", y = "t2hipp_vol_phc",
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Estradiol (pg/mL)", ylab = "Perirhinal Cortex")
+
+#Scatterplot
+t2phc_2 <- ggscatter(df_t2hipp_corrected, x = "progesterone_scan_ng_ml", y = "t2hipp_vol_phc",
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Progesterone (ng/mL)", ylab = "Perirhinal Cortex")
+
+
+#Scatterplot
+t2phc_3 <- ggscatter(df_t2hipp_corrected, x = "fsh_scan_miu_ml", y = "t2hipp_vol_phc",
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "FSH (mIU/mL)", ylab = "Perirhinal Cortex")
+
+
+#Scatterplot, facet by sex
+t2phc_4 <- ggscatter(df_t2hipp_corrected, x = "shbg_scan_nmol_l", y = "t2hipp_vol_phc",
+          facet.by = "sex",
+          add = "reg.line", 
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "SHBG (nmol/L)", ylab = "Perirhinal Cortex")
+
+#Scatterplot, facet by sex
+t2phc_5 <- ggscatter(df_t2hipp_corrected, x = "testosterone_scan_ng_dl", y = "t2hipp_vol_phc", facet.by = "sex",
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "Testosterone (ng/dL)", ylab = "Perirhinal Cortex")
+
+
+#Scatterplot, facet by sex
+t2phc_6 <- ggscatter(df_t2hipp_corrected, x = "dheas_scan_ug_dl", y = "t2hipp_vol_phc", facet.by = "sex",
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "DHEAS (ug/dL)", ylab = "Perirhinal Cortex")
+
+
+#Present as patchwork
+(t2phc_1 + t2phc_2 + t2phc_3)
+t2phc_4
+t2phc_5
+t2phc_6
+```
+
 ## SUB
+
+```{r}
+#Scatterplot
+t2sub_1 <- ggscatter(df_t2hipp_corrected, x = "estradiol_scan_pg_ml", y = "t2hipp_vol_sub",
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Estradiol (pg/mL)", ylab = "Subiculum")
+
+#Scatterplot
+t2sub_2 <- ggscatter(df_t2hipp_corrected, x = "progesterone_scan_ng_ml", y = "t2hipp_vol_sub",
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Progesterone (ng/mL)", ylab = "Subiculum")
+
+
+#Scatterplot
+t2sub_3 <- ggscatter(df_t2hipp_corrected, x = "fsh_scan_miu_ml", y = "t2hipp_vol_sub",
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "FSH (mIU/mL)", ylab = "Subiculum")
+
+
+#Scatterplot, facet by sex
+t2sub_4 <- ggscatter(df_t2hipp_corrected, x = "shbg_scan_nmol_l", y = "t2hipp_vol_sub",
+          facet.by = "sex",
+          add = "reg.line", 
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "SHBG (nmol/L)", ylab = "Subiculum")
+
+#Scatterplot, facet by sex
+t2sub_5 <- ggscatter(df_t2hipp_corrected, x = "testosterone_scan_ng_dl", y = "t2hipp_vol_sub", facet.by = "sex",
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "Testosterone (ng/dL)", ylab = "Subiculum")
+
+
+#Scatterplot, facet by sex
+t2sub_6 <- ggscatter(df_t2hipp_corrected, x = "dheas_scan_ug_dl", y = "t2hipp_vol_sub", facet.by = "sex",
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "DHEAS (ug/dL)", ylab = "Subiculum")
+
+
+#Present as patchwork
+(t2sub_1 + t2sub_2 + t2sub_3)
+t2sub_4
+t2sub_5
+t2sub_6
+```
+
 
 ## PHG
 
+```{r}
+#Scatterplot
+t2phg_1 <- ggscatter(df_t2hipp_corrected, x = "estradiol_scan_pg_ml", y = "t2hipp_vol_phg",
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Estradiol (pg/mL)", ylab = "Parahippocampal Gyrus")
+
+#Scatterplot
+t2phg_2 <- ggscatter(df_t2hipp_corrected, x = "progesterone_scan_ng_ml", y = "t2hipp_vol_phg",
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Progesterone (ng/mL)", ylab = "Parahippocampal Gyrus")
+
+
+#Scatterplot
+t2phg_3 <- ggscatter(df_t2hipp_corrected, x = "fsh_scan_miu_ml", y = "t2hipp_vol_phg",
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "FSH (mIU/mL)", ylab = "Parahippocampal Gyrus")
+
+
+#Scatterplot, facet by sex
+t2phg_4 <- ggscatter(df_t2hipp_corrected, x = "shbg_scan_nmol_l", y = "t2hipp_vol_phg",
+          facet.by = "sex",
+          add = "reg.line", 
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "SHBG (nmol/L)", ylab = "Parahippocampal Gyrus")
+
+#Scatterplot, facet by sex
+t2phg_5 <- ggscatter(df_t2hipp_corrected, x = "testosterone_scan_ng_dl", y = "t2hipp_vol_phg", facet.by = "sex",
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "Testosterone (ng/dL)", ylab = "Parahippocampal Gyrus")
+
+
+#Scatterplot, facet by sex
+t2phg_6 <- ggscatter(df_t2hipp_corrected, x = "dheas_scan_ug_dl", y = "t2hipp_vol_phg", facet.by = "sex",
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE,
+          cor.method = "pearson",
+          xlab = "DHEAS (ug/dL)", ylab = "Parahippocampal Gyrus")
+
+
+#Present as patchwork
+(t2phg_1 + t2phg_2 + t2phg_3)
+t2phg_4
+t2phg_5
+t2phg_6
+```
 
 
 # Summary
 
 
+Initial findings include:
 
+- For T1 brain data, total hippocampal and MTL volumes are marginally and negatively associated with FSH
+- For CA1 and CA2/3, they are marginally and negatively associated with FSH. CA2/3 is also marginally and negatively associated with testosterone for women
+- For ERC, it is marginally and positively associated with testosterone in men
+
+
+Future directions:
+
+- Finish data collection and re-evaluate analysis with larger and complete sample
 
 
 
