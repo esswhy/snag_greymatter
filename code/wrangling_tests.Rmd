@@ -1,0 +1,149 @@
+---
+title: "snag_wrangling_tests"
+author: "Shuying Yu"
+date: "3/11/2022"
+output: html_document
+---
+
+
+```{r setup, include = FALSE, warning = FALSE, message = FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE, fig.align = "center")
+
+#Attach libraries
+library(tidyverse)
+library(here)
+library(janitor)
+library(ggpubr)
+library(patchwork)
+```
+
+
+# Power Analyses
+
+https://davidakenny.shinyapps.io/MedPower/
+
+## Study 2
+
+X = FSH, Y = DSP solution index, M = CA1 volume
+
+Data has been cleaned into tidy format prior to analysis.
+
+```{r data_wrangling}
+########## Data 
+
+#Read in the data
+df <- read_csv(here("data", "snag_t1_t2hipp_hormones.csv"))
+
+
+
+#Filter for having T1 and scan hormone data
+df_t1 <- df %>% 
+  
+  #Filter
+  filter(t1_status == "yes") %>% 
+  
+  #Select certain columns
+  select(subject_id, sex, age_scan_years,
+         repo_status_scan, t1_vol_left_hipp:t1_csf_vbm,
+         loop_pe_rad1_m:dsp_si_true_pct,
+         estradiol_scan_pg_ml:testosterone_scan_ng_dl)
+
+
+  
+df_t2hipp <- df %>% 
+  
+  #Filter
+  filter(t2hipp_status == "yes") %>% 
+  
+  #Select certain columns
+  select(subject_id, sex, age_scan_years,
+         repo_status_scan, t1_tiv_vbm,
+         t2hipp_tiv_thick_cat12:t2hipp_thick_right_phg,
+         loop_pe_rad1_m:dsp_si_true_pct,
+         estradiol_scan_pg_ml:testosterone_scan_ng_dl)
+
+
+
+
+########## Correct using TIV, then average left and right
+
+##### T1
+df_t1_corrected <- df_t1 %>% 
+
+  #Correct using TIV from VBM
+  #(Total) hippocampus, MTL, parahippocampal gyrus
+  #Include total GMV from hippocampus 
+  mutate(t1_vol_left_hipp = t1_vol_left_hipp/t1_tiv_vbm,
+         t1_vol_right_hipp = t1_vol_left_hipp/t1_tiv_vbm,
+         t1_vol_left_mtl = t1_vol_left_mtl/t1_tiv_vbm,
+         t1_vol_right_mtl = t1_vol_right_mtl/t1_tiv_vbm,
+         t1_vol_left_parahipp = t1_vol_left_parahipp/t1_tiv_vbm,
+         t1_vol_right_parahipp = t1_vol_right_parahipp/t1_tiv_vbm,
+         t1_vol_gmv = t1_gmv_vbm/t1_tiv_vbm) %>% 
+  
+  #Average left and right regions
+  mutate(t1_vol_hipp = (t1_vol_left_hipp + t1_vol_right_hipp)/2,
+         t1_vol_mtl = (t1_vol_left_mtl + t1_vol_right_mtl)/2,
+         t1_vol_parahipp = (t1_vol_left_parahipp + t1_vol_right_parahipp)/2)
+
+
+
+##### T2hipp
+
+#Create function for apply to variables
+dividebyTIV <- function(x, na.rm = FALSE) (x/df_t2hipp$t1_tiv_vbm)
+
+#Apply function to variables
+df_t2hipp_corrected <- df_t2hipp %>% 
+  
+  #Correct using TIV from T1 VBM
+  #CA1, CA23, DG, ERC,PHC, PRC, SUB, PHG
+  mutate_at(vars(t2hipp_vol_left_ca1:t2hipp_vol_right_phg),
+            dividebyTIV) %>% 
+  
+  #Average left and right regions
+  mutate(t2hipp_vol_ca1 = (t2hipp_vol_left_ca1 + t2hipp_vol_right_ca1)/2,
+         t2hipp_vol_ca23 = (t2hipp_vol_left_ca23 + t2hipp_vol_right_ca23)/2,
+         t2hipp_vol_dg = (t2hipp_vol_left_dg + t2hipp_vol_right_dg)/2,
+         t2hipp_vol_erc = (t2hipp_vol_left_erc + t2hipp_vol_right_erc)/2,
+         t2hipp_vol_phc = (t2hipp_vol_left_phc + t2hipp_vol_right_phc)/2,
+         t2hipp_vol_sub = (t2hipp_vol_left_sub + t2hipp_vol_right_sub)/2,
+         t2hipp_vol_phg = (t2hipp_vol_left_phg + t2hipp_vol_right_phg)/2)
+```
+
+
+### Correlation FSH and CA1 volume
+
+```{r}
+cor.test(df_t2hipp_corrected$fsh_scan_miu_ml, 
+         df_t2hipp_corrected$t2hipp_vol_ca1,
+         method = "pearson")
+```
+
+### Correlation FSH and DSP Solution Index
+
+```{r}
+cor.test(df_t2hipp_corrected$fsh_scan_miu_ml, 
+         df_t2hipp_corrected$dsp_si_true_pct,
+         method = "pearson")
+```
+
+### Correlation CA1 and DSP Solution Index
+
+```{r}
+cor.test(df_t2hipp_corrected$dsp_si_true_pct, 
+         df_t2hipp_corrected$t2hipp_vol_ca1,
+         method = "pearson")
+```
+
+Effect	Beta	Partial r	Power	N
+c (total)	-.698	-.698	virtually 1	61
+a	-.370	-.370	.853	61
+b	-.250	-.324	.728	61
+c' (direct)	-.790	-.735	virtually 1	61
+ab (indirect)	.092		.621	61
+Alpha for all power calculations set to .050. Effects (a, b, and c') are Betas.
+
+
+
+

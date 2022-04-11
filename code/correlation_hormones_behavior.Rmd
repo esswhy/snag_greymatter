@@ -1,7 +1,7 @@
 ---
 title: 'SNAG: Hormones'
 author: "Shuying Yu"
-date: "1/9/2022"
+date: "4/11/2022"
 output: 
   html_document: 
     toc: yes
@@ -17,6 +17,7 @@ library(here)
 library(janitor)
 library(ggpubr)
 library(patchwork)
+library(kableExtra)
 ```
 
 # Overview
@@ -25,7 +26,8 @@ Data has been cleaned into tidy format prior to analysis.
 
 ```{r}
 #Read in the data
-df <- read_csv(here("data", "snag_t1_t2hipp_hormones.csv"))
+df <- read_csv(here("data", "HAS_SNAG_mastersheet_tidy.csv")) %>% 
+  clean_names()
 
 #Check first 6 lines of data
 #head(df)
@@ -33,9 +35,10 @@ df <- read_csv(here("data", "snag_t1_t2hipp_hormones.csv"))
 
 For hormones and behavior correlations, I want to keep participants that have 1) SNAG data *and* 2) hormones data. Men and women will be kept separate for analyses because they were tested for different sex steroid hormones.
 
-Men were tested for SHBG, DHEAS, and testosterone if they had a scan. If they did a follow-up spatial session or had no scan, they were only tested for SHBG and testosterone, or just SHBG.
+Men were tested for SHBG, DHEAS, and testosterone if they had a scan. If they did a follow-up spatial session or had no scan, they were only tested for SHBG and testosterone.
 
-Women were tested for SHBG, DHEAS, testosterone, *and* estradiol, progestoerone, and FSH if they also did scan. If they did a follow-up spatial session, they were only tested for estradiol and testosterone. Estradiol was only tested if they did not do a scan.
+Women were tested for SHBG, DHEAS, testosterone, *and* estradiol, progestoerone, and FSH if they also did scan. If they did a follow-up spatial session, they were only tested for estradiol and testosterone. Only estradiol was tested if they did not do a scan, so some women may not be represented in the correlational data.
+
 
 ```{r}
 ########## Filter for SNAG, hormones by sex
@@ -43,7 +46,7 @@ Women were tested for SHBG, DHEAS, testosterone, *and* estradiol, progestoerone,
 df_women <- df %>% 
   
   #Filter if did snag, female
-  filter(spatial_status == "yes",
+  filter(completed_spatial == "Yes",
          sex == "Female") %>% 
   
   #Select specific columns
@@ -59,7 +62,7 @@ df_women <- df %>%
 df_men <- df %>% 
   
   #Filter if did snag, male
-  filter(spatial_status == "yes",
+  filter(completed_spatial == "Yes",
          sex == "Male") %>% 
   
   #Select specific columns
@@ -77,27 +80,32 @@ df_men <- df %>%
 
 Current sample sizes for behavior $\times$ sex hormones (participants with behavior for analysis):
 
-*Male*
 
--   LOOP: 23
--   MAZE: 14
--   DSP: 21
+<br> 
 
-*Female*
+```{r snag-table}
+df %>% 
+  group_by(sex) %>% 
+  summarize(loop = sum(loop_useable == "yes", na.rm=TRUE),
+            maze = sum(maze_useable == "Yes", na.rm=TRUE),
+            dsp = sum(dsp_useable == "Yes", na.rm=TRUE)) %>% 
+  kable(col.names = c("Sex", "LOOP", "MAZE", "DSP"),
+        align = c("l", rep("c", 3)),
+        caption = c("<b> Table 1.</b> Sample sizes for participants who have useable data for LOOP, MAZE, and DP broken down by sex."),
+        table.attr = "style='width:80%;'") %>% 
+  kable_styling(position = "center")
+```
 
--   LOOP: 32
--   MAZE: 25
--   DSP: 19
 
 The following figures and Pearson's *r* correlation analyses are preliminary and exploratory. The hormone data were taken from when the SNAG study coincided with the blood draws (i.e., if participants did a follow-up SNAG, hormone data was taken from that time point and not when scan was done). See summary section for future considerations. Thus, sample sizes differ not just by task, but also by sex hormone.
 
 The 95% confidence interval is drawn with the line of best fit. Data points with missing hormone data are not plotted (dropped automatically) so they do not skew the correlation analyses or the line of best fit.
 
-## Male
+## Male {.tabset}
 
-### LOOP
+### LOOP 
 
-#### Position Error
+**Position Error**
 
 ```{r}
 #Subset
@@ -145,7 +153,7 @@ pe1 + pe2 + pe3
 
 For LOOP position error, DHEAS seems to be positively associated with behavior for men.
 
-#### Degrees Traveled
+**Degrees Traveled**
 
 ```{r}
 #Subset
@@ -196,7 +204,7 @@ For LOOP degrees traveled, it seems to have a negative trend with hormones overa
 
 ### MAZE
 
-#### Accuracy
+**Accuracy**
 
 ```{r}
 #Subset
@@ -244,7 +252,7 @@ acc1 + acc2 + acc3
 
 No associations between MAZE accuracy and hormones for men.
 
-#### Moves
+**Moves**
 
 ```{r}
 #Subset
@@ -295,7 +303,7 @@ Also no association between MAZE number of moves and hormones for men.
 
 ### DSP
 
-#### Wayfinding Success
+**Wayfinding Success**
 
 ```{r}
 #Subset
@@ -341,9 +349,9 @@ succ1 + succ2 + succ3
 ```
 
 
-Generally looks like a positive trend, but overall no associations between DSP wayfinding success and hormones for men.
+Overall no associations between DSP wayfinding success and hormones for men.
 
-#### Solution Index
+**Solution Index**
 
 ```{r}
 #Subset
@@ -389,11 +397,16 @@ si1 + si2 + si3
 
 No association between DSP solution index and hormones for men.
 
-## Female
 
-### LOOP
+## {-}
 
-#### Position Error
+<br>
+
+## Female {.tabset}
+
+### LOOP 
+
+**Position Error**
 
 ```{r}
 #Subset
@@ -492,9 +505,9 @@ pe6 <- ggscatter(df_women_loop_pe, x = "dheas_spatial_ug_dl", y = "loop_pe_avg_m
 ```
 
 
-For LOOP position error, there is a positive trend with DHEAS for women.
+For LOOP position error, there is a positive marginal trend with DHEAS for women.
 
-#### Degrees Traveled
+**Degrees Traveled**
 
 ```{r}
 #Subset
@@ -573,7 +586,7 @@ No associations between LOOP degrees traveled and hormones for women.
 
 ### MAZE
 
-#### Accuracy
+**Accuracy**
 
 ```{r}
 #Subset
@@ -647,9 +660,9 @@ acc6 <- ggscatter(df_women_maze_accuracy, x = "dheas_spatial_ug_dl", y = "maze_a
 ```
 
 
-No association between MAZE accuracy and hormones for women.
+No association between MAZE accuracy and hormones for women, except negatively and marginally correlated with testosterone.
 
-#### Moves
+**Moves**
 
 ```{r}
 #Subset
@@ -723,11 +736,11 @@ moves6 <- ggscatter(df_women_maze_moves, x = "dheas_spatial_ug_dl", y = "maze_mo
 ```
 
 
-For MAZE moves, it seems to be positively associated with DHEAS and negatively associated with testosterone for women.
+For MAZE moves, it seems to be positively, marginally associated with DHEAS and negatively associated with testosterone for women.
 
 ### DSP
 
-#### Wayfinding Success
+**Wayfinding Success**
 
 ```{r}
 #Subset
@@ -804,7 +817,7 @@ succ6 <- ggscatter(df_women_dsp_succ, x = "dheas_spatial_ug_dl", y = "dsp_succes
 
 No associations between DSP wayfinding success and hormones for women.
 
-#### Solution Index
+**Solution Index**
 
 ```{r}
 #Subset
@@ -878,17 +891,30 @@ si6 <- ggscatter(df_women_dsp_si, x = "dheas_spatial_ug_dl", y = "dsp_si_true_pc
 ```
 
 
-For DSP solution index, estradiol is positively associated and FSH is negatively associated in women.
+For DSP solution index, estradiol is marginally positively associated and FSH is negatively associated in women.
+
+
+## {-}
+
+<br>
 
 # Summary
 
-Some initial findings include the following: 
 
-- For LOOP, there is a ositive association between DHEAS and position error for men and for women, and marginal negative association between SHBG and degrees traveled for men 
-- For MAZE, there are no associations for men. For women, there is a negative correlation with moves made and testosterone, and a positive correlation for moves made with DHEAS 
-- For DSP, there are no associations for men. For women, there is a positive correlation with solution index and estradiol, and a negative association between solution index and FSH
+Still waiting on analysis for remainder of FSH, SHBG, and DHEAS. But rerunning correlations with updated hormone data so far show:
+
+- For LOOP position error and DHEAS, there is a positive association for men and positive marginal association for women. For degrees traveled, there is a negative marginal association between SHBG and degrees traveled for men .
+
+- For MAZE, there are no associations for men. For women, there is a negative marginal correlation with accuracy and testosterone, and a negative correlation for moves made with testosterone.
+
+- For DSP, there are no associations for men. For women, there is a positive marginal correlation with solution index and estradiol, and a negative correlation between solution index and FSH.
+
 
 Future directions: 
 
-- Finish data collection and re-evaluate hormones with spatial navigation behaviors for men and women
-- Consider missing hormones data for earlier participants who did SNAG only or did SNAG follow-ups (due to number of missing data from hormones, moving forward should we use hormone data taken during scan if available to substitute for missing spatial hormone data? It will improve sample size.)
+- Wait for the remainder of the hormones and re-evaluate with spatial navigation behaviors for men and women
+
+- Consider other covariates like spatial navigation batteries (e.g., SBSOD) for multiple regression model.
+
+
+

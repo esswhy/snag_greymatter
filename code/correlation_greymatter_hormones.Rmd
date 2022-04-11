@@ -265,6 +265,8 @@ t1gmv6
 
 ## MTL
 
+MTL volume was calculated by adding hippocampal volume (total hippocampus) and parahippocampus volume.
+
 ```{r}
 #Scatterplot
 t1mtl1 <- ggscatter(df_t1_corrected, x = "estradiol_scan_pg_ml", y = "t1_vol_mtl",
@@ -335,6 +337,8 @@ t1mtl5
 t1mtl6
 ```
 MTL volume as a somewhat negative association with FSH
+
+
 
 ## Parahippocampus
 
@@ -554,6 +558,7 @@ t2ca23_4
 t2ca23_5
 t2ca23_6
 ```
+
 
 
 ## DG
