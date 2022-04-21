@@ -18,6 +18,8 @@ library(janitor)
 library(ggpubr)
 library(patchwork)
 library(kableExtra)
+library(RColorBrewer)
+library(plotly)
 ```
 
 # Overview
@@ -55,7 +57,11 @@ df_women <- df %>%
          loop_pe_rad1_m:testosterone_spatial_ng_dl) %>% 
   
   #Remove irrelevant columns
-  select(-c(age_scan_years)) 
+  select(-c(age_scan_years)) %>% 
+  
+  #Reorder repo status
+  mutate(repo_status_spatial = fct_relevel(repo_status_spatial, 
+                                         c("Pre", "Peri", "Post")))
 
 
 
@@ -86,7 +92,7 @@ Current sample sizes for behavior $\times$ sex hormones (participants with behav
 ```{r snag-table}
 df %>% 
   group_by(sex) %>% 
-  summarize(loop = sum(loop_useable == "yes", na.rm=TRUE),
+  summarize(loop = sum(loop_useable == "Yes", na.rm=TRUE),
             maze = sum(maze_useable == "Yes", na.rm=TRUE),
             dsp = sum(dsp_useable == "Yes", na.rm=TRUE)) %>% 
   kable(col.names = c("Sex", "LOOP", "MAZE", "DSP"),
@@ -897,6 +903,197 @@ For DSP solution index, estradiol is marginally positively associated and FSH is
 ## {-}
 
 <br>
+
+
+# OSSD Figures
+
+
+## Hormones Bar Graph for Women
+
+```{r}
+#Summary of hormones
+ehormones_fig <- df_women %>% 
+  group_by(repo_status_spatial) %>% 
+  summarize(mean_estradiol = mean(estradiol_spatial_pg_ml),
+            sd_estradiol = sd(estradiol_spatial_pg_ml),
+            n_estradiol = n(),
+            se_estradiol = sd(estradiol_spatial_pg_ml)/sqrt(n()), 
+            .groups = "keep")
+
+fhormones_fig <- df_women %>% 
+  group_by(repo_status_spatial) %>% 
+  summarize(mean_estradiol = mean(fsh_spatial_miu_ml),
+            sd_estradiol = sd(fsh_spatial_miu_ml),
+            n_estradiol = n(),
+            se_estradiol = sd(fsh_spatial_miu_ml)/sqrt(n()), 
+            .groups = "keep")
+```
+
+
+```{r hormone-plot}
+#Estradiol plot
+ggplot(data = df_women, aes(x = repo_status_spatial, 
+                            y = estradiol_spatial_pg_ml, 
+                            fill = repo_status_spatial))+
+  
+  #Define bar plot by mean
+  geom_bar(stat="summary", fun= "mean",
+           show.legend = FALSE)+ 
+  
+  #Add SEM errorbar
+  stat_summary(geom = "errorbar", 
+               fun.data = mean_se,
+               width = 0.15, size = 0.7)+
+  
+  #Change labels
+  labs(x = "Reproductive Status",
+       y = expression(atop(paste(bold("17"),
+                                 bold(beta),
+                                 bold("-Estradiol (pg/mL)")),
+                           )),
+       tag = "A") +
+  
+  #Change colors of bars
+  #Reverse color scale
+  scale_fill_brewer(palette = "RdPu",
+                    direction = -1)+
+  
+  #Change theme
+  theme_classic() +
+  
+  #Customize theme
+  theme(axis.title = element_text(size = 11, face = "bold"), 
+        axis.text = element_text(size= 10))
+
+
+
+#FSH plot
+ggplot(data = df_women, aes(x = repo_status_spatial, 
+                            y = fsh_spatial_miu_ml, 
+                            fill = repo_status_spatial))+
+  
+  #Define bar plot by mean
+  geom_bar(stat="summary", fun= "mean",
+           show.legend = FALSE)+ 
+  
+  #Add SEM errorbar
+  stat_summary(geom = "errorbar", 
+               fun.data = mean_se,
+               width = 0.15, size = 0.7)+
+  
+  #Change labels
+  labs(x = "Reproductive Status",
+       y = "FSH (mIU/mL)\n",
+       tag = "B") +
+  
+  #Change colors of bars
+  #Reverse color scale
+  scale_fill_brewer(palette = "RdPu",
+                    direction = -1)+
+  
+  #Change theme
+  theme_classic() +
+  
+  #Customize theme
+  theme(axis.title = element_text(size = 11, face = "bold"), 
+        axis.text = element_text(size= 10))
+```
+
+
+
+## Scatterplot of Solution Index and E/FSH
+
+```{r}
+df_women_dsp <- df_women_dsp_si %>% 
+  #Reorder repo status
+  mutate(repo_status_spatial = fct_relevel(repo_status_spatial, 
+                                         c("Pre", "Peri", "Post"))) %>% 
+  
+  filter(dsp_useable == "Yes")
+```
+
+```{r}
+#Scatter of estradiol and SI
+a <- ggplot(data = df_women_dsp, aes(x = estradiol_spatial_pg_ml,
+                            y = dsp_si_true_pct)) +
+  
+  #Define scatter, change size and alpha
+  geom_point(aes(color = repo_status_spatial),
+             size = 3, alpha = 0.6) +
+  
+  #Add LM line
+  geom_smooth(method = "lm", se = FALSE,
+              color = "grey50") +
+  
+  #Change labels
+  labs(x = expression(paste(bold("17"),
+                                 bold(beta),
+                                 bold("-Estradiol (pg/mL)")),
+                           ),
+       y = "Solution Index (%)\n",
+       color = "Reproductive Status") +
+  
+  #Change color of points
+  scale_color_manual(values = c("cadetblue4", "mediumvioletred", "darkorange")) +
+  
+  theme_minimal() +
+  
+  #Customize theme
+  theme(axis.title = element_text(size = 11, face = "bold"), 
+        axis.title.x = element_text(vjust = -0.5),
+        axis.text = element_text(size= 10),
+        legend.title = element_text(face = "bold"),
+        legend.position = "top")
+
+#ggplotly(a)
+```
+
+```{r}
+#FSH plot
+b <- ggplot(data = df_women_dsp, aes(x = fsh_spatial_miu_ml,
+                            y = dsp_si_true_pct)) +
+  
+  #Define scatter, change size and alpha
+  geom_point(aes(color = repo_status_spatial),
+             size = 3, alpha = 0.6) +
+  
+  #Add LM line
+  geom_smooth(method = "lm", se = FALSE,
+              color = "grey50") +
+  
+  #Change labels
+  labs(x = "\nFSH (mIU/mL)",
+       y = "Solution Index (%)\n",
+       color = "Reproductive Status") +
+  
+  #Change color of points
+  scale_color_manual(values = c("cadetblue4", "mediumvioletred", "darkorange")) +
+  
+  theme_minimal() +
+  
+  #Customize theme
+  theme(axis.title = element_text(size = 11, face = "bold"),
+        axis.text = element_text(size= 10),
+        legend.title = element_text(face = "bold"),
+        legend.position = "top")
+```
+
+```{r}
+#Plotly
+#ggplotly(b)
+```
+
+
+```{r}
+#Combine
+a + b
+#ggsave("hormone_correlations.png")
+```
+
+
+
+## Heatmaps
+
 
 # Summary
 
