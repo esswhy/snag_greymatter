@@ -20,6 +20,7 @@ library(patchwork)
 library(kableExtra)
 library(RColorBrewer)
 library(plotly)
+library(MASS)
 ```
 
 # Overview
@@ -1004,7 +1005,7 @@ ggplot(data = df_women, aes(x = repo_status_spatial,
 ## Scatterplot of Solution Index and E/FSH
 
 ```{r}
-df_women_dsp <- df_women_dsp_si %>% 
+df_women_dsp <- df_women %>% 
   #Reorder repo status
   mutate(repo_status_spatial = fct_relevel(repo_status_spatial, 
                                          c("Pre", "Peri", "Post"))) %>% 
@@ -1015,7 +1016,8 @@ df_women_dsp <- df_women_dsp_si %>%
 ```{r}
 #Scatter of estradiol and SI
 a <- ggplot(data = df_women_dsp, aes(x = estradiol_spatial_pg_ml,
-                            y = dsp_si_true_pct)) +
+                            y = dsp_si_true_pct,
+                            text = subject_id)) +
   
   #Define scatter, change size and alpha
   geom_point(aes(color = repo_status_spatial),
@@ -1045,13 +1047,17 @@ a <- ggplot(data = df_women_dsp, aes(x = estradiol_spatial_pg_ml,
         legend.title = element_text(face = "bold"),
         legend.position = "top")
 
-#ggplotly(a)
+a
+
+#Plotly
+ggplotly(a)
 ```
 
 ```{r}
 #FSH plot
 b <- ggplot(data = df_women_dsp, aes(x = fsh_spatial_miu_ml,
-                            y = dsp_si_true_pct)) +
+                            y = dsp_si_true_pct,
+                            text = subject_id)) +
   
   #Define scatter, change size and alpha
   geom_point(aes(color = repo_status_spatial),
@@ -1076,11 +1082,11 @@ b <- ggplot(data = df_women_dsp, aes(x = fsh_spatial_miu_ml,
         axis.text = element_text(size= 10),
         legend.title = element_text(face = "bold"),
         legend.position = "top")
-```
 
-```{r}
+b
+
 #Plotly
-#ggplotly(b)
+ggplotly(b)
 ```
 
 
@@ -1091,8 +1097,114 @@ a + b
 ```
 
 
+## Correlation Values
+
+```{r}
+########## Pearson
+cor.test(df_women_dsp$estradiol_spatial_pg_ml,
+         df_women_dsp$dsp_si_true_pct,
+         conf.level = 0.95,
+         method = "pearson")
+
+#FSH
+cor.test(df_women_dsp$fsh_spatial_miu_ml,
+         df_women_dsp$dsp_si_true_pct,
+         conf.level = 0.95,
+         method = "pearson")
+
+
+
+########## Spearman
+
+#Estradiol
+cor.test(df_women_dsp$estradiol_spatial_pg_ml,
+         df_women_dsp$dsp_si_true_pct,
+         conf.level = 0.95,
+         method = "spearman")
+
+#FSH
+cor.test(df_women_dsp$fsh_spatial_miu_ml,
+         df_women_dsp$dsp_si_true_pct,
+         conf.level = 0.95,
+         method = "spearman")
+```
+### Outlier Check
+
+```{r}
+outlier <- ggplot(data = df_women_dsp, aes(x = repo_status_spatial,
+                            y = dsp_si_true_pct,
+                            text = subject_id)) +
+  
+  #Define scatter, change size and alpha
+  geom_boxplot() 
+
+
+#Plotly
+ggplotly(outlier)
+```
+
+
+### Normality check
+
+```{r}
+shapiro.test(df_women_dsp$dsp_si_true_pct)
+shapiro.test(df_women_dsp$estradiol_spatial_pg_ml)
+shapiro.test(df_women_dsp$fsh_spatial_miu_ml)
+```
+
+```{r}
+#Simple transformation with sqrt or log
+hist(sqrt(df_women_dsp$dsp_si_true_pct)) #right skewed
+hist(log(df_women_dsp$estradiol_spatial_pg_ml)) #right skewed
+hist(sqrt(df_women_dsp$fsh_spatial_miu_ml)) #right skewed
+```
+
+
+### Retest
+
+Cannot transform to normal without letting it be too complicated.
+
+```{r}
+#Add transformation
+df_dsp_norm <- df_women_dsp %>% 
+  mutate_at(scale, .vars = vars(estradiol_spatial_pg_ml,
+                                fsh_spatial_miu_ml,
+                                dsp_si_true_pct))
+
+
+
+#Retest normality
+hist(df_dsp_norm$dsp_si_true_pct)
+shapiro.test(df_dsp_norm$estradiol_spatial_pg_ml)
+shapiro.test(df_dsp_norm$fsh_spatial_miu_ml)
+```
+
+
+
+
+### Multiple regression: Age
+
+```{r}
+mod1 <- lm(dsp_si_true_pct ~ estradiol_spatial_pg_ml,
+           data = df_women_dsp)
+summary(mod1)
+
+
+
+mod2 <- lm(dsp_si_true_pct ~ fsh_spatial_miu_ml,
+           data = df_women_dsp)
+summary(mod2)
+```
+
+
 
 ## Heatmaps
+
+Copy and paste script from Yu et al., 2021 code.
+
+```{r}
+
+```
 
 
 # Summary
