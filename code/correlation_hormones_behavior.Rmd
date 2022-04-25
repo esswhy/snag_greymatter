@@ -1072,7 +1072,7 @@ b <- ggplot(data = df_women_dsp, aes(x = fsh_spatial_miu_ml,
   
   #Define scatter, change size and alpha
   geom_point(aes(color = repo_status_spatial),
-             size = 3, alpha = 0.6) +
+             size = 3, alpha = 0.6, show.legend = FALSE) +
   
   #Add LM line
   geom_smooth(method = "lm", se = FALSE,
@@ -1080,7 +1080,7 @@ b <- ggplot(data = df_women_dsp, aes(x = fsh_spatial_miu_ml,
   
   #Change labels
   labs(x = "\nFSH (mIU/mL)",
-       y = "Solution Index (%)\n",
+       y = " ",
        color = "Reproductive Status") +
   
   #Change color of points
@@ -1090,20 +1090,21 @@ b <- ggplot(data = df_women_dsp, aes(x = fsh_spatial_miu_ml,
   
   #Customize theme
   theme(axis.title = element_text(size = 11, face = "bold"),
+        axis.title.x = element_text(vjust = 2),
         axis.text = element_text(size= 10),
-        legend.title = element_text(face = "bold"),
-        legend.position = "top")
+        legend.title = element_text(face = "bold"))
 
 b
 
 #Plotly
-ggplotly(b)
+#ggplotly(b)
 ```
 
 
 ```{r}
 #Combine
-a + b
+combined <- a + b & theme(legend.position = "top")
+combined + plot_layout(guides = "collect")
 #ggsave("hormone_correlations.png")
 ```
 
@@ -1190,28 +1191,8 @@ shapiro.test(df_dsp_norm$estradiol_spatial_pg_ml)
 shapiro.test(df_dsp_norm$fsh_spatial_miu_ml)
 ```
 
+### Heatmaps
 
-
-
-### Multiple regression: Age
-
-```{r}
-mod1 <- lm(dsp_si_true_pct ~ estradiol_spatial_pg_ml,
-           data = df_women_dsp)
-summary(mod1)
-
-
-
-mod2 <- lm(dsp_si_true_pct ~ fsh_spatial_miu_ml,
-           data = df_women_dsp)
-summary(mod2)
-```
-
-
-
-## Heatmaps
-
-Copy and paste script from Yu et al., 2021 code.
 
 ```{r}
 
