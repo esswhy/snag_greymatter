@@ -1022,6 +1022,13 @@ df_women_dsp <- df_women %>%
                                          c("Pre", "Peri", "Post"))) %>% 
   
   filter(dsp_useable == "Yes")
+
+
+
+#Get mean and SD of age for this group
+df_women_dsp %>% 
+  summarize(mean_age = mean(age_spatial_years),
+            sd_age = sd(age_spatial_years))
 ```
 
 ```{r}
@@ -1032,7 +1039,7 @@ a <- ggplot(data = df_women_dsp, aes(x = estradiol_spatial_pg_ml,
   
   #Define scatter, change size and alpha
   geom_point(aes(color = repo_status_spatial),
-             size = 3, alpha = 0.6) +
+             size = 3, alpha = 0.6, show.legend = FALSE) +
   
   #Add LM line
   geom_smooth(method = "lm", se = FALSE,
@@ -1054,14 +1061,12 @@ a <- ggplot(data = df_women_dsp, aes(x = estradiol_spatial_pg_ml,
   #Customize theme
   theme(axis.title = element_text(size = 11, face = "bold"), 
         axis.title.x = element_text(vjust = -0.5),
-        axis.text = element_text(size= 10),
-        legend.title = element_text(face = "bold"),
-        legend.position = "top")
+        axis.text = element_text(size= 10))
 
 a
 
 #Plotly
-ggplotly(a)
+#ggplotly(a)
 ```
 
 ```{r}
@@ -1072,7 +1077,7 @@ b <- ggplot(data = df_women_dsp, aes(x = fsh_spatial_miu_ml,
   
   #Define scatter, change size and alpha
   geom_point(aes(color = repo_status_spatial),
-             size = 3, alpha = 0.6, show.legend = FALSE) +
+             size = 3, alpha = 0.6) +
   
   #Add LM line
   geom_smooth(method = "lm", se = FALSE,
@@ -1092,7 +1097,12 @@ b <- ggplot(data = df_women_dsp, aes(x = fsh_spatial_miu_ml,
   theme(axis.title = element_text(size = 11, face = "bold"),
         axis.title.x = element_text(vjust = 2),
         axis.text = element_text(size= 10),
-        legend.title = element_text(face = "bold"))
+        
+        #Legend
+        #legend.title = element_text(face = "bold"),
+        legend.position = "right"
+        
+        )
 
 b
 
@@ -1103,9 +1113,9 @@ b
 
 ```{r}
 #Combine
-combined <- a + b & theme(legend.position = "top")
+combined <- a + b & theme(legend.position = "bottom")
 combined + plot_layout(guides = "collect")
-#ggsave("hormone_correlations.png")
+#ggsave("hormone_correlations_legendbottom.png")
 ```
 
 
