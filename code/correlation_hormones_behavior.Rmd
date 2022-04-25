@@ -1052,7 +1052,10 @@ df_women_dsp <- df_women %>%
                       TRUE ~ 'high'),
         
         #E 33/33/33
-        e33_group = case_when(estradiol_spatial_pg_ml < quantile(estradiol_spatial_pg_ml,0.5) ~ "low",
+        e33_group = case_when(estradiol_spatial_pg_ml < quantile(estradiol_spatial_pg_ml,0.33) ~ "low",
+                              between(estradiol_spatial_pg_ml, 
+                                     quantile(estradiol_spatial_pg_ml, 0.33, na.rm=TRUE),
+                                     quantile(estradiol_spatial_pg_ml, 0.66, na.rm=TRUE))~"medium", 
                       TRUE ~ 'high'))
          
 
