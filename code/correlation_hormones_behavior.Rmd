@@ -18,8 +18,10 @@ library(janitor)
 library(ggpubr)
 library(patchwork)
 library(kableExtra)
+library(foreign)
 library(RColorBrewer)
 library(plotly)
+library(readr)
 ```
 
 # Overview
@@ -1016,12 +1018,31 @@ TukeyHSD(hormone_mod2)
 ## Scatterplot of Solution Index and E/FSH
 
 ```{r}
+#Create subset and columns for low, mid, high E/FSH
 df_women_dsp <- df_women %>% 
   #Reorder repo status
   mutate(repo_status_spatial = fct_relevel(repo_status_spatial, 
                                          c("Pre", "Peri", "Post"))) %>% 
   
-  filter(dsp_useable == "Yes")
+  filter(dsp_useable == "Yes") %>% 
+  
+  #High vs low E
+  mutate(e_group = case_when(estradiol_spatial_pg_ml < quantile(estradiol_spatial_pg_ml,0.5) ~ "low",
+                             between(estradiol_spatial_pg_ml, 
+                                     quantile(estradiol_spatial_pg_ml, 0.5),
+                                     quantile(estradiol_spatial_pg_ml, 0.75))~"medium", 
+                      TRUE ~ 'high'),
+         
+         fsh_group = case_when(fsh_spatial_miu_ml < quantile(fsh_spatial_miu_ml,0.5, na.rm=TRUE) ~ "low",
+                             between(fsh_spatial_miu_ml, 
+                                     quantile(fsh_spatial_miu_ml, 0.5, na.rm=TRUE),
+                                     quantile(fsh_spatial_miu_ml, 0.75, na.rm=TRUE))~"medium", 
+                      TRUE ~ 'high'))
+
+
+
+#Save the new columns and export
+#write_csv(df_women_dsp, here("data", "hormone_quantile_groups.csv"))
 
 
 
@@ -1201,12 +1222,63 @@ shapiro.test(df_dsp_norm$estradiol_spatial_pg_ml)
 shapiro.test(df_dsp_norm$fsh_spatial_miu_ml)
 ```
 
-### Heatmaps
+## Heatmaps
+
+### E group
+
+```{r}
+#Read in data
+hm_pre <- read_csv(here("data", "heatmaps", "PointingDSP_Pre.csv"))
+hm_peri <- read_csv(here("data", "heatmaps", "PointingDSP_Peri.csv"))
+hm_post <- read_csv(here("data", "heatmaps", "PointingDSP_Post.csv"))
+```
+
+```{r}
+#Pre heatmap
+ggplot(hm_pre, aes(x=x, y=z) ) +
+  stat_density_2d(aes(fill = ..density..), geom = "raster", contour = FALSE) +
+  #scale_fill_distiller(palette= "RdYlGn", direction=-1) +
+  scale_fill_distiller(palette= "RdYlGn", direction=-1) +
+  scale_x_continuous(expand = c(0, 0)) +
+  scale_y_continuous(expand = c(0, 0)) +
+  theme_void()+
+  theme(legend.position='none') 
+
+#Save
+#ggsave("heatmap_pre.png", width = 20, height = 20, dpi = 1000)
+```
 
 
 ```{r}
+#Peri heatmap
+ggplot(hm_pre, aes(x=x, y=z) ) +
+  stat_density_2d(aes(fill = ..density..), geom = "raster", contour = FALSE) +
+  #scale_fill_distiller(palette= "RdYlGn", direction=-1) +
+  scale_fill_distiller(palette= "RdYlGn", direction=-1) +
+  scale_x_continuous(expand = c(0, 0)) +
+  scale_y_continuous(expand = c(0, 0)) +
+  theme_void()+
+  theme(legend.position='none') 
 
+#Save
+#ggsave("heatmap_peri.png", width = 20, height = 20, dpi = 1000)
 ```
+
+```{r}
+#Post heatmap
+ggplot(hm_post, aes(x=x, y=z) ) +
+  stat_density_2d(aes(fill = ..density..), geom = "raster", contour = FALSE) +
+  #scale_fill_distiller(palette= "RdYlGn", direction=-1) +
+  scale_fill_distiller(palette= "RdYlGn", direction=-1) +
+  scale_x_continuous(expand = c(0, 0)) +
+  scale_y_continuous(expand = c(0, 0)) +
+  theme_void()+
+  theme(legend.position='none') 
+
+#Save
+ggsave("heatmap_post.png", width = 20, height = 20, dpi = 1000)
+```
+
 
 
 # Summary
