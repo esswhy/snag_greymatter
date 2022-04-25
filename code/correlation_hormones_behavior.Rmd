@@ -1005,8 +1005,11 @@ ggplot(data = df_women, aes(x = repo_status_spatial,
 #ANOVA of hormones
 hormone_mod <- aov(estradiol_spatial_pg_ml ~ repo_status_spatial,
       data = df_women)
-
 TukeyHSD(hormone_mod)
+
+hormone_mod2 <- aov(fsh_spatial_miu_ml ~ repo_status_spatial,
+      data = df_women)
+TukeyHSD(hormone_mod2)
 ```
 
 
