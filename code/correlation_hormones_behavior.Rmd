@@ -1033,13 +1033,28 @@ df_women_dsp <- df_women %>%
                                      quantile(estradiol_spatial_pg_ml, 0.75))~"medium", 
                       TRUE ~ 'high'),
          
+         #FSH
          fsh_group = case_when(fsh_spatial_miu_ml < quantile(fsh_spatial_miu_ml,0.5, na.rm=TRUE) ~ "low",
                              between(fsh_spatial_miu_ml, 
                                      quantile(fsh_spatial_miu_ml, 0.5, na.rm=TRUE),
                                      quantile(fsh_spatial_miu_ml, 0.75, na.rm=TRUE))~"medium", 
+                      TRUE ~ 'high'),
+         
+         
+         #E half and half
+         e50_group = case_when(estradiol_spatial_pg_ml < quantile(estradiol_spatial_pg_ml,0.5) ~ "low",
+                      TRUE ~ 'high'),
+         
+         
+         
+         #FSH half and half)
+        fsh50_group = case_when(fsh_spatial_miu_ml < quantile(fsh_spatial_miu_ml,0.5, na.rm=TRUE) ~ "low",
+                      TRUE ~ 'high'),
+        
+        #E 33/33/33
+        e33_group = case_when(estradiol_spatial_pg_ml < quantile(estradiol_spatial_pg_ml,0.5) ~ "low",
                       TRUE ~ 'high'))
-
-
+         
 
 #Save the new columns and export
 #write_csv(df_women_dsp, here("data", "hormone_quantile_groups.csv"))
@@ -1224,18 +1239,17 @@ shapiro.test(df_dsp_norm$fsh_spatial_miu_ml)
 
 ## Heatmaps
 
-### E group
+### Original Repo
 
 ```{r}
 #Read in data
 hm_pre <- read_csv(here("data", "heatmaps", "PointingDSP_Pre.csv"))
 hm_peri <- read_csv(here("data", "heatmaps", "PointingDSP_Peri.csv"))
 hm_post <- read_csv(here("data", "heatmaps", "PointingDSP_Post.csv"))
-```
 
-```{r}
+
 #Pre heatmap
-ggplot(hm_pre, aes(x=x, y=z) ) +
+a <- ggplot(hm_pre, aes(x=x, y=z) ) +
   stat_density_2d(aes(fill = ..density..), geom = "raster", contour = FALSE) +
   #scale_fill_distiller(palette= "RdYlGn", direction=-1) +
   scale_fill_distiller(palette= "RdYlGn", direction=-1) +
@@ -1244,14 +1258,45 @@ ggplot(hm_pre, aes(x=x, y=z) ) +
   theme_void()+
   theme(legend.position='none') 
 
+
+b <- ggplot(hm_peri, aes(x=x, y=z) ) +
+  stat_density_2d(aes(fill = ..density..), geom = "raster", contour = FALSE) +
+  #scale_fill_distiller(palette= "RdYlGn", direction=-1) +
+  scale_fill_distiller(palette= "RdYlGn", direction=-1) +
+  scale_x_continuous(expand = c(0, 0)) +
+  scale_y_continuous(expand = c(0, 0)) +
+  theme_void()+
+  theme(legend.position='none') 
+
+#Post
+c <- ggplot(hm_post, aes(x=x, y=z) ) +
+  stat_density_2d(aes(fill = ..density..), geom = "raster", contour = FALSE) +
+  #scale_fill_distiller(palette= "RdYlGn", direction=-1) +
+  scale_fill_distiller(palette= "RdYlGn", direction=-1) +
+  scale_x_continuous(expand = c(0, 0)) +
+  scale_y_continuous(expand = c(0, 0)) +
+  theme_void()+
+  theme(legend.position='none') 
+
+#Combined
+a+b+c
+
 #Save
-#ggsave("heatmap_pre.png", width = 20, height = 20, dpi = 1000)
+#ggsave("heatmap_repo.png")
 ```
 
+
+### Estradiol: low, med, high
 
 ```{r}
-#Peri heatmap
-ggplot(hm_pre, aes(x=x, y=z) ) +
+#Read in data
+hm_elow <- read_csv(here("data", "heatmaps", "PointingDSP_ELow.csv"))
+hm_emed <- read_csv(here("data", "heatmaps", "PointingDSP_EMed.csv"))
+hm_ehigh <- read_csv(here("data", "heatmaps", "PointingDSP_EHigh.csv"))
+
+
+#ELow heatmap
+a <- ggplot(hm_elow, aes(x=x, y=z) ) +
   stat_density_2d(aes(fill = ..density..), geom = "raster", contour = FALSE) +
   #scale_fill_distiller(palette= "RdYlGn", direction=-1) +
   scale_fill_distiller(palette= "RdYlGn", direction=-1) +
@@ -1260,13 +1305,44 @@ ggplot(hm_pre, aes(x=x, y=z) ) +
   theme_void()+
   theme(legend.position='none') 
 
+#Emed
+b <- ggplot(hm_emed, aes(x=x, y=z) ) +
+  stat_density_2d(aes(fill = ..density..), geom = "raster", contour = FALSE) +
+  #scale_fill_distiller(palette= "RdYlGn", direction=-1) +
+  scale_fill_distiller(palette= "RdYlGn", direction=-1) +
+  scale_x_continuous(expand = c(0, 0)) +
+  scale_y_continuous(expand = c(0, 0)) +
+  theme_void()+
+  theme(legend.position='none') 
+
+#Ehigh
+c <- ggplot(hm_ehigh, aes(x=x, y=z) ) +
+  stat_density_2d(aes(fill = ..density..), geom = "raster", contour = FALSE) +
+  #scale_fill_distiller(palette= "RdYlGn", direction=-1) +
+  scale_fill_distiller(palette= "RdYlGn", direction=-1) +
+  scale_x_continuous(expand = c(0, 0)) +
+  scale_y_continuous(expand = c(0, 0)) +
+  theme_void()+
+  theme(legend.position='none') 
+
+#Combined
+a+b+c
+
 #Save
-#ggsave("heatmap_peri.png", width = 20, height = 20, dpi = 1000)
+#ggsave("heatmap_egroup.png")
 ```
+
+
+### Estradiol: low and high
 
 ```{r}
-#Post heatmap
-ggplot(hm_post, aes(x=x, y=z) ) +
+#Read in data
+hm_e50low <- read_csv(here("data", "heatmaps", "PointingDSP_E50Low.csv"))
+hm_e50high <- read_csv(here("data", "heatmaps", "PointingDSP_E50High.csv"))
+
+
+#ELow heatmap
+a <- ggplot(hm_e50low, aes(x=x, y=z) ) +
   stat_density_2d(aes(fill = ..density..), geom = "raster", contour = FALSE) +
   #scale_fill_distiller(palette= "RdYlGn", direction=-1) +
   scale_fill_distiller(palette= "RdYlGn", direction=-1) +
@@ -1275,10 +1351,105 @@ ggplot(hm_post, aes(x=x, y=z) ) +
   theme_void()+
   theme(legend.position='none') 
 
+#Ehigh heatmap
+b <- ggplot(hm_e50high, aes(x=x, y=z) ) +
+  stat_density_2d(aes(fill = ..density..), geom = "raster", contour = FALSE) +
+  #scale_fill_distiller(palette= "RdYlGn", direction=-1) +
+  scale_fill_distiller(palette= "RdYlGn", direction=-1) +
+  scale_x_continuous(expand = c(0, 0)) +
+  scale_y_continuous(expand = c(0, 0)) +
+  theme_void()+
+  theme(legend.position='none') 
+
+#Combined
+a+b
+
 #Save
-ggsave("heatmap_post.png", width = 20, height = 20, dpi = 1000)
+#ggsave("heatmap_egroup.png")
 ```
 
+
+### FSH: low, med, high
+
+```{r}
+#Read in data
+hm_fshlow <- read_csv(here("data", "heatmaps", "PointingDSP_FSHLow.csv"))
+hm_fshmed <- read_csv(here("data", "heatmaps", "PointingDSP_FSHMed.csv"))
+hm_fshhigh <- read_csv(here("data", "heatmaps", "PointingDSP_FSHHigh.csv"))
+
+
+#FSHLow heatmap
+a <- ggplot(hm_fshlow, aes(x=x, y=z) ) +
+  stat_density_2d(aes(fill = ..density..), geom = "raster", contour = FALSE) +
+  #scale_fill_distiller(palette= "RdYlGn", direction=-1) +
+  scale_fill_distiller(palette= "RdYlGn", direction=-1) +
+  scale_x_continuous(expand = c(0, 0)) +
+  scale_y_continuous(expand = c(0, 0)) +
+  theme_void()+
+  theme(legend.position='none') 
+
+#FSHmed
+b <- ggplot(hm_fshmed, aes(x=x, y=z) ) +
+  stat_density_2d(aes(fill = ..density..), geom = "raster", contour = FALSE) +
+  #scale_fill_distiller(palette= "RdYlGn", direction=-1) +
+  scale_fill_distiller(palette= "RdYlGn", direction=-1) +
+  scale_x_continuous(expand = c(0, 0)) +
+  scale_y_continuous(expand = c(0, 0)) +
+  theme_void()+
+  theme(legend.position='none') 
+
+#FSHhigh
+c <- ggplot(hm_fshhigh, aes(x=x, y=z) ) +
+  stat_density_2d(aes(fill = ..density..), geom = "raster", contour = FALSE) +
+  #scale_fill_distiller(palette= "RdYlGn", direction=-1) +
+  scale_fill_distiller(palette= "RdYlGn", direction=-1) +
+  scale_x_continuous(expand = c(0, 0)) +
+  scale_y_continuous(expand = c(0, 0)) +
+  theme_void()+
+  theme(legend.position='none') 
+
+#Combined
+a+b+c
+
+#Save
+#ggsave("heatmap_egroup.png")
+```
+
+
+### FSH: low and high
+
+```{r}
+#Read in data
+hm_fsh50low <- read_csv(here("data", "heatmaps", "PointingDSP_FSH50Low.csv"))
+hm_fsh50high <- read_csv(here("data", "heatmaps", "PointingDSP_FSH50High.csv"))
+
+
+#FSHLow heatmap
+a <- ggplot(hm_fsh50low, aes(x=x, y=z) ) +
+  stat_density_2d(aes(fill = ..density..), geom = "raster", contour = FALSE) +
+  #scale_fill_distiller(palette= "RdYlGn", direction=-1) +
+  scale_fill_distiller(palette= "RdYlGn", direction=-1) +
+  scale_x_continuous(expand = c(0, 0)) +
+  scale_y_continuous(expand = c(0, 0)) +
+  theme_void()+
+  theme(legend.position='none') 
+
+#FSHhigh heatmap
+b <- ggplot(hm_fsh50high, aes(x=x, y=z) ) +
+  stat_density_2d(aes(fill = ..density..), geom = "raster", contour = FALSE) +
+  #scale_fill_distiller(palette= "RdYlGn", direction=-1) +
+  scale_fill_distiller(palette= "RdYlGn", direction=-1) +
+  scale_x_continuous(expand = c(0, 0)) +
+  scale_y_continuous(expand = c(0, 0)) +
+  theme_void()+
+  theme(legend.position='none') 
+
+#Combined
+a+b
+
+#Save
+#ggsave("heatmap_egroup.png")
+```
 
 
 # Summary
