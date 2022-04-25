@@ -20,7 +20,6 @@ library(patchwork)
 library(kableExtra)
 library(RColorBrewer)
 library(plotly)
-library(MASS)
 ```
 
 # Overview
@@ -54,11 +53,8 @@ df_women <- df %>%
   
   #Select specific columns
   #Basic demo, snag, hormones
-  select(subject_id:repo_status_spatial,
+  dplyr::select(subject_id:repo_status_spatial,
          loop_pe_rad1_m:testosterone_spatial_ng_dl) %>% 
-  
-  #Remove irrelevant columns
-  select(-c(age_scan_years)) %>% 
   
   #Reorder repo status
   mutate(repo_status_spatial = fct_relevel(repo_status_spatial, 
@@ -74,11 +70,11 @@ df_men <- df %>%
   
   #Select specific columns
   #Basic demo, snag, hormones
-  select(subject_id:repo_status_spatial,
+  dplyr::select(subject_id:repo_status_spatial,
          loop_pe_rad1_m:testosterone_spatial_ng_dl) %>% 
   
   #Remove irrelevant columns
-  select(-c(age_scan_years, repo_status_scan, repo_status_spatial,
+  dplyr::select(-c(age_scan_years, repo_status_scan, repo_status_spatial,
          estradiol_scan_pg_ml:fsh_scan_miu_ml,
          estradiol_spatial_pg_ml:fsh_spatial_miu_ml))
 ```
@@ -966,6 +962,7 @@ ggplot(data = df_women, aes(x = repo_status_spatial,
   theme(axis.title = element_text(size = 11, face = "bold"), 
         axis.text = element_text(size= 10))
 
+#ggsave("estradiol_bar.png")
 
 
 #FSH plot
@@ -998,8 +995,19 @@ ggplot(data = df_women, aes(x = repo_status_spatial,
   #Customize theme
   theme(axis.title = element_text(size = 11, face = "bold"), 
         axis.text = element_text(size= 10))
+
+#ggsave("fsh_bar.png")
 ```
 
+
+
+```{r}
+#ANOVA of hormones
+hormone_mod <- aov(estradiol_spatial_pg_ml ~ repo_status_spatial,
+      data = df_women)
+
+TukeyHSD(hormone_mod)
+```
 
 
 ## Scatterplot of Solution Index and E/FSH
