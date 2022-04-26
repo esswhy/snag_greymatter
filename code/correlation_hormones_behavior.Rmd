@@ -1139,7 +1139,7 @@ b <- ggplot(data = df_women_dsp, aes(x = fsh_spatial_miu_ml,
         
         #Legend
         #legend.title = element_text(face = "bold"),
-        legend.position = "right"
+        legend.position = "top"
         
         )
 
@@ -1152,9 +1152,9 @@ b
 
 ```{r}
 #Combine
-combined <- a + b & theme(legend.position = "bottom")
+combined <- a + b & theme(legend.position = "top")
 combined + plot_layout(guides = "collect")
-#ggsave("hormone_correlations_legendbottom.png")
+ggsave("hormone_correlations_legendtop.png")
 ```
 
 
@@ -1252,7 +1252,7 @@ hm_post <- read_csv(here("data", "heatmaps", "PointingDSP_Post.csv"))
 
 
 #Pre heatmap
-a <- ggplot(hm_pre, aes(x=x, y=z) ) +
+ggplot(hm_pre, aes(x=x, y=z) ) +
   stat_density_2d(aes(fill = ..density..), geom = "raster", contour = FALSE) +
   #scale_fill_distiller(palette= "RdYlGn", direction=-1) +
   scale_fill_distiller(palette= "RdYlGn", direction=-1) +
@@ -1261,8 +1261,11 @@ a <- ggplot(hm_pre, aes(x=x, y=z) ) +
   theme_void()+
   theme(legend.position='none') 
 
+#ggsave("heatmap_pre.png")
 
-b <- ggplot(hm_peri, aes(x=x, y=z) ) +
+
+#Peri
+ggplot(hm_peri, aes(x=x, y=z) ) +
   stat_density_2d(aes(fill = ..density..), geom = "raster", contour = FALSE) +
   #scale_fill_distiller(palette= "RdYlGn", direction=-1) +
   scale_fill_distiller(palette= "RdYlGn", direction=-1) +
@@ -1270,9 +1273,11 @@ b <- ggplot(hm_peri, aes(x=x, y=z) ) +
   scale_y_continuous(expand = c(0, 0)) +
   theme_void()+
   theme(legend.position='none') 
+
+#ggsave("heatmap_peri.png")
 
 #Post
-c <- ggplot(hm_post, aes(x=x, y=z) ) +
+ggplot(hm_post, aes(x=x, y=z) ) +
   stat_density_2d(aes(fill = ..density..), geom = "raster", contour = FALSE) +
   #scale_fill_distiller(palette= "RdYlGn", direction=-1) +
   scale_fill_distiller(palette= "RdYlGn", direction=-1) +
@@ -1281,8 +1286,10 @@ c <- ggplot(hm_post, aes(x=x, y=z) ) +
   theme_void()+
   theme(legend.position='none') 
 
+#ggsave("heatmap_post.png")
+
 #Combined
-a+b+c
+#a+b+c
 
 #Save
 #ggsave("heatmap_repo.png")
@@ -1338,7 +1345,6 @@ a+b+c
 
 ### Estradiol: low, med, high (33/33/33)
 
-### Estradiol: low, med, high (<50, 50-75, 75+)
 
 ```{r}
 #Read in data
