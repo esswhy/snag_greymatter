@@ -1289,7 +1289,7 @@ a+b+c
 ```
 
 
-### Estradiol: low, med, high
+### Estradiol: low, med, high (<50, 50-75, 75+)
 
 ```{r}
 #Read in data
@@ -1334,6 +1334,56 @@ a+b+c
 #Save
 #ggsave("heatmap_egroup.png")
 ```
+
+
+### Estradiol: low, med, high (33/33/33)
+
+### Estradiol: low, med, high (<50, 50-75, 75+)
+
+```{r}
+#Read in data
+hm_e33low <- read_csv(here("data", "heatmaps", "PointingDSP_E33Low.csv"))
+hm_e33med <- read_csv(here("data", "heatmaps", "PointingDSP_E33Med.csv"))
+hm_e33high <- read_csv(here("data", "heatmaps", "PointingDSP_E33High.csv"))
+
+
+#ELow heatmap
+a <- ggplot(hm_e33low, aes(x=x, y=z) ) +
+  stat_density_2d(aes(fill = ..density..), geom = "raster", contour = FALSE) +
+  #scale_fill_distiller(palette= "RdYlGn", direction=-1) +
+  scale_fill_distiller(palette= "RdYlGn", direction=-1) +
+  scale_x_continuous(expand = c(0, 0)) +
+  scale_y_continuous(expand = c(0, 0)) +
+  theme_void()+
+  theme(legend.position='none') 
+
+#Emed
+b <- ggplot(hm_e33med, aes(x=x, y=z) ) +
+  stat_density_2d(aes(fill = ..density..), geom = "raster", contour = FALSE) +
+  #scale_fill_distiller(palette= "RdYlGn", direction=-1) +
+  scale_fill_distiller(palette= "RdYlGn", direction=-1) +
+  scale_x_continuous(expand = c(0, 0)) +
+  scale_y_continuous(expand = c(0, 0)) +
+  theme_void()+
+  theme(legend.position='none') 
+
+#Ehigh
+c <- ggplot(hm_e33high, aes(x=x, y=z) ) +
+  stat_density_2d(aes(fill = ..density..), geom = "raster", contour = FALSE) +
+  #scale_fill_distiller(palette= "RdYlGn", direction=-1) +
+  scale_fill_distiller(palette= "RdYlGn", direction=-1) +
+  scale_x_continuous(expand = c(0, 0)) +
+  scale_y_continuous(expand = c(0, 0)) +
+  theme_void()+
+  theme(legend.position='none') 
+
+#Combined
+a+b+c
+
+#Save
+#ggsave("heatmap_egroup.png")
+```
+
 
 
 ### Estradiol: low and high
