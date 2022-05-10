@@ -1,0 +1,28 @@
+---
+title: "Hormones Bar Plot"
+author: "Shuying Yu"
+date: "5/9/2022"
+output: 
+  html_document: 
+    toc: yes
+    toc_float: true
+---
+
+```{r setup, include=TRUE, warning = FALSE, message = FALSE}
+knitr::opts_chunk$set(echo = TRUE,  warning = FALSE, message = FALSE)
+
+#Attach packages
+library(tidyverse)
+```
+
+
+```{r}
+#Read in the data
+
+```
+
+
+# Estradiol
+
+
+# FSH
