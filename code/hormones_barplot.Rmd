@@ -6,6 +6,7 @@ output:
   html_document: 
     toc: yes
     toc_float: true
+    code_folding: hide
 ---
 
 ```{r setup, include=TRUE, warning = FALSE, message = FALSE}
@@ -13,16 +14,105 @@ knitr::opts_chunk$set(echo = TRUE,  warning = FALSE, message = FALSE)
 
 #Attach packages
 library(tidyverse)
+library(here)
+library(RColorBrewer)
 ```
 
 
 ```{r}
 #Read in the data
+df_hormones <- read_csv(here("data", "hormone_quantile_groups.csv"))
+
+
+#Subset women
+df_women <- df_hormones %>% 
+
+  #Filter if female
+  filter(sex == "Female") %>% 
+  
+  #Select specific columns
+  #Basic demo, snag, hormones
+  dplyr::select(subject_id:repo_status_spatial,
+                loop_pe_rad1_m:testosterone_spatial_ng_dl) %>% 
+  
+  #Reorder repo status
+  mutate(repo_status_scan = fct_relevel(repo_status_scan, 
+                                         c("Pre", "Peri", "Post")))
 
 ```
 
 
 # Estradiol
 
+```{r}
+#Estradiol plot
+ggplot(data = df_women, aes(x = repo_status_scan, 
+                            y = estradiol_scan_pg_ml, 
+                            fill = repo_status_scan))+
+  
+  #Define bar plot by mean
+  geom_bar(stat="summary", fun= "mean",
+           show.legend = FALSE)+ 
+  
+  #Add SEM errorbar
+  stat_summary(geom = "errorbar", 
+               fun.data = mean_se,
+               width = 0.15, size = 0.7)+
+  
+  #Change labels
+  labs(x = "Reproductive Status",
+       y = expression(atop(paste(bold("17"),
+                                 bold(beta),
+                                 bold("-Estradiol (pg/mL)")),
+                           ))) +
+  
+  #Change colors of bars
+  #Reverse color scale
+  scale_fill_brewer(palette = "RdPu",
+                    direction = -1)+
+  
+  #Change theme
+  theme_classic() +
+  
+  #Customize theme
+  theme(axis.title = element_text(size = 11, face = "bold"), 
+        axis.text = element_text(size= 10))
+```
+
 
 # FSH
+
+```{r}
+#FSH plot
+ggplot(data = df_women, aes(x = repo_status_scan, 
+                            y = fsh_scan_miu_ml, 
+                            fill = repo_status_scan))+
+  
+  #Define bar plot by mean
+  geom_bar(stat="summary", fun= "mean",
+           show.legend = FALSE)+ 
+  
+  #Add SEM errorbar
+  stat_summary(geom = "errorbar", 
+               fun.data = mean_se,
+               width = 0.15, size = 0.7)+
+  
+  #Change labels
+  labs(x = "Reproductive Status",
+       y = "FSH (mIU/mL)\n") +
+  
+  #Change colors of bars
+  #Reverse color scale
+  scale_fill_brewer(palette = "RdPu",
+                    direction = -1)+
+  
+  #Change theme
+  theme_classic() +
+  
+  #Customize theme
+  theme(axis.title = element_text(size = 11, face = "bold"), 
+        axis.text = element_text(size= 10))
+```
+
+
+
