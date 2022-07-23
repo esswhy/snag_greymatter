@@ -5,7 +5,69 @@ date: "7/22/2022"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r setup, include=FALSE, warning = FALSE, message = FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+
+#Libraries
+library(tidyverse)
+library(here)
+library(janitor)
 ```
+
+
+# Introduction
+
+
+Study 1 aims to investigate the relationship between sex hormones and spatial navigation behavior in midlife women and men.
+
+# Research Question
+
+Do sex hormones (estradiol, FSH) covary with dependent variables in each spatial navigation task (LOOP, MAZE, DSP) for midlife women and men?
+
+**Prediction:** The decline in ovarian estradiol production in midlife women will be associated with a shift in performance characteristics across spatial navigation paradigms, including more position errors in the LOOP task, fewer correct targets in the MAZE task, and an increased reliance on response-based strategies in the DSP task. For men, I hypothesize that lower testosterone concentrations will also be associated with more position errors in the LOOP task, fewer correct targets in the MAZE task, and an increased reliance on response-based strategies in the DSP task. 
+
+
+Does the ratio of E/FSH among midlife women covary with position error in LOOP, accuracy in MAZE, or navigation strategy in DSP?
+
+**Prediction:** Women with higher ratio of FSH to E (estradiol) will have more position errors in LOOP, less accuracy in MAZE, and more likely to use response-based strategies in DSP compared to women with higher E to FSH.
+
+
+Another aim is to characterize the change in spatial navigation behavior for men and women from young to midlife. Using data collection from young adults (SNAG, OHS, HAS),I will plot how changes in behavior change with age for mainly women and men.
+
+
+
+
+# Methods
+
+## Participants
+
+
+## Task Paradigms
+
+Same as in *Yu et al. (2021)*, with focus on Dual-Solution Paradigm (DSP) and Maze Learning Task (MAZE).
+
+
+# Results
+
+## Hormone and Behavior Correlations
+
+
+## Estradiol and FSH ratio in Midlife
+
+## Behavior for Young and Midlife
+
+
+# Summary
+
+
+Future directions for this analysis will incorporate 
+
+
+# References
+
+
+
+
+
+
 
