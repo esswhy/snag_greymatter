@@ -6,12 +6,14 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE, warning = FALSE, message = FALSE}
-knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE,
+                      include = FALSE)
 
 #Libraries
 library(tidyverse)
 library(here)
 library(janitor)
+library(kableExtra)
 ```
 
 
@@ -34,12 +36,89 @@ Does the ratio of E/FSH among midlife women covary with position error in LOOP, 
 
 Another aim is to characterize the change in spatial navigation behavior for men and women from young to midlife. Using data collection from young adults (SNAG, OHS, HAS),I will plot how changes in behavior change with age for mainly women and men.
 
-
-
-
 # Methods
 
 ## Participants
+
+Adults
+
+```{r}
+#Table for final sample and age mean, sd for Aim 1
+aim1 <- read_csv(here("data", "HAS_SNAG_mastersheet_tidy.csv"))
+
+#Filter for those with SNAG data
+aim1 <- aim1 %>% filter(completed_spatial == "Yes",
+                        )
+
+#Table overall
+tab_overall <- aim1 %>% 
+  group_by(sex) %>% 
+  summarize(n_subject = n(),
+            age_mean = mean(age_spatial_years),
+            age_Sd = sd(age_spatial_years))
+
+#Table LOOP
+tab_loop <- aim1 %>% 
+  filter(loop_useable == "Yes") %>% 
+  group_by(sex) %>% 
+  summarize(n_subject = n(),
+            age_mean = mean(age_spatial_years),
+            age_Sd = sd(age_spatial_years))
+
+#Table MAZE
+tab_maze <- aim1 %>% 
+  filter(maze_useable == "Yes") %>% 
+  group_by(sex) %>% 
+  summarize(n_subject = n(),
+            age_mean = mean(age_spatial_years),
+            age_Sd = sd(age_spatial_years))
+
+
+#Table DSP
+tab_dsp <- aim1 %>% 
+  filter(dsp_useable == "Yes") %>% 
+  group_by(sex) %>% 
+  summarize(n_subject = n(),
+            age_mean = mean(age_spatial_years),
+            age_Sd = sd(age_spatial_years))
+
+
+#Join df based on sex
+tab1 <- merge(tab_overall, tab_loop, by = "sex")
+
+#Rename columns
+tab1 <- tab1 %>% 
+  rename(n_subject_overall = n_subject.x,
+         age_mean_overall = age_mean.x,
+         age_sd_overall = age_Sd.x,
+         n_subject_loop = n_subject.y,
+         age_mean_loop = age_mean.y,
+         age_sd_loop = age_Sd.y)
+
+#Rest of the merge
+tab2 <- merge(tab1, tab_maze, by = "sex")
+tab_final <- merge(tab2, tab_dsp, by = "sex")
+
+#Rename columns
+tab_final <- tab_final %>% 
+  rename(n_subject_maze = n_subject.x,
+         age_mean_maze = age_mean.x,
+         age_sd_maze = age_Sd.x,
+         n_subject_dsp = n_subject.y,
+         age_mean_dsp = age_mean.y,
+         age_sd_dsp = age_Sd.y)
+
+
+#Kable presentation
+tab_final %>% 
+  kable()
+```
+
+
+
+Young Adults
+
+
 
 
 ## Task Paradigms
@@ -52,7 +131,7 @@ Same as in *Yu et al. (2021)*, with focus on Dual-Solution Paradigm (DSP) and Ma
 ## Hormone and Behavior Correlations
 
 
-## Estradiol and FSH ratio in Midlife
+## Estradiol and FSH ratio in Midlife Women
 
 ## Behavior for Young and Midlife
 
