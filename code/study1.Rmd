@@ -206,7 +206,7 @@ No correlations for accuracy or moves
 ```{r}
 ########## pearson for wayfinding success
 cor.test(aim1_men$testosterone_spatial_ng_dl,
-         aim1_men$maze_accuracy_pct,
+         aim1_men$dsp_success_pct,
          conf.level = 0.95,
          method = "pearson")
 
@@ -457,6 +457,85 @@ cor.test(aim1_women$fsh_spatial_miu_ml,
          method = "spearman")
 ```
 No correlation for wayfinding success, but significant correlation for solution index.
+
+
+
+```{r}
+#E and FSH plot with SI
+a <- ggplot(data = aim1_women_dsp, aes(x = estradiol_spatial_pg_ml,
+                            y = dsp_si_true_pct,
+                            color = repo_status_spatial,
+                            text = subject_id)) +
+  
+  #Define scatter, change size and alpha
+  geom_point(aes(color = repo_status_spatial),
+             size = 3, alpha = 0.6, show.legend = FALSE) +
+  
+  #Add LM line
+  geom_smooth(method = "lm", se = FALSE,
+              color = "grey50") +
+  
+  #Change labels
+  labs(x = expression(paste(bold("17"),
+                                 bold(beta),
+                                 bold("-Estradiol (pg/mL)")),
+                           ),
+       y = "Solution Index (%)\n",
+       color = "Reproductive Status") +
+  
+  #Change color of points
+  scale_color_manual(values = c("cadetblue4", "mediumvioletred", "darkorange")) +
+  
+  theme_minimal() +
+  
+  #Customize theme
+  theme(axis.title = element_text(size = 11, face = "bold"), 
+        axis.title.x = element_text(vjust = -0.5),
+        axis.text = element_text(size= 10))
+
+b <- ggplot(data = aim1_women_dsp, aes(x = fsh_spatial_miu_ml,
+                            y = dsp_si_true_pct,
+                            color = repo_status_spatial,
+                            text = subject_id)) +
+  
+  #Define scatter, change size and alpha
+  geom_point(aes(color = repo_status_spatial),
+             size = 3, alpha = 0.6) +
+  
+  #Add LM line
+  geom_smooth(method = "lm", se = FALSE,
+              color = "grey50") +
+  
+  #Change labels
+  labs(x = "\nFollicle Stimulating Hormone (mIU/mL)",
+       y = " ",
+       color = "Reproductive Status") +
+  
+  #Change color of points
+  scale_color_manual(values = c("cadetblue4", "mediumvioletred", "darkorange")) +
+  
+  theme_minimal() +
+  
+  #Customize theme
+  theme(axis.title = element_text(size = 11, face = "bold"),
+        axis.title.x = element_text(vjust = 2),
+        axis.text = element_text(size= 10),
+        
+        #Legend
+        #legend.title = element_text(face = "bold"),
+        legend.position = "top"
+        
+        )
+
+
+#Combine
+combined <- a + b & theme(legend.position = "top")
+combined + plot_layout(guides = "collect")
+
+#save
+#ggsave("study1_dsp_si_e_fsh.png")
+```
+
 
 
 ## Estradiol to FSH ratio in Midlife Women
