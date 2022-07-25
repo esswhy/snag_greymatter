@@ -48,7 +48,7 @@ aim1 <- read_csv(here("data", "HAS_SNAG_mastersheet_tidy.csv"))
 
 #Filter for those with SNAG data
 aim1 <- aim1 %>% filter(completed_spatial == "Yes",
-                        )
+                        age_group == "Midlife")
 
 #Table overall
 tab_overall <- aim1 %>% 
@@ -118,6 +118,13 @@ tab_final %>%
 
 Young Adults
 
+```{r}
+ya <- read_csv(here("data", "HAS_SNAG_mastersheet_tidy.csv"))
+
+#Filter for those with SNAG data
+ya <- ya %>% filter(completed_spatial == "Yes",
+                    age_group == "Young")
+```
 
 
 
