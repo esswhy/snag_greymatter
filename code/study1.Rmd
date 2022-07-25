@@ -9,11 +9,17 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE,
                       include = FALSE)
 
-#Libraries
+#Attach libraries
 library(tidyverse)
 library(here)
 library(janitor)
+library(ggpubr)
+library(patchwork)
 library(kableExtra)
+library(foreign)
+library(RColorBrewer)
+library(plotly)
+library(readr)
 ```
 
 
@@ -44,11 +50,11 @@ Adults
 
 ```{r}
 #Table for final sample and age mean, sd for Aim 1
-aim1 <- read_csv(here("data", "HAS_SNAG_mastersheet_tidy.csv"))
+df_all <- read_csv(here("data", "HAS_SNAG_mastersheet_tidy.csv"))
 
 #Filter for those with SNAG data
-aim1 <- aim1 %>% filter(completed_spatial == "Yes",
-                        age_group == "Midlife")
+aim1 <- df_all %>% filter(completed_spatial == "Yes",
+                          age_group == "Midlife")
 
 #Table overall
 tab_overall <- aim1 %>% 
@@ -119,10 +125,8 @@ tab_final %>%
 Young Adults
 
 ```{r}
-ya <- read_csv(here("data", "HAS_SNAG_mastersheet_tidy.csv"))
-
 #Filter for those with SNAG data
-ya <- ya %>% filter(completed_spatial == "Yes",
+ya <- df_all %>% filter(completed_spatial == "Yes",
                     age_group == "Young")
 ```
 
@@ -135,12 +139,557 @@ Same as in *Yu et al. (2021)*, with focus on Dual-Solution Paradigm (DSP) and Ma
 
 # Results
 
-## Hormone and Behavior Correlations
+
+## Men: Hormone and Behavior Correlations
 
 
-## Estradiol and FSH ratio in Midlife Women
+```{r}
+#Filter for men
+aim1_men <- aim1 %>% filter(sex == "Male")
+```
+
+
+```{r normality-check-men}
+shapiro.test(aim1_men$dsp_si_true_pct)
+shapiro.test(aim1_men$dsp_success_pct)
+shapiro.test(aim1_men$maze_accuracy_pct)
+shapiro.test(aim1_men$maze_moves)
+shapiro.test(aim1_men$loop_pe_avg_m)
+shapiro.test(aim1_men$loop_de_avg_degree)
+shapiro.test(aim1_men$testosterone_spatial_ng_dl)
+```
+Spearman rank correlation needed for DSP solution index, MAZE accuracy
+ 
+ 
+### LOOP
+
+```{r}
+########## Pearson for position error
+cor.test(aim1_men$testosterone_spatial_ng_dl,
+         aim1_men$loop_pe_avg_m,
+         conf.level = 0.95,
+         method = "pearson")
+
+
+
+########## Pearson for degrees traveled
+cor.test(aim1_men$testosterone_spatial_ng_dl,
+         aim1_men$loop_de_avg_degree,
+         conf.level = 0.95,
+         method = "pearson")
+
+```
+No correlations for position error and degrees traveled 
+
+### MAZE
+
+```{r}
+########## spearman for accuracy
+cor.test(aim1_men$testosterone_spatial_ng_dl,
+         aim1_men$maze_accuracy_pct,
+         conf.level = 0.95,
+         method = "spearman")
+
+
+
+########## Pearson for moves
+cor.test(aim1_men$testosterone_spatial_ng_dl,
+         aim1_men$maze_moves,
+         conf.level = 0.95,
+         method = "pearson")
+```
+No correlations for accuracy or moves
+
+ 
+### DSP
+
+```{r}
+########## pearson for wayfinding success
+cor.test(aim1_men$testosterone_spatial_ng_dl,
+         aim1_men$maze_accuracy_pct,
+         conf.level = 0.95,
+         method = "pearson")
+
+
+
+########## spearman for si
+cor.test(aim1_men$testosterone_spatial_ng_dl,
+         aim1_men$dsp_si_true_pct,
+         conf.level = 0.95,
+         method = "spearman")
+```
+
+
+
+
+## Women: Hormone and Behavior Correlations
+
+Hormones bar plot
+
+```{r}
+#Filter for women
+aim1_women <- aim1 %>% 
+  filter(sex == "Female") %>% 
+  #Reorder repo status
+  mutate(repo_status_spatial = fct_relevel(repo_status_spatial, 
+                                         c("Pre", "Peri", "Post")))
+
+#Summary of hormones
+ehormones_fig <- aim1_women %>% 
+  group_by(repo_status_spatial) %>% 
+  summarize(mean_estradiol = mean(estradiol_spatial_pg_ml),
+            sd_estradiol = sd(estradiol_spatial_pg_ml),
+            n_estradiol = n(),
+            se_estradiol = sd(estradiol_spatial_pg_ml)/sqrt(n()), 
+            .groups = "keep")
+
+fhormones_fig <- aim1_women %>% 
+  group_by(repo_status_spatial) %>% 
+  summarize(mean_estradiol = mean(fsh_spatial_miu_ml),
+            sd_estradiol = sd(fsh_spatial_miu_ml),
+            n_estradiol = n(),
+            se_estradiol = sd(fsh_spatial_miu_ml)/sqrt(n()), 
+            .groups = "keep")
+```
+
+
+```{r hormone-plot}
+#Estradiol plot
+ggplot(data = aim1_women, aes(x = repo_status_spatial, 
+                            y = estradiol_spatial_pg_ml, 
+                            fill = repo_status_spatial))+
+  
+  #Define bar plot by mean
+  geom_bar(stat="summary", fun= "mean",
+           show.legend = FALSE)+ 
+  
+  #Add SEM errorbar
+  stat_summary(geom = "errorbar", 
+               fun.data = mean_se,
+               width = 0.15, size = 0.7)+
+  
+  #Change labels
+  labs(x = "Reproductive Status",
+       y = expression(atop(paste(bold("17"),
+                                 bold(beta),
+                                 bold("-Estradiol (pg/mL)")),
+                           )),
+       tag = "A") +
+  
+  #Change colors of bars
+  #Reverse color scale
+  scale_fill_brewer(palette = "RdPu",
+                    direction = -1)+
+  
+  #Change theme
+  theme_classic() +
+  
+  #Customize theme
+  theme(axis.title = element_text(size = 11, face = "bold"), 
+        axis.text = element_text(size= 10))
+
+#ggsave("estradiol_bar.png")
+
+
+#FSH plot
+ggplot(data = aim1_women, aes(x = repo_status_spatial, 
+                            y = fsh_spatial_miu_ml, 
+                            fill = repo_status_spatial))+
+  
+  #Define bar plot by mean
+  geom_bar(stat="summary", fun= "mean",
+           show.legend = FALSE)+ 
+  
+  #Add SEM errorbar
+  stat_summary(geom = "errorbar", 
+               fun.data = mean_se,
+               width = 0.15, size = 0.7)+
+  
+  #Change labels
+  labs(x = "Reproductive Status",
+       y = "FSH (mIU/mL)\n",
+       tag = "B") +
+  
+  #Change colors of bars
+  #Reverse color scale
+  scale_fill_brewer(palette = "RdPu",
+                    direction = -1)+
+  
+  #Change theme
+  theme_classic() +
+  
+  #Customize theme
+  theme(axis.title = element_text(size = 11, face = "bold"), 
+        axis.text = element_text(size= 10))
+
+#ggsave("fsh_bar.png")
+```
+
+
+
+```{r}
+#ANOVA of hormones
+hormone_mod <- aov(estradiol_spatial_pg_ml ~ repo_status_spatial,
+      data = aim1_women)
+TukeyHSD(hormone_mod)
+
+hormone_mod2 <- aov(fsh_spatial_miu_ml ~ repo_status_spatial,
+      data = aim1_women)
+TukeyHSD(hormone_mod2)
+```
+Estradiol is statistivcally significant between all pairs of reproductive groups, as well as FSH.
+
+
+
+```{r normality-check-women}
+shapiro.test(aim1_women$dsp_si_true_pct)
+shapiro.test(aim1_women$dsp_success_pct)
+shapiro.test(aim1_women$maze_accuracy_pct)
+shapiro.test(aim1_women$maze_moves)
+shapiro.test(aim1_women$loop_pe_avg_m)
+shapiro.test(aim1_women$loop_de_avg_degree)
+shapiro.test(aim1_women$estradiol_spatial_pg_ml)
+shapiro.test(aim1_women$fsh_spatial_miu_ml)
+```
+
+
+LOOP dependent variables were not significant as well as DSP wayfinding success, but all other variables were significant, meaning that the normality assumption was violated.
+
+
+### LOOP
+
+
+```{r}
+########## Pearson for position error
+cor.test(aim1_women$estradiol_spatial_pg_ml,
+         aim1_women$loop_pe_avg_m,
+         conf.level = 0.95,
+         method = "pearson")
+
+#FSH
+cor.test(aim1_women$fsh_spatial_miu_ml,
+         aim1_women$loop_pe_avg_m,
+         conf.level = 0.95,
+         method = "pearson")
+
+
+########## Pearson for degrees traveled
+cor.test(aim1_women$estradiol_spatial_pg_ml,
+         aim1_women$loop_de_avg_degree,
+         conf.level = 0.95,
+         method = "pearson")
+
+#FSH
+cor.test(aim1_women$fsh_spatial_miu_ml,
+         aim1_women$loop_de_avg_degree,
+         conf.level = 0.95,
+         method = "pearson")
+```
+No correlations for position error and degrees traveled
+
+
+### MAZE
+
+```{r}
+########## Spearman for wayfinding success
+
+#Estradiol
+cor.test(aim1_women$estradiol_spatial_pg_ml,
+         aim1_women$maze_accuracy_pct,
+         conf.level = 0.95,
+         method = "spearman")
+
+#FSH
+cor.test(aim1_women$fsh_spatial_miu_ml,
+         aim1_women$maze_accuracy_pct,
+         conf.level = 0.95,
+         method = "spearman")
+
+
+########## Spearman for solution index
+
+#Estradiol
+cor.test(aim1_women$estradiol_spatial_pg_ml,
+         aim1_women$maze_moves,
+         conf.level = 0.95,
+         method = "spearman")
+
+#FSH
+cor.test(aim1_women$fsh_spatial_miu_ml,
+         aim1_women$maze_moves,
+         conf.level = 0.95,
+         method = "spearman")
+```
+No correlations for accuracy or moves made
+
+
+### DSP
+
+```{r}
+
+########## Spearman for wayfinding success
+
+#Estradiol
+cor.test(aim1_women$estradiol_spatial_pg_ml,
+         aim1_women$dsp_success_pct,
+         conf.level = 0.95,
+         method = "spearman")
+
+#FSH
+cor.test(aim1_women$fsh_spatial_miu_ml,
+         aim1_women$dsp_success_pct,
+         conf.level = 0.95,
+         method = "spearman")
+
+
+########## Spearman for solution index
+
+#Estradiol
+cor.test(aim1_women$estradiol_spatial_pg_ml,
+         aim1_women$dsp_si_true_pct,
+         conf.level = 0.95,
+         method = "spearman")
+
+#FSH
+cor.test(aim1_women$fsh_spatial_miu_ml,
+         aim1_women$dsp_si_true_pct,
+         conf.level = 0.95,
+         method = "spearman")
+```
+No correlation for wayfinding success, but significant correlation for solution index.
+
+
+## Estradiol to FSH ratio in Midlife Women
+
+```{r}
+#Midlife women
+
+#Create new column with ratio
+aim1_women <- aim1_women %>% 
+  mutate(e_fsh_ratio = estradiol_spatial_pg_ml/fsh_spatial_miu_ml)
+
+#Filter for DSP
+aim1_women_dsp <- aim1_women %>% 
+  filter(dsp_useable == "Yes")
+
+
+#Plot ratio x success
+
+
+
+#Plot ratio x soltuion index
+ggplot(data = aim1_women_dsp, aes(x = e_fsh_ratio,
+                            y = dsp_si_true_pct,
+                            text = subject_id)) +
+  
+  #Define scatter, change size and alpha
+  geom_point(aes(color = repo_status_spatial),
+             size = 3, alpha = 0.6) +
+  
+  #Add LM line
+  geom_smooth(method = "lm", se = FALSE,
+              color = "grey50") +
+  
+  #Change labels
+  labs(x = "\nEstradiol to FSH Ratio",
+       y = "Solution Index",
+       color = "Reproductive Status") +
+  
+  #Change color of points
+  scale_color_manual(values = c("cadetblue4", "mediumvioletred", "darkorange")) +
+  
+  theme_minimal() +
+  
+  #Customize theme
+  theme(axis.title = element_text(size = 11, face = "bold"),
+        axis.title.x = element_text(vjust = 2),
+        axis.text = element_text(size= 10),
+        
+        #Legend
+        #legend.title = element_text(face = "bold"),
+        legend.position = "top")
+
+```
+
+### LOOP
+
+```{r}
+#Correlation with E:FSH ratio
+
+########## Spearman for wayfinding success
+
+cor.test(aim1_women$e_fsh_ratio,
+         aim1_women$loop_pe_avg_m,
+         conf.level = 0.95,
+         method = "spearman")
+
+
+########## Spearman for solution index
+
+
+cor.test(aim1_women$e_fsh_ratio,
+         aim1_women$loop_de_avg_degree,
+         conf.level = 0.95,
+         method = "spearman")
+```
+
+### MAZE
+
+```{r}
+#Correlation with E:FSH ratio
+
+########## Spearman for wayfinding success
+
+cor.test(aim1_women$e_fsh_ratio,
+         aim1_women$maze_accuracy_pct,
+         conf.level = 0.95,
+         method = "spearman")
+
+
+########## Spearman for solution index
+
+
+cor.test(aim1_women$e_fsh_ratio,
+         aim1_women$maze_moves,
+         conf.level = 0.95,
+         method = "spearman")
+```
+
+### DSP
+
+```{r}
+#Correlation with E:FSH ratio
+
+########## Spearman for wayfinding success
+
+cor.test(aim1_women$e_fsh_ratio,
+         aim1_women$dsp_success_pct,
+         conf.level = 0.95,
+         method = "spearman")
+
+
+########## Spearman for solution index
+
+
+cor.test(aim1_women$e_fsh_ratio,
+         aim1_women$dsp_si_true_pct,
+         conf.level = 0.95,
+         method = "spearman")
+```
+
+Solution index is still significant
 
 ## Behavior for Young and Midlife
+
+Visualizations
+
+```{r}
+#Combine dataframes
+long_viz <- df_all %>% 
+  select(subject_id, completed_spatial, sex, age_group,
+         age_spatial_years, repo_status_spatial, straw_status,
+         loop_useable:dsp_si_true_pct)
+```
+
+
+```{r}
+#LOOP
+long_viz_loop <- long_viz %>% 
+  filter(loop_useable == "Yes")
+
+#Scatterpot 
+a1 <- ggplot(data = long_viz_loop, aes(x = age_spatial_years,
+                                 y = loop_pe_avg_m)) +
+  geom_point(aes(color = sex), size = 2, alpha = 0.6) +
+  geom_smooth(aes(group = sex, color = sex), method = "lm", position = "identity") +
+  labs(x = "Age (years)",
+       y = "Mean position error (m)",
+       color = "Sex") +
+  theme_minimal()+
+  theme(legend.position = c(0.3, 0.9))
+
+
+a2 <- ggplot(data = long_viz_loop, aes(x = age_spatial_years,
+                                 y = loop_de_avg_degree)) +
+  geom_point(aes(color = sex), size = 2, alpha = 0.6,
+             show.legend = FALSE) +
+  geom_smooth(aes(group = sex, color = sex), method = "lm", 
+              position = "identity", show.legend = FALSE) +
+  labs(x = "Age (years)",
+       y = "Mean degrees traveled",
+       color = "Sex") +
+  theme_minimal()
+
+#Display combination
+a1+a2
+```
+
+
+
+```{r}
+#MAZE
+long_viz_maze <- long_viz %>% 
+  filter(maze_useable == "Yes")
+
+#Scatterpot 
+a1 <- ggplot(data = long_viz_maze, aes(x = age_spatial_years,
+                                 y = maze_accuracy_pct)) +
+  geom_point(aes(color = sex), size = 2, alpha = 0.6,
+             show.legend = FALSE) +
+  geom_smooth(aes(group = sex, color = sex), method = "lm", 
+              position = "identity", show.legend = FALSE) +
+  labs(x = "Age (years)",
+       y = "Accuracy (%)",
+       color = "Sex") +
+  theme_minimal()
+
+a2 <- ggplot(data = long_viz_maze, aes(x = age_spatial_years,
+                                      y = maze_moves)) +
+  geom_point(aes(color = sex), size = 2, alpha = 0.6) +
+  geom_smooth(aes(group = sex, color = sex), method = "lm", position = "identity") +
+  labs(x = "Age (years)",
+       y = "Number of Moves",
+       color = "Sex") +
+  theme_minimal() +
+  theme(legend.position = c(0.3, 0.1))
+
+#Display
+a1+a2
+```
+
+
+```{r}
+#DSP
+long_viz_dsp <- long_viz %>% 
+  filter(dsp_useable == "Yes")
+
+#Scatterpot with curve
+a1 <- ggplot(data = long_viz_dsp, aes(x = age_spatial_years,
+                                 y = dsp_success_pct)) +
+  geom_point(aes(color = sex), size = 2, alpha = 0.6) +
+  geom_smooth(aes(group = sex, color = sex), method = "lm", position = "identity") +
+  labs(x = "Age (years)",
+       y = "Wayfinding Success (%)",
+       color = "Sex") +
+  theme_minimal()+
+  theme(legend.position = c(0.2, 0.1))
+
+a2 <- ggplot(data = long_viz_dsp, aes(x = age_spatial_years,
+                                 y = dsp_si_true_pct)) +
+  geom_point(aes(color = sex), size = 2, alpha = 0.6,
+             show.legend = FALSE) +
+  geom_smooth(aes(group = sex, color = sex), method = "lm", 
+              position = "identity", show.legend = FALSE) +
+  labs(x = "Age (years)",
+       y = "Solution Index (%)",
+       color = "Sex") +
+  theme_minimal() 
+
+#Display
+a1+a2
+```
+
+
 
 
 # Summary
