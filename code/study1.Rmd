@@ -234,6 +234,7 @@ aim1_women <- aim1 %>%
   mutate(repo_status_spatial = fct_relevel(repo_status_spatial, 
                                          c("Pre", "Peri", "Post")))
 
+
 #Summary of hormones
 ehormones_fig <- aim1_women %>% 
   group_by(repo_status_spatial) %>% 
@@ -461,11 +462,18 @@ No correlation for wayfinding success, but significant correlation for solution 
 
 
 ```{r}
+#Filter for DSP
+aim1_women_dsp <- aim1 %>% 
+  filter(sex == "Female", dsp_useable == "Yes") %>% 
+  #Reorder repo status
+  mutate(repo_status_spatial = fct_relevel(repo_status_spatial, 
+                                         c("Pre", "Peri", "Post"))) 
+
+
+
 #E and FSH plot with SI
 a <- ggplot(data = aim1_women_dsp, aes(x = estradiol_spatial_pg_ml,
-                            y = dsp_si_true_pct,
-                            color = repo_status_spatial,
-                            text = subject_id)) +
+                                        y = dsp_si_true_pct)) +
   
   #Define scatter, change size and alpha
   geom_point(aes(color = repo_status_spatial),
@@ -493,10 +501,11 @@ a <- ggplot(data = aim1_women_dsp, aes(x = estradiol_spatial_pg_ml,
         axis.title.x = element_text(vjust = -0.5),
         axis.text = element_text(size= 10))
 
+
+
 b <- ggplot(data = aim1_women_dsp, aes(x = fsh_spatial_miu_ml,
                             y = dsp_si_true_pct,
-                            color = repo_status_spatial,
-                            text = subject_id)) +
+                            color = repo_status_spatial)) +
   
   #Define scatter, change size and alpha
   geom_point(aes(color = repo_status_spatial),
@@ -541,19 +550,12 @@ combined + plot_layout(guides = "collect")
 ## Estradiol to FSH ratio in Midlife Women
 
 ```{r}
+
 #Midlife women
 
 #Create new column with ratio
 aim1_women <- aim1_women %>% 
   mutate(e_fsh_ratio = estradiol_spatial_pg_ml/fsh_spatial_miu_ml)
-
-#Filter for DSP
-aim1_women_dsp <- aim1_women %>% 
-  filter(dsp_useable == "Yes")
-
-
-#Plot ratio x success
-
 
 
 #Plot ratio x soltuion index
@@ -680,7 +682,9 @@ long_viz_loop <- long_viz %>%
 a1 <- ggplot(data = long_viz_loop, aes(x = age_spatial_years,
                                  y = loop_pe_avg_m)) +
   geom_point(aes(color = sex), size = 2, alpha = 0.6) +
-  geom_smooth(aes(group = sex, color = sex), method = "lm", position = "identity") +
+  geom_smooth(aes(group = sex, color = sex), method = "lm", 
+              formula = y ~ poly(x, 2),
+              position = "identity") +
   labs(x = "Age (years)",
        y = "Mean position error (m)",
        color = "Sex") +
