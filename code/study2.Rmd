@@ -1,0 +1,23 @@
+---
+title: 'Study 2: Brain, Behavior, Hormones'
+author: "Shuying Yu"
+date: "8/5/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE, warning = FALSE, message = FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE,
+                      include = FALSE)
+
+#Attach libraries
+library(tidyverse)
+library(here)
+library(janitor)
+library(ggpubr)
+library(patchwork)
+library(kableExtra)
+library(foreign)
+library(RColorBrewer)
+library(plotly)
+library(readr)
+```
