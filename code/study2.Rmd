@@ -21,3 +21,43 @@ library(RColorBrewer)
 library(plotly)
 library(readr)
 ```
+
+
+# Introduction
+
+I cleaned some of the data prior to analyses. I had to:
+
+1) Filter participants that have either T1 or T2 subfield data from scan
+2) Select sex hormone measures from when scan was conducted
+3) Correct T1 and T2 subfield volumes using TIV, which is a combination of GMV, WMV, CSF
+4) No need to average left and right volumes to get an average measure for each subfield and brain region, since the reported data from CT is already averaged bilaterally
+
+For example: `t2hipp_vol_ca1`, `t2hipp_vol_ca23`...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
