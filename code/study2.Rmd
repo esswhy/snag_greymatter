@@ -23,18 +23,307 @@ library(readr)
 ```
 
 
+# Overview
+
+Study 1 has shown that there is a correlation between sex hormones and spatial navigation strategy, such that higher estradiol is positively associated with higher use of shortcuts in the DSP task (higher solution index). Higher FSH, on the other hand, was marginally negatively associated with shortcut use (lower solution index) using Spearman rank correlations.
+
+Here, I determine whether there are associations between T2 high-resolution hippocampal subregion volume and spatial navigation behaviors, and sex hormones and subregion volume.
+
+Later, I determine how subregion volume mediates the relationship between sex hormones and behavior for navigation strategy.
+
+
 # Introduction
 
 I cleaned some of the data prior to analyses. I had to:
 
-1) Filter participants that have either T1 or T2 subfield data from scan
+1) Filter for midlife participants that have T2 subfield data (subject 333 and over)
 2) Select sex hormone measures from when scan was conducted
-3) Correct T1 and T2 subfield volumes using TIV, which is a combination of GMV, WMV, CSF
-4) No need to average left and right volumes to get an average measure for each subfield and brain region, since the reported data from CT is already averaged bilaterally
+3) Correct for subfield volumes using TIV, which is a combination of GMV, WMV, CSF. Divide the volumes by TIV
+4) No need to average left and right volumes to get an average measure for each subfield and brain region, since the reported data from CT (August 2022) is already averaged bilaterally. However, these have not been manually refined/corrected yet.
 
-For example: `t2hipp_vol_ca1`, `t2hipp_vol_ca23`...
+For example: `t2hipp_vol_ca1`, `t2hipp_vol_ca23`... `t2hipp_vol_csf` before correction and `t2hipp_vol_ca1_cor`, `t2hipp_vol_ca23_cor`... `t2hipp_vol_csf_cor`after correction
+
+```{r}
+#Read in the data
+data <- read_csv(here("data", "HAS_SNAG_mastersheet_tidy.csv"))
+
+#Filter for midlife, has snag data, has t2hipp data
+data <- data %>% 
+  filter(age_group == "Midlife", 
+         completed_spatial == "Yes",
+         t2hipp_status == "Yes") %>% 
+  select(subject_id, sex, age_scan_years:testosterone_spatial_ng_dl,
+         t2hipp_vol_ca1:t2hipp_vol_csf)
+
+#Correct for TIV for t2hipp bilateral volumes
+data <- data %>% 
+  mutate(t2hipp_vol_ca1_cor = t2hipp_vol_ca1 / t2hipp_vol_tiv,
+         t2hipp_vol_ca23_cor = t2hipp_vol_ca23 / t2hipp_vol_tiv,
+         t2hipp_vol_dg_cor = t2hipp_vol_dg / t2hipp_vol_tiv,
+         t2hipp_vol_erc_cor = t2hipp_vol_erc / t2hipp_vol_tiv,
+         t2hipp_vol_phc_cor = t2hipp_vol_phc / t2hipp_vol_tiv,
+         t2hipp_vol_prc_cor = t2hipp_vol_prc / t2hipp_vol_tiv,
+         t2hipp_vol_sub_cor = t2hipp_vol_sub / t2hipp_vol_tiv,
+         t2hipp_vol_totalhipp_cor = t2hipp_vol_totalhipp / t2hipp_vol_tiv,
+         t2hipp_vol_phg_cor = t2hipp_vol_phg / t2hipp_vol_tiv,
+         t2hipp_vol_mtl_cor = t2hipp_vol_mtl / t2hipp_vol_tiv)
 
 
+#Separate for women and men
+data_women <- data %>% 
+  filter(sex == "Female", dsp_useable == "Yes")
+data_men <- data %>% 
+  filter(sex == "Male", dsp_useable == "Yes")
+```
+
+
+# Data Analysis
+
+
+## Total Effect (Hormones -> DV)
+
+
+```{r}
+#Estradiol
+
+#wayfinding success
+fit.totaleffect <- lm(dsp_success_pct ~ estradiol_spatial_pg_ml,
+                     data = data_women)
+summary(fit.totaleffect)
+
+#solution index
+fit.totaleffect <- lm(dsp_si_true_pct ~ estradiol_spatial_pg_ml,
+                     data = data_women)
+summary(fit.totaleffect)
+```
+
+There doesn’t necessarily have to be a significant relationship between the iv and the dv. Just as correlation doesn’t prove causation, no correlation does not disprove causation 
+
+## IV on mediator
+
+```{r}
+
+```
+
+
+
+
+
+
+
+
+## Subregion Volume and Spatial Behavior
+
+
+Assessing any relationships between subregion volume and SNAG behavior, specifically with DSP. First, check normality of the volume data
+
+```{r}
+#Subregions
+par(mfrow=c(2,2))
+hist(data_women$t2hipp_vol_ca1_cor)
+hist(data_women$t2hipp_vol_ca23_cor)
+hist(data_women$t2hipp_vol_mtl_cor)
+hist(data_women$t2hipp_vol_totalhipp_cor)
+
+
+#DSP 
+par(mfrow=c(1,2))
+hist(data_women$dsp_success_pct)
+hist(data_women$dsp_si_true_pct)
+```
+Subregion volumes appear to be normally distributed. There is an outlier wirh the MTL corrected subregion volume (max 20997.82 compared to mean of 7986.304).
+
+For DSP, wayfinding success if left skewed and solution index is right skewed. I try to see if I can take the log of these dependent variables to normalize them for Pearson correlation
+
+```{r}
+#log transform
+par(mfrow=c(1,2))
+hist(log(data_women$dsp_success_pct))
+hist(log(data_women$dsp_si_true_pct))
+
+#inverse
+par(mfrow=c(1,2))
+hist((data_women$dsp_success_pct)^-1)
+hist((data_women$dsp_si_true_pct)^-1)
+
+#square root
+par(mfrow=c(1,2))
+hist(sqrt(data_women$dsp_success_pct))
+hist(sqrt(data_women$dsp_si_true_pct))
+```
+
+Log transformation and square root makes the DSP dependent variable more normally distributed, moreso for solution index than for wayfinding success. Use spearman rank correlation instead.
+
+
+```{r}
+#Correlations: wayfinding success and CA1, CS23, MTL, totalhipp
+
+########## Spearman for wayfinding success
+
+#CA1
+cor.test(data_women$t2hipp_vol_ca1_cor,
+         data_women$dsp_success_pct,
+         conf.level = 0.95,
+         method = "spearman")
+
+#CA23
+cor.test(data_women$t2hipp_vol_ca23_cor,
+         data_women$dsp_success_pct,
+         conf.level = 0.95,
+         method = "spearman")
+
+#MTL
+cor.test(data_women$t2hipp_vol_mtl_cor,
+         data_women$dsp_success_pct,
+         conf.level = 0.95,
+         method = "spearman")
+
+#Total hipp
+cor.test(data_women$t2hipp_vol_totalhipp_cor,
+         data_women$dsp_success_pct,
+         conf.level = 0.95,
+         method = "spearman")
+```
+
+
+```{r}
+#Correlations: solution index and CA1, CS23, MTL, totalhipp
+
+########## Spearman for solution index
+
+#CA1
+cor.test(data_women$t2hipp_vol_ca1_cor,
+         data_women$dsp_si_true_pct,
+         conf.level = 0.95,
+         method = "spearman")
+
+#CA23
+cor.test(data_women$t2hipp_vol_ca23_cor,
+         data_women$dsp_si_true_pct,
+         conf.level = 0.95,
+         method = "spearman")
+
+#MTL
+cor.test(data_women$t2hipp_vol_mtl_cor,
+         data_women$dsp_si_true_pct,
+         conf.level = 0.95,
+         method = "spearman")
+
+#Total hipp
+cor.test(data_women$t2hipp_vol_totalhipp_cor,
+         data_women$dsp_si_true_pct,
+         conf.level = 0.95,
+         method = "spearman")
+```
+
+
+## Effect of hormones on subregion volume
+
+
+```{r}
+#Hormones
+par(mfrow=c(2,2))
+hist(data_women$estradiol_scan_pg_ml)
+hist(data_women$progesterone_scan_ng_ml)
+hist(data_women$testosterone_scan_ng_dl)
+hist(data_women$fsh_scan_miu_ml)
+```
+
+
+```{r}
+#log transform
+par(mfrow=c(2,2))
+hist(log(data_women$estradiol_scan_pg_ml))
+hist(log(data_women$progesterone_scan_ng_ml))
+hist(log(data_women$testosterone_scan_ng_dl))
+hist(log(data_women$fsh_scan_miu_ml))
+
+#inverse
+par(mfrow=c(2,2))
+hist((data_women$estradiol_scan_pg_ml)^-1)
+hist((data_women$progesterone_scan_ng_ml)^-1)
+hist((data_women$testosterone_scan_ng_dl)^-1)
+hist((data_women$fsh_scan_miu_ml)^-1)
+
+#square root
+par(mfrow=c(2,2))
+hist(sqrt(data_women$estradiol_scan_pg_ml))
+hist(sqrt(data_women$progesterone_scan_ng_ml))
+hist(sqrt(data_women$testosterone_scan_ng_dl))
+hist(sqrt(data_women$fsh_scan_miu_ml))
+```
+
+Log transformation appears to be the best for normalizing the hormone data.
+
+
+### Estradiol
+
+```{r}
+#Correlations: estradiol and CA1, CS23, MTL, totalhipp
+
+########## Spearman for estradiol
+
+#CA1
+cor.test(data_women$t2hipp_vol_ca1_cor,
+         log(data_women$estradiol_scan_pg_ml),
+         conf.level = 0.95,
+         method = "pearson")
+
+#CA23
+cor.test(data_women$t2hipp_vol_ca23_cor,
+         log(data_women$estradiol_scan_pg_ml),
+         conf.level = 0.95,
+         method = "pearson")
+
+#MTL
+cor.test(data_women$t2hipp_vol_mtl_cor,
+         log(data_women$estradiol_scan_pg_ml),
+         conf.level = 0.95,
+         method = "pearson")
+
+#Total hipp
+cor.test(data_women$t2hipp_vol_totalhipp_cor,
+         log(data_women$estradiol_scan_pg_ml),
+         conf.level = 0.95,
+         method = "pearson")
+```
+
+
+### FSH
+
+```{r}
+#Correlations: FSH and CA1, CS23, MTL, totalhipp
+
+########## Spearman for FSH
+
+#CA1
+cor.test(data_women$t2hipp_vol_ca1_cor,
+         log(data_women$fsh_scan_miu_ml),
+         conf.level = 0.95,
+         method = "pearson")
+
+#CA23
+cor.test(data_women$t2hipp_vol_ca23_cor,
+         log(data_women$fsh_scan_miu_ml),
+         conf.level = 0.95,
+         method = "pearson")
+
+#MTL
+cor.test(data_women$t2hipp_vol_mtl_cor,
+         log(data_women$fsh_scan_miu_ml),
+         conf.level = 0.95,
+         method = "pearson")
+
+#Total hipp
+cor.test(data_women$t2hipp_vol_totalhipp_cor,
+         log(data_women$fsh_scan_miu_ml),
+         conf.level = 0.95,
+         method = "pearson")
+```
+
+
+
+## Causal Mediation Analysis
 
 
 
