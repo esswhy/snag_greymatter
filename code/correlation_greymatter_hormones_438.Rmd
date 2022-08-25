@@ -29,7 +29,7 @@ This report provides exploratory and preliminary correlation analyses between se
 
 Black diamond point are the group means. Highlighted in purple triangle point and purple line is subject 438.
 
-Data did not include correction for TIV since left and right CSF, GMV, and WMV were not included.
+Data did not include correction for TIV since left and right CSF, GMV, and WMV were not included yet in this round for analysis.
 
 Cleaning data steps included:
 
@@ -106,6 +106,7 @@ df_clean_repo <- df_clean %>%
 
 ## CA1 
 
+Subject 438: average volume of 648.8035
 
 ### Structural Comparison
 
@@ -162,10 +163,8 @@ p3 <- ggplot(data = df_clean, aes(x = avg_ca1)) +
 (p1+p2)/p3
 ```
 
-Subject 438: volume of 648.8035
 
-
-### Hormone Correlation
+### Hormone Correlation by Reproductive Status
 
 ```{r}
 #Estradiol
@@ -176,84 +175,133 @@ c1 <- ggscatter(df_clean_repo, x = "estradiol_pg_m_l", y = "avg_ca1", color = "r
           conf.int = TRUE, 
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
-          xlab = "Estradiol (pg/mL)", ylab = "Averaged CA1 Subfield Volume")
+          xlab = "Estradiol (pg/mL)", ylab = "Averaged CA1 Subfield Volume") +
+    geom_point(aes(x = df_438$estradiol_pg_m_l, y= df_438$avg_ca1),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
 
 #Progesterone
-
-
-
-#FSH
-```
-
-
-```{r}
-#Scatterplot
-t2ca1_1 <- ggscatter(df_t2hipp_corrected, x = "estradiol_scan_pg_ml", y = "t2hipp_vol_ca1",
+c2 <- ggscatter(df_clean_repo, x = "progesterone_ng_m_l", y = "avg_ca1", color = "repo_status",
           add = "reg.line",
-          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
           conf.int = TRUE, 
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
-          xlab = "Estradiol (pg/mL)", ylab = "CA1")
+          xlab = "Progesterone (ng/mL)", ylab = "Averaged CA1 Subfield Volume") +
+    geom_point(aes(x = df_438$progesterone_ng_m_l, y= df_438$avg_ca1),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
 
-#Scatterplot
-t2ca1_2 <- ggscatter(df_t2hipp_corrected, x = "progesterone_scan_ng_ml", y = "t2hipp_vol_ca1",
+#FSH
+c3 <- ggscatter(df_clean_repo, x = "fsh_m_iu_m_l", y = "avg_ca1", color = "repo_status",
           add = "reg.line",
-          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
-          conf.int = TRUE,
+          conf.int = TRUE, 
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
-          xlab = "Progesterone (ng/mL)", ylab = "CA1")
+          xlab = "FSH (mIU/mL)", ylab = "Averaged CA1 Subfield Volume") +
+    geom_point(aes(x = df_438$fsh_m_iu_m_l, y= df_438$avg_ca1),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
 
-
-#Scatterplot
-t2ca1_3 <- ggscatter(df_t2hipp_corrected, x = "fsh_scan_miu_ml", y = "t2hipp_vol_ca1",
+#SHBG
+c4 <- ggscatter(df_clean_repo, x = "shbg_nmol_l", y = "avg_ca1", color = "repo_status",
           add = "reg.line",
-          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
-          conf.int = TRUE,
+          conf.int = TRUE, 
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
-          xlab = "FSH (mIU/mL)", ylab = "CA1")
+          xlab = "SHBG (nmol/L)", ylab = "Averaged CA1 Subfield Volume") +
+    geom_point(aes(x = df_438$shbg_nmol_l, y= df_438$avg_ca1),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
 
 
-#Scatterplot, facet by sex
-t2ca1_4 <- ggscatter(df_t2hipp_corrected, x = "shbg_scan_nmol_l", y = "t2hipp_vol_ca1",
-          facet.by = "sex",
-          add = "reg.line", 
-          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
-          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
-          conf.int = TRUE,
-          cor.method = "pearson",
-          xlab = "SHBG (nmol/L)", ylab = "CA1")
-
-#Scatterplot, facet by sex
-t2ca1_5 <- ggscatter(df_t2hipp_corrected, x = "testosterone_scan_ng_dl", y = "t2hipp_vol_ca1", facet.by = "sex",
+#DHEAS
+c5 <- ggscatter(df_clean_repo, x = "dhea_s_ug_d_l", y = "avg_ca1", color = "repo_status",
           add = "reg.line",
-          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
-          conf.int = TRUE,
+          conf.int = TRUE, 
           cor.method = "pearson",
-          xlab = "Testosterone (ng/dL)", ylab = "CA1")
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "DHEAS (ug/dL)", ylab = "Averaged CA1 Subfield Volume") +
+    geom_point(aes(x = df_438$dhea_s_ug_d_l, y= df_438$avg_ca1),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
 
 
-#Scatterplot, facet by sex
-t2ca1_6 <- ggscatter(df_t2hipp_corrected, x = "dheas_scan_ug_dl", y = "t2hipp_vol_ca1", facet.by = "sex",
+#Testosterone
+c6 <- ggscatter(df_clean_repo, x = "total_testosterone_ng_d_l", y = "avg_ca1", color = "repo_status",
           add = "reg.line",
-          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
-          conf.int = TRUE,
+          conf.int = TRUE, 
           cor.method = "pearson",
-          xlab = "DHEAS (ug/dL)", ylab = "CA1")
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Testosterone (ng/dL)", ylab = "Averaged CA1 Subfield Volume") +
+    geom_point(aes(x = df_438$total_testosterone_ng_d_l, y= df_438$avg_ca1),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
 
 
 #Present as patchwork
-(t2ca1_1 + t2ca1_2 + t2ca1_3)
-t2ca1_4
-t2ca1_5
-t2ca1_6
+(c1+c2)
+(c3+c4)
+(c5+c6)
+```
+
+
+### Hormone Correlation by Reproductive Sex
+
+```{r}
+#SHBG
+c1 <- ggscatter(df_clean, x = "shbg_nmol_l", y = "avg_ca1", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "SHBG (nmol/L)", ylab = "Averaged CA1 Subfield Volume") +
+    geom_point(aes(x = df_438$shbg_nmol_l, y= df_438$avg_ca1),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
+
+
+#DHEAS
+c2 <- ggscatter(df_clean, x = "dhea_s_ug_d_l", y = "avg_ca1", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "DHEAS (ug/dL)", ylab = "Averaged CA1 Subfield Volume") +
+    geom_point(aes(x = df_438$dhea_s_ug_d_l, y= df_438$avg_ca1),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
+
+
+#Testosterone
+c3 <- ggscatter(df_clean, x = "total_testosterone_ng_d_l", y = "avg_ca1", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Testosterone (ng/dL)", ylab = "Averaged CA1 Subfield Volume") +
+    geom_point(aes(x = df_438$total_testosterone_ng_d_l, y= df_438$avg_ca1),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
+
+
+#Present as patchwork
+(c1+c2+c3)
 ```
 
 
@@ -262,440 +310,1239 @@ t2ca1_6
 
 ## CA2/3
 
+Subject 438: average volume of 242.462
+
+### Structural Comparison
+
 ```{r}
-#Scatterplot
-t2ca23_1 <- ggscatter(df_t2hipp_corrected, x = "estradiol_scan_pg_ml", y = "t2hipp_vol_ca23",
+#Reproductive status
+p1 <- ggplot(data = df_clean_repo, aes(y = avg_ca23,
+                                 x = repo_status,
+                                 fill = repo_status,
+                                 color = repo_status)) + 
+  geom_boxplot(alpha = 0.5,show.legend = FALSE) +
+  geom_jitter(width = 0.1, show.legend = FALSE) +
+  stat_summary(fun.y=mean, geom="point",
+               shape=20, size=3, color="black", fill="black") +
+  labs(x = "Reproductive Status",
+       y = "Averaged CA23 Subfield Volume",
+       title = "Reproductive Status") + 
+  theme(legend.position = "none") +
+   #Add 438
+  geom_point(aes(x = factor("Post"), y= df_438$avg_ca23),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
+
+#Sex
+p2 <- ggplot(data = df_clean, aes(y = avg_ca23,
+                                 x = sex,
+                                 fill = sex,
+                                 color = sex)) + 
+  geom_boxplot(alpha = 0.5,show.legend = FALSE) +
+  geom_jitter(width = 0.1, show.legend = FALSE) +
+  stat_summary(fun.y=mean, geom="point",
+               shape=20, size=3, color="black", fill="black") +
+  labs(x = "Sex",
+       y = "Averaged CA23 Subfield Volume",
+       title = "Sex") + 
+  theme(legend.position = "none") +
+      #Add 438
+  geom_point(aes(x = factor("Female"), y= df_438$avg_ca23),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
+
+
+#Total
+p3 <- ggplot(data = df_clean, aes(x = avg_ca23)) + 
+  geom_histogram(alpha = 0.5, position = "identity",
+                 show.legend = FALSE) +
+  labs(x = "Average CA23 Subfield Volume",
+       y = "Count",
+       title = "Total") +
+  #Add 438 
+  geom_vline(aes(xintercept = df_438$avg_ca23), color = "purple", size = 1.5)
+
+
+#Combine
+(p1+p2)/p3
+```
+
+
+### Hormone Correlation by Reproductive Status
+
+```{r}
+#Estradiol
+c1 <- ggscatter(df_clean_repo, x = "estradiol_pg_m_l", y = "avg_ca23", color = "repo_status",
           add = "reg.line",
-          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
           conf.int = TRUE, 
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
-          xlab = "Estradiol (pg/mL)", ylab = "CA23")
+          xlab = "Estradiol (pg/mL)", ylab = "Averaged CA23 Subfield Volume") +
+    geom_point(aes(x = df_438$estradiol_pg_m_l, y= df_438$avg_ca23),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
 
-#Scatterplot
-t2ca23_2 <- ggscatter(df_t2hipp_corrected, x = "progesterone_scan_ng_ml", y = "t2hipp_vol_ca23",
+#Progesterone
+c2 <- ggscatter(df_clean_repo, x = "progesterone_ng_m_l", y = "avg_ca23", color = "repo_status",
           add = "reg.line",
-          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
-          conf.int = TRUE,
+          conf.int = TRUE, 
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
-          xlab = "Progesterone (ng/mL)", ylab = "CA23")
+          xlab = "Progesterone (ng/mL)", ylab = "Averaged CA23 Subfield Volume") +
+    geom_point(aes(x = df_438$progesterone_ng_m_l, y= df_438$avg_ca23),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
 
-
-#Scatterplot
-t2ca23_3 <- ggscatter(df_t2hipp_corrected, x = "fsh_scan_miu_ml", y = "t2hipp_vol_ca23",
+#FSH
+c3 <- ggscatter(df_clean_repo, x = "fsh_m_iu_m_l", y = "avg_ca23", color = "repo_status",
           add = "reg.line",
-          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
-          conf.int = TRUE,
+          conf.int = TRUE, 
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
-          xlab = "FSH (mIU/mL)", ylab = "CA23")
+          xlab = "FSH (mIU/mL)", ylab = "Averaged CA23 Subfield Volume") +
+    geom_point(aes(x = df_438$fsh_m_iu_m_l, y= df_438$avg_ca23),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
 
-
-#Scatterplot, facet by sex
-t2ca23_4 <- ggscatter(df_t2hipp_corrected, x = "shbg_scan_nmol_l", y = "t2hipp_vol_ca23",
-          facet.by = "sex",
-          add = "reg.line", 
-          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
-          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
-          conf.int = TRUE,
-          cor.method = "pearson",
-          xlab = "SHBG (nmol/L)", ylab = "CA23")
-
-#Scatterplot, facet by sex
-t2ca23_5 <- ggscatter(df_t2hipp_corrected, x = "testosterone_scan_ng_dl", y = "t2hipp_vol_ca23", facet.by = "sex",
+#SHBG
+c4 <- ggscatter(df_clean_repo, x = "shbg_nmol_l", y = "avg_ca23", color = "repo_status",
           add = "reg.line",
-          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
-          conf.int = TRUE,
+          conf.int = TRUE, 
           cor.method = "pearson",
-          xlab = "Testosterone (ng/dL)", ylab = "CA23")
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "SHBG (nmol/L)", ylab = "Averaged CA23 Subfield Volume") +
+    geom_point(aes(x = df_438$shbg_nmol_l, y= df_438$avg_ca23),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
 
 
-#Scatterplot, facet by sex
-t2ca23_6 <- ggscatter(df_t2hipp_corrected, x = "dheas_scan_ug_dl", y = "t2hipp_vol_ca23", facet.by = "sex",
+#DHEAS
+c5 <- ggscatter(df_clean_repo, x = "dhea_s_ug_d_l", y = "avg_ca23", color = "repo_status",
           add = "reg.line",
-          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
-          conf.int = TRUE,
+          conf.int = TRUE, 
           cor.method = "pearson",
-          xlab = "DHEAS (ug/dL)", ylab = "CA23")
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "DHEAS (ug/dL)", ylab = "Averaged CA23 Subfield Volume") +
+    geom_point(aes(x = df_438$dhea_s_ug_d_l, y= df_438$avg_ca23),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
+
+
+#Testosterone
+c6 <- ggscatter(df_clean_repo, x = "total_testosterone_ng_d_l", y = "avg_ca23", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Testosterone (ng/dL)", ylab = "Averaged CA23 Subfield Volume") +
+    geom_point(aes(x = df_438$total_testosterone_ng_d_l, y= df_438$avg_ca23),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
 
 
 #Present as patchwork
-(t2ca23_1 + t2ca23_2 + t2ca23_3)
-t2ca23_4
-t2ca23_5
-t2ca23_6
+(c1+c2)
+(c3+c4)
+(c5+c6)
+```
+
+
+### Hormone Correlation by Reproductive Sex
+
+```{r}
+#SHBG
+c1 <- ggscatter(df_clean, x = "shbg_nmol_l", y = "avg_ca23", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "SHBG (nmol/L)", ylab = "Averaged CA23 Subfield Volume") +
+    geom_point(aes(x = df_438$shbg_nmol_l, y= df_438$avg_ca23),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
+
+
+#DHEAS
+c2 <- ggscatter(df_clean, x = "dhea_s_ug_d_l", y = "avg_ca23", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "DHEAS (ug/dL)", ylab = "Averaged CA23 Subfield Volume") +
+    geom_point(aes(x = df_438$dhea_s_ug_d_l, y= df_438$avg_ca23),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
+
+
+#Testosterone
+c3 <- ggscatter(df_clean, x = "total_testosterone_ng_d_l", y = "avg_ca23", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Testosterone (ng/dL)", ylab = "Averaged CA23 Subfield Volume") +
+    geom_point(aes(x = df_438$total_testosterone_ng_d_l, y= df_438$avg_ca23),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
+
+
+#Present as patchwork
+(c1+c2+c3)
 ```
 
 
 
 ## DG
 
+Subject 438: average volume of 724.0295
+
+### Structural Comparison
+
 ```{r}
-#Scatterplot
-t2dg_1 <- ggscatter(df_t2hipp_corrected, x = "estradiol_scan_pg_ml", y = "t2hipp_vol_dg",
+#Reproductive status
+p1 <- ggplot(data = df_clean_repo, aes(y = avg_dg,
+                                 x = repo_status,
+                                 fill = repo_status,
+                                 color = repo_status)) + 
+  geom_boxplot(alpha = 0.5,show.legend = FALSE) +
+  geom_jitter(width = 0.1, show.legend = FALSE) +
+  stat_summary(fun.y=mean, geom="point",
+               shape=20, size=3, color="black", fill="black") +
+  labs(x = "Reproductive Status",
+       y = "Averaged DG Subfield Volume",
+       title = "Reproductive Status") + 
+  theme(legend.position = "none") +
+   #Add 438
+  geom_point(aes(x = factor("Post"), y= df_438$avg_dg),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
+
+#Sex
+p2 <- ggplot(data = df_clean, aes(y = avg_dg,
+                                 x = sex,
+                                 fill = sex,
+                                 color = sex)) + 
+  geom_boxplot(alpha = 0.5,show.legend = FALSE) +
+  geom_jitter(width = 0.1, show.legend = FALSE) +
+  stat_summary(fun.y=mean, geom="point",
+               shape=20, size=3, color="black", fill="black") +
+  labs(x = "Sex",
+       y = "Averaged DG Subfield Volume",
+       title = "Sex") + 
+  theme(legend.position = "none") +
+      #Add 438
+  geom_point(aes(x = factor("Female"), y= df_438$avg_dg),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
+
+
+#Total
+p3 <- ggplot(data = df_clean, aes(x = avg_dg)) + 
+  geom_histogram(alpha = 0.5, position = "identity",
+                 show.legend = FALSE) +
+  labs(x = "Average DG Subfield Volume",
+       y = "Count",
+       title = "Total") +
+  #Add 438 
+  geom_vline(aes(xintercept = df_438$avg_dg), color = "purple", size = 1.5)
+
+
+#Combine
+(p1+p2)/p3
+```
+
+
+### Hormone Correlation by Reproductive Status
+
+```{r}
+#Estradiol
+c1 <- ggscatter(df_clean_repo, x = "estradiol_pg_m_l", y = "avg_dg", color = "repo_status",
           add = "reg.line",
-          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
           conf.int = TRUE, 
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
-          xlab = "Estradiol (pg/mL)", ylab = "Dendate Gyrus")
+          xlab = "Estradiol (pg/mL)", ylab = "Averaged DG Subfield Volume") +
+    geom_point(aes(x = df_438$estradiol_pg_m_l, y= df_438$avg_dg),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
 
-#Scatterplot
-t2dg_2 <- ggscatter(df_t2hipp_corrected, x = "progesterone_scan_ng_ml", y = "t2hipp_vol_dg",
+#Progesterone
+c2 <- ggscatter(df_clean_repo, x = "progesterone_ng_m_l", y = "avg_dg", color = "repo_status",
           add = "reg.line",
-          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
-          conf.int = TRUE,
+          conf.int = TRUE, 
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
-          xlab = "Progesterone (ng/mL)", ylab = "Dendate Gyrus")
+          xlab = "Progesterone (ng/mL)", ylab = "Averaged DG Subfield Volume") +
+    geom_point(aes(x = df_438$progesterone_ng_m_l, y= df_438$avg_dg),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
 
-
-#Scatterplot
-t2dg_3 <- ggscatter(df_t2hipp_corrected, x = "fsh_scan_miu_ml", y = "t2hipp_vol_dg",
+#FSH
+c3 <- ggscatter(df_clean_repo, x = "fsh_m_iu_m_l", y = "avg_dg", color = "repo_status",
           add = "reg.line",
-          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
-          conf.int = TRUE,
+          conf.int = TRUE, 
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
-          xlab = "FSH (mIU/mL)", ylab = "Dendate Gyrus")
+          xlab = "FSH (mIU/mL)", ylab = "Averaged DG Subfield Volume") +
+    geom_point(aes(x = df_438$fsh_m_iu_m_l, y= df_438$avg_dg),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
 
-
-#Scatterplot, facet by sex
-t2dg_4 <- ggscatter(df_t2hipp_corrected, x = "shbg_scan_nmol_l", y = "t2hipp_vol_dg",
-          facet.by = "sex",
-          add = "reg.line", 
-          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
-          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
-          conf.int = TRUE,
-          cor.method = "pearson",
-          xlab = "SHBG (nmol/L)", ylab = "Dendate Gyrus")
-
-#Scatterplot, facet by sex
-t2dg_5 <- ggscatter(df_t2hipp_corrected, x = "testosterone_scan_ng_dl", y = "t2hipp_vol_dg", facet.by = "sex",
+#SHBG
+c4 <- ggscatter(df_clean_repo, x = "shbg_nmol_l", y = "avg_dg", color = "repo_status",
           add = "reg.line",
-          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
-          conf.int = TRUE,
+          conf.int = TRUE, 
           cor.method = "pearson",
-          xlab = "Testosterone (ng/dL)", ylab = "Dendate Gyrus")
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "SHBG (nmol/L)", ylab = "Averaged DG Subfield Volume") +
+    geom_point(aes(x = df_438$shbg_nmol_l, y= df_438$avg_dg),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
 
 
-#Scatterplot, facet by sex
-t2dg_6 <- ggscatter(df_t2hipp_corrected, x = "dheas_scan_ug_dl", y = "t2hipp_vol_dg", facet.by = "sex",
+#DHEAS
+c5 <- ggscatter(df_clean_repo, x = "dhea_s_ug_d_l", y = "avg_dg", color = "repo_status",
           add = "reg.line",
-          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
-          conf.int = TRUE,
+          conf.int = TRUE, 
           cor.method = "pearson",
-          xlab = "DHEAS (ug/dL)", ylab = "Dendate Gyrus")
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "DHEAS (ug/dL)", ylab = "Averaged DG Subfield Volume") +
+    geom_point(aes(x = df_438$dhea_s_ug_d_l, y= df_438$avg_dg),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
+
+
+#Testosterone
+c6 <- ggscatter(df_clean_repo, x = "total_testosterone_ng_d_l", y = "avg_dg", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Testosterone (ng/dL)", ylab = "Averaged DG Subfield Volume") +
+    geom_point(aes(x = df_438$total_testosterone_ng_d_l, y= df_438$avg_dg),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
 
 
 #Present as patchwork
-(t2dg_1 + t2dg_2 + t2dg_3)
-t2dg_4
-t2dg_5
-t2dg_6
+(c1+c2)
+(c3+c4)
+(c5+c6)
 ```
+
+
+### Hormone Correlation by Reproductive Sex
+
+```{r}
+#SHBG
+c1 <- ggscatter(df_clean, x = "shbg_nmol_l", y = "avg_dg", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "SHBG (nmol/L)", ylab = "Averaged DG Subfield Volume") +
+    geom_point(aes(x = df_438$shbg_nmol_l, y= df_438$avg_dg),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
+
+
+#DHEAS
+c2 <- ggscatter(df_clean, x = "dhea_s_ug_d_l", y = "avg_dg", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "DHEAS (ug/dL)", ylab = "Averaged DG Subfield Volume") +
+    geom_point(aes(x = df_438$dhea_s_ug_d_l, y= df_438$avg_dg),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
+
+
+#Testosterone
+c3 <- ggscatter(df_clean, x = "total_testosterone_ng_d_l", y = "avg_dg", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Testosterone (ng/dL)", ylab = "Averaged DG Subfield Volume") +
+    geom_point(aes(x = df_438$total_testosterone_ng_d_l, y= df_438$avg_dg),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
+
+
+#Present as patchwork
+(c1+c2+c3)
+```
+
+
+
+
+
+
+
+
+
+
 
 
 ## ERC
 
+Subject 438: average volume of 1117.86
+
+### Structural Comparison
+
 ```{r}
-#Scatterplot
-t2erc_1 <- ggscatter(df_t2hipp_corrected, x = "estradiol_scan_pg_ml", y = "t2hipp_vol_erc",
+#Reproductive status
+p1 <- ggplot(data = df_clean_repo, aes(y = avg_erc,
+                                 x = repo_status,
+                                 fill = repo_status,
+                                 color = repo_status)) + 
+  geom_boxplot(alpha = 0.5,show.legend = FALSE) +
+  geom_jitter(width = 0.1, show.legend = FALSE) +
+  stat_summary(fun.y=mean, geom="point",
+               shape=20, size=3, color="black", fill="black") +
+  labs(x = "Reproductive Status",
+       y = "Averaged ERC Subfield Volume",
+       title = "Reproductive Status") + 
+  theme(legend.position = "none") +
+   #Add 438
+  geom_point(aes(x = factor("Post"), y= df_438$avg_erc),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
+
+#Sex
+p2 <- ggplot(data = df_clean, aes(y = avg_erc,
+                                 x = sex,
+                                 fill = sex,
+                                 color = sex)) + 
+  geom_boxplot(alpha = 0.5,show.legend = FALSE) +
+  geom_jitter(width = 0.1, show.legend = FALSE) +
+  stat_summary(fun.y=mean, geom="point",
+               shape=20, size=3, color="black", fill="black") +
+  labs(x = "Sex",
+       y = "Averaged ERC Subfield Volume",
+       title = "Sex") + 
+  theme(legend.position = "none") +
+      #Add 438
+  geom_point(aes(x = factor("Female"), y= df_438$avg_erc),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
+
+
+#Total
+p3 <- ggplot(data = df_clean, aes(x = avg_erc)) + 
+  geom_histogram(alpha = 0.5, position = "identity",
+                 show.legend = FALSE) +
+  labs(x = "Average ERC Subfield Volume",
+       y = "Count",
+       title = "Total") +
+  #Add 438 
+  geom_vline(aes(xintercept = df_438$avg_erc), color = "purple", size = 1.5)
+
+
+#Combine
+(p1+p2)/p3
+```
+
+
+### Hormone Correlation by Reproductive Status
+
+```{r}
+#Estradiol
+c1 <- ggscatter(df_clean_repo, x = "estradiol_pg_m_l", y = "avg_erc", color = "repo_status",
           add = "reg.line",
-          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
           conf.int = TRUE, 
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
-          xlab = "Estradiol (pg/mL)", ylab = "Entorhinal Cortex")
+          xlab = "Estradiol (pg/mL)", ylab = "Averaged ERC Subfield Volume") +
+    geom_point(aes(x = df_438$estradiol_pg_m_l, y= df_438$avg_erc),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
 
-#Scatterplot
-t2erc_2 <- ggscatter(df_t2hipp_corrected, x = "progesterone_scan_ng_ml", y = "t2hipp_vol_erc",
+#Progesterone
+c2 <- ggscatter(df_clean_repo, x = "progesterone_ng_m_l", y = "avg_erc", color = "repo_status",
           add = "reg.line",
-          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
-          conf.int = TRUE,
+          conf.int = TRUE, 
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
-          xlab = "Progesterone (ng/mL)", ylab = "Entorhinal Cortex")
+          xlab = "Progesterone (ng/mL)", ylab = "Averaged ERC Subfield Volume") +
+    geom_point(aes(x = df_438$progesterone_ng_m_l, y= df_438$avg_erc),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
 
-
-#Scatterplot
-t2erc_3 <- ggscatter(df_t2hipp_corrected, x = "fsh_scan_miu_ml", y = "t2hipp_vol_erc",
+#FSH
+c3 <- ggscatter(df_clean_repo, x = "fsh_m_iu_m_l", y = "avg_erc", color = "repo_status",
           add = "reg.line",
-          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
-          conf.int = TRUE,
+          conf.int = TRUE, 
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
-          xlab = "FSH (mIU/mL)", ylab = "Entorhinal Cortex")
+          xlab = "FSH (mIU/mL)", ylab = "Averaged ERC Subfield Volume") +
+    geom_point(aes(x = df_438$fsh_m_iu_m_l, y= df_438$avg_erc),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
 
-
-#Scatterplot, facet by sex
-t2erc_4 <- ggscatter(df_t2hipp_corrected, x = "shbg_scan_nmol_l", y = "t2hipp_vol_erc",
-          facet.by = "sex",
-          add = "reg.line", 
-          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
-          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
-          conf.int = TRUE,
-          cor.method = "pearson",
-          xlab = "SHBG (nmol/L)", ylab = "Entorhinal Cortex")
-
-#Scatterplot, facet by sex
-t2erc_5 <- ggscatter(df_t2hipp_corrected, x = "testosterone_scan_ng_dl", y = "t2hipp_vol_erc", facet.by = "sex",
+#SHBG
+c4 <- ggscatter(df_clean_repo, x = "shbg_nmol_l", y = "avg_erc", color = "repo_status",
           add = "reg.line",
-          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
-          conf.int = TRUE,
+          conf.int = TRUE, 
           cor.method = "pearson",
-          xlab = "Testosterone (ng/dL)", ylab = "Entorhinal Cortex")
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "SHBG (nmol/L)", ylab = "Averaged ERC Subfield Volume") +
+    geom_point(aes(x = df_438$shbg_nmol_l, y= df_438$avg_erc),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
 
 
-#Scatterplot, facet by sex
-t2erc_6 <- ggscatter(df_t2hipp_corrected, x = "dheas_scan_ug_dl", y = "t2hipp_vol_erc", facet.by = "sex",
+#DHEAS
+c5 <- ggscatter(df_clean_repo, x = "dhea_s_ug_d_l", y = "avg_erc", color = "repo_status",
           add = "reg.line",
-          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
-          conf.int = TRUE,
+          conf.int = TRUE, 
           cor.method = "pearson",
-          xlab = "DHEAS (ug/dL)", ylab = "Entorhinal Cortex")
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "DHEAS (ug/dL)", ylab = "Averaged ERC Subfield Volume") +
+    geom_point(aes(x = df_438$dhea_s_ug_d_l, y= df_438$avg_erc),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
+
+
+#Testosterone
+c6 <- ggscatter(df_clean_repo, x = "total_testosterone_ng_d_l", y = "avg_erc", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Testosterone (ng/dL)", ylab = "Averaged ERC Subfield Volume") +
+    geom_point(aes(x = df_438$total_testosterone_ng_d_l, y= df_438$avg_erc),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
 
 
 #Present as patchwork
-(t2erc_1 + t2erc_2 + t2erc_3)
-t2erc_4
-t2erc_5
-t2erc_6
+(c1+c2)
+(c3+c4)
+(c5+c6)
 ```
+
+
+### Hormone Correlation by Reproductive Sex
+
+```{r}
+#SHBG
+c1 <- ggscatter(df_clean, x = "shbg_nmol_l", y = "avg_erc", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "SHBG (nmol/L)", ylab = "Averaged ERC Subfield Volume") +
+    geom_point(aes(x = df_438$shbg_nmol_l, y= df_438$avg_erc),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
+
+
+#DHEAS
+c2 <- ggscatter(df_clean, x = "dhea_s_ug_d_l", y = "avg_erc", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "DHEAS (ug/dL)", ylab = "Averaged ERC Subfield Volume") +
+    geom_point(aes(x = df_438$dhea_s_ug_d_l, y= df_438$avg_erc),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
+
+
+#Testosterone
+c3 <- ggscatter(df_clean, x = "total_testosterone_ng_d_l", y = "avg_erc", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Testosterone (ng/dL)", ylab = "Averaged ERC Subfield Volume") +
+    geom_point(aes(x = df_438$total_testosterone_ng_d_l, y= df_438$avg_erc),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
+
+
+#Present as patchwork
+(c1+c2+c3)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ## PHC
 
+Subject 438: average volume of 2061.765
+
+### Structural Comparison
+
 ```{r}
-#Scatterplot
-t2phc_1 <- ggscatter(df_t2hipp_corrected, x = "estradiol_scan_pg_ml", y = "t2hipp_vol_phc",
+#Reproductive status
+p1 <- ggplot(data = df_clean_repo, aes(y = avg_phc,
+                                 x = repo_status,
+                                 fill = repo_status,
+                                 color = repo_status)) + 
+  geom_boxplot(alpha = 0.5,show.legend = FALSE) +
+  geom_jitter(width = 0.1, show.legend = FALSE) +
+  stat_summary(fun.y=mean, geom="point",
+               shape=20, size=3, color="black", fill="black") +
+  labs(x = "Reproductive Status",
+       y = "Averaged PHC Subfield Volume",
+       title = "Reproductive Status") + 
+  theme(legend.position = "none") +
+   #Add 438
+  geom_point(aes(x = factor("Post"), y= df_438$avg_phc),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
+
+#Sex
+p2 <- ggplot(data = df_clean, aes(y = avg_phc,
+                                 x = sex,
+                                 fill = sex,
+                                 color = sex)) + 
+  geom_boxplot(alpha = 0.5,show.legend = FALSE) +
+  geom_jitter(width = 0.1, show.legend = FALSE) +
+  stat_summary(fun.y=mean, geom="point",
+               shape=20, size=3, color="black", fill="black") +
+  labs(x = "Sex",
+       y = "Averaged PHC Subfield Volume",
+       title = "Sex") + 
+  theme(legend.position = "none") +
+      #Add 438
+  geom_point(aes(x = factor("Female"), y= df_438$avg_phc),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
+
+
+#Total
+p3 <- ggplot(data = df_clean, aes(x = avg_phc)) + 
+  geom_histogram(alpha = 0.5, position = "identity",
+                 show.legend = FALSE) +
+  labs(x = "Average PHC Subfield Volume",
+       y = "Count",
+       title = "Total") +
+  #Add 438 
+  geom_vline(aes(xintercept = df_438$avg_phc), color = "purple", size = 1.5)
+
+
+#Combine
+(p1+p2)/p3
+```
+
+
+### Hormone Correlation by Reproductive Status
+
+```{r}
+#Estradiol
+c1 <- ggscatter(df_clean_repo, x = "estradiol_pg_m_l", y = "avg_phc", color = "repo_status",
           add = "reg.line",
-          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
           conf.int = TRUE, 
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
-          xlab = "Estradiol (pg/mL)", ylab = "Perirhinal Cortex")
+          xlab = "Estradiol (pg/mL)", ylab = "Averaged PHC Subfield Volume") +
+    geom_point(aes(x = df_438$estradiol_pg_m_l, y= df_438$avg_phc),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
 
-#Scatterplot
-t2phc_2 <- ggscatter(df_t2hipp_corrected, x = "progesterone_scan_ng_ml", y = "t2hipp_vol_phc",
+#Progesterone
+c2 <- ggscatter(df_clean_repo, x = "progesterone_ng_m_l", y = "avg_phc", color = "repo_status",
           add = "reg.line",
-          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
-          conf.int = TRUE,
+          conf.int = TRUE, 
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
-          xlab = "Progesterone (ng/mL)", ylab = "Perirhinal Cortex")
+          xlab = "Progesterone (ng/mL)", ylab = "Averaged PHC Subfield Volume") +
+    geom_point(aes(x = df_438$progesterone_ng_m_l, y= df_438$avg_phc),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
 
-
-#Scatterplot
-t2phc_3 <- ggscatter(df_t2hipp_corrected, x = "fsh_scan_miu_ml", y = "t2hipp_vol_phc",
+#FSH
+c3 <- ggscatter(df_clean_repo, x = "fsh_m_iu_m_l", y = "avg_phc", color = "repo_status",
           add = "reg.line",
-          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
-          conf.int = TRUE,
+          conf.int = TRUE, 
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
-          xlab = "FSH (mIU/mL)", ylab = "Perirhinal Cortex")
+          xlab = "FSH (mIU/mL)", ylab = "Averaged PHC Subfield Volume") +
+    geom_point(aes(x = df_438$fsh_m_iu_m_l, y= df_438$avg_phc),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
 
-
-#Scatterplot, facet by sex
-t2phc_4 <- ggscatter(df_t2hipp_corrected, x = "shbg_scan_nmol_l", y = "t2hipp_vol_phc",
-          facet.by = "sex",
-          add = "reg.line", 
-          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
-          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
-          conf.int = TRUE,
-          cor.method = "pearson",
-          xlab = "SHBG (nmol/L)", ylab = "Perirhinal Cortex")
-
-#Scatterplot, facet by sex
-t2phc_5 <- ggscatter(df_t2hipp_corrected, x = "testosterone_scan_ng_dl", y = "t2hipp_vol_phc", facet.by = "sex",
+#SHBG
+c4 <- ggscatter(df_clean_repo, x = "shbg_nmol_l", y = "avg_phc", color = "repo_status",
           add = "reg.line",
-          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
-          conf.int = TRUE,
+          conf.int = TRUE, 
           cor.method = "pearson",
-          xlab = "Testosterone (ng/dL)", ylab = "Perirhinal Cortex")
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "SHBG (nmol/L)", ylab = "Averaged PHC Subfield Volume") +
+    geom_point(aes(x = df_438$shbg_nmol_l, y= df_438$avg_phc),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
 
 
-#Scatterplot, facet by sex
-t2phc_6 <- ggscatter(df_t2hipp_corrected, x = "dheas_scan_ug_dl", y = "t2hipp_vol_phc", facet.by = "sex",
+#DHEAS
+c5 <- ggscatter(df_clean_repo, x = "dhea_s_ug_d_l", y = "avg_phc", color = "repo_status",
           add = "reg.line",
-          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
-          conf.int = TRUE,
+          conf.int = TRUE, 
           cor.method = "pearson",
-          xlab = "DHEAS (ug/dL)", ylab = "Perirhinal Cortex")
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "DHEAS (ug/dL)", ylab = "Averaged PHC Subfield Volume") +
+    geom_point(aes(x = df_438$dhea_s_ug_d_l, y= df_438$avg_phc),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
+
+
+#Testosterone
+c6 <- ggscatter(df_clean_repo, x = "total_testosterone_ng_d_l", y = "avg_phc", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Testosterone (ng/dL)", ylab = "Averaged PHC Subfield Volume") +
+    geom_point(aes(x = df_438$total_testosterone_ng_d_l, y= df_438$avg_phc),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
 
 
 #Present as patchwork
-(t2phc_1 + t2phc_2 + t2phc_3)
-t2phc_4
-t2phc_5
-t2phc_6
+(c1+c2)
+(c3+c4)
+(c5+c6)
 ```
+
+
+### Hormone Correlation by Reproductive Sex
+
+```{r}
+#SHBG
+c1 <- ggscatter(df_clean, x = "shbg_nmol_l", y = "avg_phc", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "SHBG (nmol/L)", ylab = "Averaged PHC Subfield Volume") +
+    geom_point(aes(x = df_438$shbg_nmol_l, y= df_438$avg_phc),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
+
+
+#DHEAS
+c2 <- ggscatter(df_clean, x = "dhea_s_ug_d_l", y = "avg_phc", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "DHEAS (ug/dL)", ylab = "Averaged PHC Subfield Volume") +
+    geom_point(aes(x = df_438$dhea_s_ug_d_l, y= df_438$avg_phc),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
+
+
+#Testosterone
+c3 <- ggscatter(df_clean, x = "total_testosterone_ng_d_l", y = "avg_phc", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Testosterone (ng/dL)", ylab = "Averaged PHC Subfield Volume") +
+    geom_point(aes(x = df_438$total_testosterone_ng_d_l, y= df_438$avg_phc),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
+
+
+#Present as patchwork
+(c1+c2+c3)
+```
+
+
+
+## PRC
+
+Subject 438: average volume of 1871.035
+
+### Structural Comparison
+
+```{r}
+#Reproductive status
+p1 <- ggplot(data = df_clean_repo, aes(y = avg_prc,
+                                 x = repo_status,
+                                 fill = repo_status,
+                                 color = repo_status)) + 
+  geom_boxplot(alpha = 0.5,show.legend = FALSE) +
+  geom_jitter(width = 0.1, show.legend = FALSE) +
+  stat_summary(fun.y=mean, geom="point",
+               shape=20, size=3, color="black", fill="black") +
+  labs(x = "Reproductive Status",
+       y = "Averaged PRC Subfield Volume",
+       title = "Reproductive Status") + 
+  theme(legend.position = "none") +
+   #Add 438
+  geom_point(aes(x = factor("Post"), y= df_438$avg_prc),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
+
+#Sex
+p2 <- ggplot(data = df_clean, aes(y = avg_prc,
+                                 x = sex,
+                                 fill = sex,
+                                 color = sex)) + 
+  geom_boxplot(alpha = 0.5,show.legend = FALSE) +
+  geom_jitter(width = 0.1, show.legend = FALSE) +
+  stat_summary(fun.y=mean, geom="point",
+               shape=20, size=3, color="black", fill="black") +
+  labs(x = "Sex",
+       y = "Averaged PRC Subfield Volume",
+       title = "Sex") + 
+  theme(legend.position = "none") +
+      #Add 438
+  geom_point(aes(x = factor("Female"), y= df_438$avg_prc),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
+
+
+#Total
+p3 <- ggplot(data = df_clean, aes(x = avg_prc)) + 
+  geom_histogram(alpha = 0.5, position = "identity",
+                 show.legend = FALSE) +
+  labs(x = "Average PRC Subfield Volume",
+       y = "Count",
+       title = "Total") +
+  #Add 438 
+  geom_vline(aes(xintercept = df_438$avg_prc), color = "purple", size = 1.5)
+
+
+#Combine
+(p1+p2)/p3
+```
+
+
+### Hormone Correlation by Reproductive Status
+
+```{r}
+#Estradiol
+c1 <- ggscatter(df_clean_repo, x = "estradiol_pg_m_l", y = "avg_prc", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Estradiol (pg/mL)", ylab = "Averaged PRC Subfield Volume") +
+    geom_point(aes(x = df_438$estradiol_pg_m_l, y= df_438$avg_prc),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
+
+#Progesterone
+c2 <- ggscatter(df_clean_repo, x = "progesterone_ng_m_l", y = "avg_prc", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Progesterone (ng/mL)", ylab = "Averaged PRC Subfield Volume") +
+    geom_point(aes(x = df_438$progesterone_ng_m_l, y= df_438$avg_prc),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
+
+#FSH
+c3 <- ggscatter(df_clean_repo, x = "fsh_m_iu_m_l", y = "avg_prc", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "FSH (mIU/mL)", ylab = "Averaged PRC Subfield Volume") +
+    geom_point(aes(x = df_438$fsh_m_iu_m_l, y= df_438$avg_prc),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
+
+#SHBG
+c4 <- ggscatter(df_clean_repo, x = "shbg_nmol_l", y = "avg_prc", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "SHBG (nmol/L)", ylab = "Averaged PRC Subfield Volume") +
+    geom_point(aes(x = df_438$shbg_nmol_l, y= df_438$avg_prc),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
+
+
+#DHEAS
+c5 <- ggscatter(df_clean_repo, x = "dhea_s_ug_d_l", y = "avg_prc", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "DHEAS (ug/dL)", ylab = "Averaged PRC Subfield Volume") +
+    geom_point(aes(x = df_438$dhea_s_ug_d_l, y= df_438$avg_prc),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
+
+
+#Testosterone
+c6 <- ggscatter(df_clean_repo, x = "total_testosterone_ng_d_l", y = "avg_prc", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Testosterone (ng/dL)", ylab = "Averaged PRC Subfield Volume") +
+    geom_point(aes(x = df_438$total_testosterone_ng_d_l, y= df_438$avg_prc),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
+
+
+#Present as patchwork
+(c1+c2)
+(c3+c4)
+(c5+c6)
+```
+
+
+### Hormone Correlation by Reproductive Sex
+
+```{r}
+#SHBG
+c1 <- ggscatter(df_clean, x = "shbg_nmol_l", y = "avg_prc", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "SHBG (nmol/L)", ylab = "Averaged PRC Subfield Volume") +
+    geom_point(aes(x = df_438$shbg_nmol_l, y= df_438$avg_prc),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
+
+
+#DHEAS
+c2 <- ggscatter(df_clean, x = "dhea_s_ug_d_l", y = "avg_prc", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "DHEAS (ug/dL)", ylab = "Averaged PRC Subfield Volume") +
+    geom_point(aes(x = df_438$dhea_s_ug_d_l, y= df_438$avg_prc),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
+
+
+#Testosterone
+c3 <- ggscatter(df_clean, x = "total_testosterone_ng_d_l", y = "avg_prc", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Testosterone (ng/dL)", ylab = "Averaged PRC Subfield Volume") +
+    geom_point(aes(x = df_438$total_testosterone_ng_d_l, y= df_438$avg_prc),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
+
+
+#Present as patchwork
+(c1+c2+c3)
+```
+
+
+
 
 ## SUB
 
+Subject 438: average volume of 352.936
+
+### Structural Comparison
+
 ```{r}
-#Scatterplot
-t2sub_1 <- ggscatter(df_t2hipp_corrected, x = "estradiol_scan_pg_ml", y = "t2hipp_vol_sub",
+#Reproductive status
+p1 <- ggplot(data = df_clean_repo, aes(y = avg_sub,
+                                 x = repo_status,
+                                 fill = repo_status,
+                                 color = repo_status)) + 
+  geom_boxplot(alpha = 0.5,show.legend = FALSE) +
+  geom_jitter(width = 0.1, show.legend = FALSE) +
+  stat_summary(fun.y=mean, geom="point",
+               shape=20, size=3, color="black", fill="black") +
+  labs(x = "Reproductive Status",
+       y = "Averaged SUB Subfield Volume",
+       title = "Reproductive Status") + 
+  theme(legend.position = "none") +
+   #Add 438
+  geom_point(aes(x = factor("Post"), y= df_438$avg_sub),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
+
+#Sex
+p2 <- ggplot(data = df_clean, aes(y = avg_sub,
+                                 x = sex,
+                                 fill = sex,
+                                 color = sex)) + 
+  geom_boxplot(alpha = 0.5,show.legend = FALSE) +
+  geom_jitter(width = 0.1, show.legend = FALSE) +
+  stat_summary(fun.y=mean, geom="point",
+               shape=20, size=3, color="black", fill="black") +
+  labs(x = "Sex",
+       y = "Averaged SUB Subfield Volume",
+       title = "Sex") + 
+  theme(legend.position = "none") +
+      #Add 438
+  geom_point(aes(x = factor("Female"), y= df_438$avg_sub),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
+
+
+#Total
+p3 <- ggplot(data = df_clean, aes(x = avg_sub)) + 
+  geom_histogram(alpha = 0.5, position = "identity",
+                 show.legend = FALSE) +
+  labs(x = "Average SUB Subfield Volume",
+       y = "Count",
+       title = "Total") +
+  #Add 438 
+  geom_vline(aes(xintercept = df_438$avg_sub), color = "purple", size = 1.5)
+
+
+#Combine
+(p1+p2)/p3
+```
+
+
+### Hormone Correlation by Reproductive Status
+
+```{r}
+#Estradiol
+c1 <- ggscatter(df_clean_repo, x = "estradiol_pg_m_l", y = "avg_sub", color = "repo_status",
           add = "reg.line",
-          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
           conf.int = TRUE, 
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
-          xlab = "Estradiol (pg/mL)", ylab = "Subiculum")
+          xlab = "Estradiol (pg/mL)", ylab = "Averaged SUB Subfield Volume") +
+    geom_point(aes(x = df_438$estradiol_pg_m_l, y= df_438$avg_sub),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
 
-#Scatterplot
-t2sub_2 <- ggscatter(df_t2hipp_corrected, x = "progesterone_scan_ng_ml", y = "t2hipp_vol_sub",
+#Progesterone
+c2 <- ggscatter(df_clean_repo, x = "progesterone_ng_m_l", y = "avg_sub", color = "repo_status",
           add = "reg.line",
-          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
-          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
-          conf.int = TRUE,
-          cor.method = "pearson",
-          cor.coeff.args = list(label.sep = "\n"),
-          xlab = "Progesterone (ng/mL)", ylab = "Subiculum")
-
-
-#Scatterplot
-t2sub_3 <- ggscatter(df_t2hipp_corrected, x = "fsh_scan_miu_ml", y = "t2hipp_vol_sub",
-          add = "reg.line",
-          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
-          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
-          conf.int = TRUE,
-          cor.method = "pearson",
-          cor.coeff.args = list(label.sep = "\n"),
-          xlab = "FSH (mIU/mL)", ylab = "Subiculum")
-
-
-#Scatterplot, facet by sex
-t2sub_4 <- ggscatter(df_t2hipp_corrected, x = "shbg_scan_nmol_l", y = "t2hipp_vol_sub",
-          facet.by = "sex",
-          add = "reg.line", 
-          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
-          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
-          conf.int = TRUE,
-          cor.method = "pearson",
-          xlab = "SHBG (nmol/L)", ylab = "Subiculum")
-
-#Scatterplot, facet by sex
-t2sub_5 <- ggscatter(df_t2hipp_corrected, x = "testosterone_scan_ng_dl", y = "t2hipp_vol_sub", facet.by = "sex",
-          add = "reg.line",
-          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
-          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
-          conf.int = TRUE,
-          cor.method = "pearson",
-          xlab = "Testosterone (ng/dL)", ylab = "Subiculum")
-
-
-#Scatterplot, facet by sex
-t2sub_6 <- ggscatter(df_t2hipp_corrected, x = "dheas_scan_ug_dl", y = "t2hipp_vol_sub", facet.by = "sex",
-          add = "reg.line",
-          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
-          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
-          conf.int = TRUE,
-          cor.method = "pearson",
-          xlab = "DHEAS (ug/dL)", ylab = "Subiculum")
-
-
-#Present as patchwork
-(t2sub_1 + t2sub_2 + t2sub_3)
-t2sub_4
-t2sub_5
-t2sub_6
-```
-
-
-## PHG
-
-```{r}
-#Scatterplot
-t2phg_1 <- ggscatter(df_t2hipp_corrected, x = "estradiol_scan_pg_ml", y = "t2hipp_vol_phg",
-          add = "reg.line",
-          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
           conf.int = TRUE, 
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
-          xlab = "Estradiol (pg/mL)", ylab = "Parahippocampal Gyrus")
+          xlab = "Progesterone (ng/mL)", ylab = "Averaged SUB Subfield Volume") +
+    geom_point(aes(x = df_438$progesterone_ng_m_l, y= df_438$avg_sub),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
 
-#Scatterplot
-t2phg_2 <- ggscatter(df_t2hipp_corrected, x = "progesterone_scan_ng_ml", y = "t2hipp_vol_phg",
+#FSH
+c3 <- ggscatter(df_clean_repo, x = "fsh_m_iu_m_l", y = "avg_sub", color = "repo_status",
           add = "reg.line",
-          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
-          conf.int = TRUE,
+          conf.int = TRUE, 
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
-          xlab = "Progesterone (ng/mL)", ylab = "Parahippocampal Gyrus")
+          xlab = "FSH (mIU/mL)", ylab = "Averaged SUB Subfield Volume") +
+    geom_point(aes(x = df_438$fsh_m_iu_m_l, y= df_438$avg_sub),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
 
-
-#Scatterplot
-t2phg_3 <- ggscatter(df_t2hipp_corrected, x = "fsh_scan_miu_ml", y = "t2hipp_vol_phg",
+#SHBG
+c4 <- ggscatter(df_clean_repo, x = "shbg_nmol_l", y = "avg_sub", color = "repo_status",
           add = "reg.line",
-          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
-          conf.int = TRUE,
+          conf.int = TRUE, 
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
-          xlab = "FSH (mIU/mL)", ylab = "Parahippocampal Gyrus")
+          xlab = "SHBG (nmol/L)", ylab = "Averaged SUB Subfield Volume") +
+    geom_point(aes(x = df_438$shbg_nmol_l, y= df_438$avg_sub),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
 
 
-#Scatterplot, facet by sex
-t2phg_4 <- ggscatter(df_t2hipp_corrected, x = "shbg_scan_nmol_l", y = "t2hipp_vol_phg",
-          facet.by = "sex",
-          add = "reg.line", 
-          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
-          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
-          conf.int = TRUE,
-          cor.method = "pearson",
-          xlab = "SHBG (nmol/L)", ylab = "Parahippocampal Gyrus")
-
-#Scatterplot, facet by sex
-t2phg_5 <- ggscatter(df_t2hipp_corrected, x = "testosterone_scan_ng_dl", y = "t2hipp_vol_phg", facet.by = "sex",
+#DHEAS
+c5 <- ggscatter(df_clean_repo, x = "dhea_s_ug_d_l", y = "avg_sub", color = "repo_status",
           add = "reg.line",
-          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
-          conf.int = TRUE,
+          conf.int = TRUE, 
           cor.method = "pearson",
-          xlab = "Testosterone (ng/dL)", ylab = "Parahippocampal Gyrus")
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "DHEAS (ug/dL)", ylab = "Averaged SUB Subfield Volume") +
+    geom_point(aes(x = df_438$dhea_s_ug_d_l, y= df_438$avg_sub),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
 
 
-#Scatterplot, facet by sex
-t2phg_6 <- ggscatter(df_t2hipp_corrected, x = "dheas_scan_ug_dl", y = "t2hipp_vol_phg", facet.by = "sex",
+#Testosterone
+c6 <- ggscatter(df_clean_repo, x = "total_testosterone_ng_d_l", y = "avg_sub", color = "repo_status",
           add = "reg.line",
-          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
-          conf.int = TRUE,
+          conf.int = TRUE, 
           cor.method = "pearson",
-          xlab = "DHEAS (ug/dL)", ylab = "Parahippocampal Gyrus")
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Testosterone (ng/dL)", ylab = "Averaged SUB Subfield Volume") +
+    geom_point(aes(x = df_438$total_testosterone_ng_d_l, y= df_438$avg_sub),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
 
 
 #Present as patchwork
-(t2phg_1 + t2phg_2 + t2phg_3)
-t2phg_4
-t2phg_5
-t2phg_6
+(c1+c2)
+(c3+c4)
+(c5+c6)
 ```
+
+
+### Hormone Correlation by Reproductive Sex
+
+```{r}
+#SHBG
+c1 <- ggscatter(df_clean, x = "shbg_nmol_l", y = "avg_sub", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "SHBG (nmol/L)", ylab = "Averaged SUB Subfield Volume") +
+    geom_point(aes(x = df_438$shbg_nmol_l, y= df_438$avg_sub),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
+
+
+#DHEAS
+c2 <- ggscatter(df_clean, x = "dhea_s_ug_d_l", y = "avg_sub", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "DHEAS (ug/dL)", ylab = "Averaged SUB Subfield Volume") +
+    geom_point(aes(x = df_438$dhea_s_ug_d_l, y= df_438$avg_sub),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
+
+
+#Testosterone
+c3 <- ggscatter(df_clean, x = "total_testosterone_ng_d_l", y = "avg_sub", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Testosterone (ng/dL)", ylab = "Averaged SUB Subfield Volume") +
+    geom_point(aes(x = df_438$total_testosterone_ng_d_l, y= df_438$avg_sub),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
+
+
+#Present as patchwork
+(c1+c2+c3)
+```
+
+
+
 
 
 
@@ -704,17 +1551,11 @@ t2phg_6
 
 # Summary
 
-
 Initial findings include:
 
-- For T1 brain data, total hippocampal and MTL volumes are marginally and negatively associated with FSH
-- For CA1 and CA2/3, they are marginally and negatively associated with FSH. CA2/3 is also marginally and negatively associated with testosterone for women
-- For ERC, it is marginally and positively associated with testosterone in men
+...
 
 
-Future directions:
-
-- Finish data collection and re-evaluate analysis with larger and complete sample
 
 
 
