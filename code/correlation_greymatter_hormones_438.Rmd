@@ -25,16 +25,15 @@ library(readxl)
 
 # Overview
 
-This report provides exploratory and preliminary correlation analyses between sex hormones and T2 *unretouched* hippocampal subfield data from the Healthy Aging Study sample (subjects 333 - 437, including 438). 
+This report provides exploratory and preliminary correlation analyses between sex hormones and T2 *unretouched*, raw hippocampal subfield data from the Healthy Aging Study sample (subjects 333 - 437, including 438). 
 
 Black diamond point are the group means. Highlighted in purple triangle point and purple line is subject 438.
-
-Data did not include correction for TIV since left and right CSF, GMV, and WMV were not included yet in this round for analysis.
 
 Cleaning data steps included:
 
 1) Filter participants that have T2 subfield data from scan
 2) Select sex hormone measures from when scan was conducted
+3) Correct left and right volumes with TIV
 3) Average left and right volumes to get an average measure for each subfield region
 
 
@@ -44,6 +43,11 @@ Cleaning data steps included:
 #Read in the data
 df <- read_xlsx(here("data", "HASHippDenoise_ASHS_raw.xlsx"))
 
+#Add in 438 age and sex
+df[106, 2] <- 64
+df[106, 3] <- "Female"
+df[106, 4] <- "Post"
+
 #Clean columns and rest of data
 #Remove rows after 438, rename x1 to subject_id as index
 df <- clean_names(df) %>% 
@@ -52,13 +56,8 @@ df <- clean_names(df) %>%
   mutate(sex = recode(sex, 
                       "F" = "Female",
                       "M" = "Male")) %>% 
-  slice(-c(89:95))
-
-#Add in 438 age and sex
-df[88, 2] <- 64
-df[88, 3] <- "Female"
-df[88, 4] <- "Post"
-
+  drop_na(age, sex) %>% 
+  slice(-c(108:112))
 
 
 ########## Correct using TIV, then average left and right
@@ -68,16 +67,17 @@ df[88, 4] <- "Post"
 
 #Convert rca1 to numeric
 df$rca1 <- as.numeric(df$rca1)
+
 #Create function for apply to variables
-# dividebyTIV <- function(x, na.rm = FALSE) (x/df_t2hipp$t1_tiv_vbm)
+dividebyTIV <- function(x, na.rm = FALSE) (x/df$tiv)
 
 #Apply function to variables
 df_avg <- df %>% 
   
-  #Correct using TIV from T1 VBM
-  #CA1, CA23, DG, ERC,PHC, PRC, SUB, PHG
-  # mutate_at(vars(t2hipp_vol_left_ca1:t2hipp_vol_right_phg),
-  #           dividebyTIV) %>% 
+  #Correct using TIV from SPM
+  #CA1, CA23, DG, ERC,PHC, PRC, SUB
+  mutate_at(vars(lca1:rsub),
+            dividebyTIV) %>% 
   
   #Average left and right regions
   mutate(avg_ca1 = (lca1 + rca1)/2,
@@ -93,7 +93,7 @@ df_avg <- df %>%
 df_438 <- df_avg[88,]
 df_clean <- df_avg[-88,]
 
-#Subses for women by repo status
+#Subset for women by repo status
 df_clean_repo <- df_clean %>% 
   filter(sex == "Female") %>% 
   mutate(repo_status = fct_relevel(repo_status, 
@@ -106,7 +106,7 @@ df_clean_repo <- df_clean %>%
 
 ## CA1 
 
-Subject 438: average volume of 648.8035
+Subject 438: average volume of 0.545094
 
 ### Structural Comparison
 
@@ -121,7 +121,7 @@ p1 <- ggplot(data = df_clean_repo, aes(y = avg_ca1,
   stat_summary(fun.y=mean, geom="point",
                shape=20, size=3, color="black", fill="black") +
   labs(x = "Reproductive Status",
-       y = "Averaged CA1 Subfield Volume",
+       y = "Averaged CA1 \nSubfield Volume",
        title = "Reproductive Status") + 
   theme(legend.position = "none") +
    #Add 438
@@ -139,7 +139,7 @@ p2 <- ggplot(data = df_clean, aes(y = avg_ca1,
   stat_summary(fun.y=mean, geom="point",
                shape=20, size=3, color="black", fill="black") +
   labs(x = "Sex",
-       y = "Averaged CA1 Subfield Volume",
+       y = "Averaged CA1 \nSubfield Volume",
        title = "Sex") + 
   theme(legend.position = "none") +
       #Add 438
@@ -286,22 +286,8 @@ c2 <- ggscatter(df_clean, x = "dhea_s_ug_d_l", y = "avg_ca1", color = "sex",
              show.legend = FALSE)
 
 
-#Testosterone
-c3 <- ggscatter(df_clean, x = "total_testosterone_ng_d_l", y = "avg_ca1", color = "sex",
-          add = "reg.line",
-          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
-          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
-          conf.int = TRUE, 
-          cor.method = "pearson",
-          cor.coeff.args = list(label.sep = "\n"),
-          xlab = "Testosterone (ng/dL)", ylab = "Averaged CA1 Subfield Volume") +
-    geom_point(aes(x = df_438$total_testosterone_ng_d_l, y= df_438$avg_ca1),
-             color = "purple", shape = 17, size = 3,
-             show.legend = FALSE)
-
-
 #Present as patchwork
-(c1+c2+c3)
+(c1+c2)
 ```
 
 
@@ -310,7 +296,7 @@ c3 <- ggscatter(df_clean, x = "total_testosterone_ng_d_l", y = "avg_ca1", color 
 
 ## CA2/3
 
-Subject 438: average volume of 242.462
+Subject 438: average volume of 0.2098802
 
 ### Structural Comparison
 
@@ -325,7 +311,7 @@ p1 <- ggplot(data = df_clean_repo, aes(y = avg_ca23,
   stat_summary(fun.y=mean, geom="point",
                shape=20, size=3, color="black", fill="black") +
   labs(x = "Reproductive Status",
-       y = "Averaged CA23 Subfield Volume",
+       y = "Averaged CA23 \nSubfield Volume",
        title = "Reproductive Status") + 
   theme(legend.position = "none") +
    #Add 438
@@ -343,7 +329,7 @@ p2 <- ggplot(data = df_clean, aes(y = avg_ca23,
   stat_summary(fun.y=mean, geom="point",
                shape=20, size=3, color="black", fill="black") +
   labs(x = "Sex",
-       y = "Averaged CA23 Subfield Volume",
+       y = "Averaged CA23 \nSubfield Volume",
        title = "Sex") + 
   theme(legend.position = "none") +
       #Add 438
@@ -490,29 +476,16 @@ c2 <- ggscatter(df_clean, x = "dhea_s_ug_d_l", y = "avg_ca23", color = "sex",
              show.legend = FALSE)
 
 
-#Testosterone
-c3 <- ggscatter(df_clean, x = "total_testosterone_ng_d_l", y = "avg_ca23", color = "sex",
-          add = "reg.line",
-          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
-          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
-          conf.int = TRUE, 
-          cor.method = "pearson",
-          cor.coeff.args = list(label.sep = "\n"),
-          xlab = "Testosterone (ng/dL)", ylab = "Averaged CA23 Subfield Volume") +
-    geom_point(aes(x = df_438$total_testosterone_ng_d_l, y= df_438$avg_ca23),
-             color = "purple", shape = 17, size = 3,
-             show.legend = FALSE)
-
 
 #Present as patchwork
-(c1+c2+c3)
+(c1+c2)
 ```
 
 
 
 ## DG
 
-Subject 438: average volume of 724.0295
+Subject 438: average volume of 0.6703311
 
 ### Structural Comparison
 
@@ -527,7 +500,7 @@ p1 <- ggplot(data = df_clean_repo, aes(y = avg_dg,
   stat_summary(fun.y=mean, geom="point",
                shape=20, size=3, color="black", fill="black") +
   labs(x = "Reproductive Status",
-       y = "Averaged DG Subfield Volume",
+       y = "Averaged DG \nSubfield Volume",
        title = "Reproductive Status") + 
   theme(legend.position = "none") +
    #Add 438
@@ -545,7 +518,7 @@ p2 <- ggplot(data = df_clean, aes(y = avg_dg,
   stat_summary(fun.y=mean, geom="point",
                shape=20, size=3, color="black", fill="black") +
   labs(x = "Sex",
-       y = "Averaged DG Subfield Volume",
+       y = "Averaged DG \nSubfield Volume",
        title = "Sex") + 
   theme(legend.position = "none") +
       #Add 438
@@ -692,22 +665,9 @@ c2 <- ggscatter(df_clean, x = "dhea_s_ug_d_l", y = "avg_dg", color = "sex",
              show.legend = FALSE)
 
 
-#Testosterone
-c3 <- ggscatter(df_clean, x = "total_testosterone_ng_d_l", y = "avg_dg", color = "sex",
-          add = "reg.line",
-          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
-          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
-          conf.int = TRUE, 
-          cor.method = "pearson",
-          cor.coeff.args = list(label.sep = "\n"),
-          xlab = "Testosterone (ng/dL)", ylab = "Averaged DG Subfield Volume") +
-    geom_point(aes(x = df_438$total_testosterone_ng_d_l, y= df_438$avg_dg),
-             color = "purple", shape = 17, size = 3,
-             show.legend = FALSE)
-
 
 #Present as patchwork
-(c1+c2+c3)
+(c1+c2)
 ```
 
 
@@ -723,7 +683,7 @@ c3 <- ggscatter(df_clean, x = "total_testosterone_ng_d_l", y = "avg_dg", color =
 
 ## ERC
 
-Subject 438: average volume of 1117.86
+Subject 438: average volume of 0.4225437
 
 ### Structural Comparison
 
@@ -738,7 +698,7 @@ p1 <- ggplot(data = df_clean_repo, aes(y = avg_erc,
   stat_summary(fun.y=mean, geom="point",
                shape=20, size=3, color="black", fill="black") +
   labs(x = "Reproductive Status",
-       y = "Averaged ERC Subfield Volume",
+       y = "Averaged ERC \nSubfield Volume",
        title = "Reproductive Status") + 
   theme(legend.position = "none") +
    #Add 438
@@ -756,7 +716,7 @@ p2 <- ggplot(data = df_clean, aes(y = avg_erc,
   stat_summary(fun.y=mean, geom="point",
                shape=20, size=3, color="black", fill="black") +
   labs(x = "Sex",
-       y = "Averaged ERC Subfield Volume",
+       y = "Averaged ERC \nSubfield Volume",
        title = "Sex") + 
   theme(legend.position = "none") +
       #Add 438
@@ -903,42 +863,15 @@ c2 <- ggscatter(df_clean, x = "dhea_s_ug_d_l", y = "avg_erc", color = "sex",
              show.legend = FALSE)
 
 
-#Testosterone
-c3 <- ggscatter(df_clean, x = "total_testosterone_ng_d_l", y = "avg_erc", color = "sex",
-          add = "reg.line",
-          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
-          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
-          conf.int = TRUE, 
-          cor.method = "pearson",
-          cor.coeff.args = list(label.sep = "\n"),
-          xlab = "Testosterone (ng/dL)", ylab = "Averaged ERC Subfield Volume") +
-    geom_point(aes(x = df_438$total_testosterone_ng_d_l, y= df_438$avg_erc),
-             color = "purple", shape = 17, size = 3,
-             show.legend = FALSE)
-
-
 #Present as patchwork
-(c1+c2+c3)
+(c1+c2)
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
 ## PHC
 
-Subject 438: average volume of 2061.765
+Subject 438: average volume of 1.432311
 
 ### Structural Comparison
 
@@ -953,7 +886,7 @@ p1 <- ggplot(data = df_clean_repo, aes(y = avg_phc,
   stat_summary(fun.y=mean, geom="point",
                shape=20, size=3, color="black", fill="black") +
   labs(x = "Reproductive Status",
-       y = "Averaged PHC Subfield Volume",
+       y = "Averaged PHC \nSubfield Volume",
        title = "Reproductive Status") + 
   theme(legend.position = "none") +
    #Add 438
@@ -971,7 +904,7 @@ p2 <- ggplot(data = df_clean, aes(y = avg_phc,
   stat_summary(fun.y=mean, geom="point",
                shape=20, size=3, color="black", fill="black") +
   labs(x = "Sex",
-       y = "Averaged PHC Subfield Volume",
+       y = "Averaged PHC \nSubfield Volume",
        title = "Sex") + 
   theme(legend.position = "none") +
       #Add 438
@@ -1118,29 +1051,15 @@ c2 <- ggscatter(df_clean, x = "dhea_s_ug_d_l", y = "avg_phc", color = "sex",
              show.legend = FALSE)
 
 
-#Testosterone
-c3 <- ggscatter(df_clean, x = "total_testosterone_ng_d_l", y = "avg_phc", color = "sex",
-          add = "reg.line",
-          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
-          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
-          conf.int = TRUE, 
-          cor.method = "pearson",
-          cor.coeff.args = list(label.sep = "\n"),
-          xlab = "Testosterone (ng/dL)", ylab = "Averaged PHC Subfield Volume") +
-    geom_point(aes(x = df_438$total_testosterone_ng_d_l, y= df_438$avg_phc),
-             color = "purple", shape = 17, size = 3,
-             show.legend = FALSE)
-
-
 #Present as patchwork
-(c1+c2+c3)
+(c1+c2)
 ```
 
 
 
 ## PRC
 
-Subject 438: average volume of 1871.035
+Subject 438: average volume of 1.574246
 
 ### Structural Comparison
 
@@ -1343,7 +1262,7 @@ c3 <- ggscatter(df_clean, x = "total_testosterone_ng_d_l", y = "avg_prc", color 
 
 ## SUB
 
-Subject 438: average volume of 352.936
+Subject 438: average volume of 0.3014333
 
 ### Structural Comparison
 
@@ -1358,7 +1277,7 @@ p1 <- ggplot(data = df_clean_repo, aes(y = avg_sub,
   stat_summary(fun.y=mean, geom="point",
                shape=20, size=3, color="black", fill="black") +
   labs(x = "Reproductive Status",
-       y = "Averaged SUB Subfield Volume",
+       y = "Averaged SUB \nSubfield Volume",
        title = "Reproductive Status") + 
   theme(legend.position = "none") +
    #Add 438
@@ -1376,7 +1295,7 @@ p2 <- ggplot(data = df_clean, aes(y = avg_sub,
   stat_summary(fun.y=mean, geom="point",
                shape=20, size=3, color="black", fill="black") +
   labs(x = "Sex",
-       y = "Averaged SUB Subfield Volume",
+       y = "Averaged SUB \nSubfield Volume",
        title = "Sex") + 
   theme(legend.position = "none") +
       #Add 438
@@ -1523,22 +1442,8 @@ c2 <- ggscatter(df_clean, x = "dhea_s_ug_d_l", y = "avg_sub", color = "sex",
              show.legend = FALSE)
 
 
-#Testosterone
-c3 <- ggscatter(df_clean, x = "total_testosterone_ng_d_l", y = "avg_sub", color = "sex",
-          add = "reg.line",
-          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
-          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
-          conf.int = TRUE, 
-          cor.method = "pearson",
-          cor.coeff.args = list(label.sep = "\n"),
-          xlab = "Testosterone (ng/dL)", ylab = "Averaged SUB Subfield Volume") +
-    geom_point(aes(x = df_438$total_testosterone_ng_d_l, y= df_438$avg_sub),
-             color = "purple", shape = 17, size = 3,
-             show.legend = FALSE)
-
-
 #Present as patchwork
-(c1+c2+c3)
+(c1+c2)
 ```
 
 
