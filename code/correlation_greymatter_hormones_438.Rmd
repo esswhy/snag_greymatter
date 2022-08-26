@@ -6,7 +6,7 @@ output:
   html_document:
     toc: true
     toc_float: true
-    toc_depth: 5
+    toc_depth: 4
     theme: flatly
 ---
 
@@ -20,6 +20,9 @@ library(janitor)
 library(ggpubr)
 library(patchwork)
 library(readxl)
+library(knitr)
+library(broom)
+library(purrr)
 ```
 
 
@@ -27,7 +30,7 @@ library(readxl)
 
 This report provides exploratory and preliminary correlation analyses between sex hormones and T2 *unretouched*, raw hippocampal subfield data from the Healthy Aging Study sample (subjects 333 - 437, with 438 appended). 
 
-Black diamond point are the group means. Highlighted in purple triangle point and purple line is subject 438. Note that subject 438 was on estrogen HRT at the time of her scan and blood draw.
+Black diamond points are the group means. Highlighted in purple triangle point and purple line is subject 438. Note that subject 438 was on estrogen HRT at the time of her scan and blood draw.
 
 Cleaning data steps included:
 
@@ -36,9 +39,11 @@ Cleaning data steps included:
 3) Correct left and right volumes with TIV
 3) Average left and right volumes to get an average measure for each subfield region
 
+
 Sample size:
 
 - Men = 24
+
 - Women = 63 (24 pre, 20 peri, 19 post)
 
 
@@ -106,12 +111,190 @@ df_clean_repo <- df_clean %>%
 ```
 
 
+# Hormone Distributions {.tabset}
+
+## Reproductive Status
+
+```{r}
+### Repo stage: all histograms right-skewed, so apply transformation
+h1 <- ggplot(data = df_clean_repo, aes(x = estradiol_pg_m_l)) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Estradiol (pg/mL)",
+       y = "Count",
+       title = "Raw")
+h1a <- ggplot(data = df_clean_repo, aes(x = log(estradiol_pg_m_l))) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Log Estradiol (pg/mL)",
+       y = "Count",
+       title = "Log Transformed")
+h2 <- ggplot(data = df_clean_repo, aes(x = progesterone_ng_m_l)) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Progesterone (ng/mL)",
+       y = "Count",
+       title = "Raw")
+h2a <- ggplot(data = df_clean_repo, aes(x = log(progesterone_ng_m_l))) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Log Progesterone (ng/mL)",
+       y = "Count",
+       title = "Log Transformed")
+h3 <- ggplot(data = df_clean_repo, aes(x = fsh_m_iu_m_l)) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "FSH (mIU/mL)",
+       y = "Count",
+       title = "Raw")
+h3a <- ggplot(data = df_clean_repo, aes(x = log(fsh_m_iu_m_l))) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Log FSH (mIU/mL)",
+       y = "Count",
+       title = "Log Transformed")
+h4 <- ggplot(data = df_clean_repo, aes(x = dhea_s_ug_d_l)) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "DHEAS (ug/dL)",
+       y = "Count",
+       title = "Raw")
+h4a <- ggplot(data = df_clean_repo, aes(x = log(dhea_s_ug_d_l))) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Log DHEAS (ug/dL)",
+       y = "Count",
+       title = "Log Transformed")
+h5 <- ggplot(data = df_clean_repo, aes(x = shbg_nmol_l)) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "SHBG (nmol/L)",
+       y = "Count",
+       title = "Raw")
+h5a <- ggplot(data = df_clean_repo, aes(x = log(shbg_nmol_l))) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Log SHBG (nmol/L)",
+       y = "Count",
+       title = "Log Transformed")
+h6 <- ggplot(data = df_clean_repo, aes(x = total_testosterone_ng_d_l)) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Testosterone (ng/dL)",
+       y = "Count",
+       title = "Raw")
+h6a <- ggplot(data = df_clean_repo, aes(x = log(total_testosterone_ng_d_l))) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Log Testosterone (ng/dL)",
+       y = "Count",
+       title = "Log Transformed")
+
+(h1+h1a)/(h2+h2a)
+(h3+h3a)/(h4+h4a)
+(h5+h5a)/(h6+h6a)
+```
+
+For women, hormones will be log transformed to allow for Pearson correlations to run in the subsequent analyses (by reproductive stage)
+
+
+## Men and Women
+
+```{r}
+### Men and women: all right skewed, so transform
+h4 <- ggplot(data = df_clean, aes(x = dhea_s_ug_d_l)) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "DHEAS (ug/dL)",
+       y = "Count",
+       title = "Raw")
+h4a <- ggplot(data = df_clean, aes(x = log(dhea_s_ug_d_l))) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Log DHEAS (ug/dL)",
+       y = "Count",
+       title = "Log Transformed")
+h5 <- ggplot(data = df_clean, aes(x = shbg_nmol_l)) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "SHBG (nmol/L)",
+       y = "Count",
+       title = "Raw")
+h5a <- ggplot(data = df_clean, aes(x = log(shbg_nmol_l))) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Log SHBG (nmol/L)",
+       y = "Count",
+       title = "Log Transformed")
+h6 <- ggplot(data = df_clean, aes(x = total_testosterone_ng_d_l)) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Testosterone (ng/dL)",
+       y = "Count",
+       title = "Raw")
+h6a <- ggplot(data = df_clean, aes(x = log(total_testosterone_ng_d_l))) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Log Testosterone (ng/dL)",
+       y = "Count",
+       title = "Log Transformed")
+
+h4+h4a
+h5+h5a
+h6+h6a
+```
+For any correlation analyses between women and men, hormones will also be log transformed for Pearson correlations.
+
+
+## Men Only
+
+```{r}
+### Men: DHEAS was normal, but allow all to be log transformed too
+df_clean_men <- df_clean %>% 
+  filter(sex == "Male")
+
+h4 <- ggplot(data = df_clean_men, aes(x = dhea_s_ug_d_l)) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "DHEAS (ug/dL)",
+       y = "Count",
+       title = "Raw")
+h4a <- ggplot(data = df_clean_men, aes(x = log(dhea_s_ug_d_l))) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Log DHEAS (ug/dL)",
+       y = "Count",
+       title = "Log Transformed")
+h5 <- ggplot(data = df_clean_men, aes(x = shbg_nmol_l)) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "SHBG (nmol/L)",
+       y = "Count",
+       title = "Raw")
+h5a <- ggplot(data = df_clean_men, aes(x = log(shbg_nmol_l))) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Log SHBG (nmol/L)",
+       y = "Count",
+       title = "Log Transformed")
+h6 <- ggplot(data = df_clean_men, aes(x = total_testosterone_ng_d_l)) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Testosterone (ng/dL)",
+       y = "Count",
+       title = "Raw")
+h6a <- ggplot(data = df_clean_men, aes(x = log(total_testosterone_ng_d_l))) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Log Testosterone (ng/dL)",
+       y = "Count",
+       title = "Log Transformed")
+
+h4+h4a
+h5+h5a
+h6+h6a
+```
+
+For just men, log transformation will also be applied in the following Pearson correlations
+
+
+```{r log-transform}
+#Transform hormones so the hormone correlations would run with Pearson
+df_clean_repo <- df_clean_repo %>% 
+  mutate_at(vars(estradiol_pg_m_l:total_testosterone_ng_d_l), log)
+
+df_clean <- df_clean %>% 
+  mutate_at(vars(estradiol_pg_m_l:total_testosterone_ng_d_l), log)
+
+df_438 <- df_438 %>% 
+  mutate_at(vars(estradiol_pg_m_l:total_testosterone_ng_d_l), log)
+```
+
+
+
+# {-}
 
 # T2 Subfield Volume {.tabset}
 
 ## CA1 
 
-Subject 438: average volume of 0.545094
+Subject 438: average volume of 0.6379874
 
 ### Structural Comparison
 
@@ -168,6 +351,24 @@ p3 <- ggplot(data = df_clean, aes(x = avg_ca1)) +
 (p1+p2)/p3
 ```
 
+
+```{r}
+#ANOVA of subfield by repo stage
+aov <- aov(avg_ca1 ~ repo_status, data = df_clean_repo)
+summary_aov <- summary(aov)
+kable(summary_aov[[1]])
+```
+
+ANOVA results comparing CA1 subfield by reproductive status was not significant.
+
+```{r}
+#T-test of subfield by sex
+ttest <- t.test(avg_ca1 ~ sex, data = df_clean)
+ttest
+```
+
+
+T-test results comparing CA1 subfield by sex was significant.
 
 ### Hormone Correlation by Reproductive Status
 
@@ -443,7 +644,7 @@ c3
 
 ## CA2/3
 
-Subject 438: average volume of 0.2098802
+Subject 438: average volume of 0.2456474
 
 ### Structural Comparison
 
@@ -499,6 +700,24 @@ p3 <- ggplot(data = df_clean, aes(x = avg_ca23)) +
 #Combine
 (p1+p2)/p3
 ```
+
+
+```{r}
+#ANOVA of subfield by repo stage
+aov <- aov(avg_ca23 ~ repo_status, data = df_clean_repo)
+summary_aov <- summary(aov)
+kable(summary_aov[[1]])
+```
+
+ANOVA results comparing CA23 subfield by reproductive status was not significant.
+
+```{r}
+#T-test of subfield by sex
+ttest <- t.test(avg_ca23 ~ sex, data = df_clean)
+ttest
+```
+
+T-test results comparing CA23 subfield by sex was significant.
 
 
 ### Hormone Correlation by Reproductive Status
@@ -764,7 +983,7 @@ c3
 
 ## DG
 
-Subject 438: average volume of 0.6703311
+Subject 438: average volume of 0.7845671
 
 ### Structural Comparison
 
@@ -820,6 +1039,23 @@ p3 <- ggplot(data = df_clean, aes(x = avg_dg)) +
 #Combine
 (p1+p2)/p3
 ```
+
+```{r}
+#ANOVA of subfield by repo stage
+aov <- aov(avg_dg ~ repo_status, data = df_clean_repo)
+summary_aov <- summary(aov)
+kable(summary_aov[[1]])
+```
+
+ANOVA results comparing DG subfield by reproductive status was not significant.
+
+```{r}
+#T-test of subfield by sex
+ttest <- t.test(avg_dg ~ sex, data = df_clean)
+ttest
+```
+
+T-test results comparing DG subfield by sex was significant.
 
 
 ### Hormone Correlation by Reproductive Status
@@ -1083,7 +1319,7 @@ c3
 
 ## ERC
 
-Subject 438: average volume of 0.4225437
+Subject 438: average volume of 0.4945524
 
 ### Structural Comparison
 
@@ -1139,6 +1375,22 @@ p3 <- ggplot(data = df_clean, aes(x = avg_erc)) +
 #Combine
 (p1+p2)/p3
 ```
+```{r}
+#ANOVA of subfield by repo stage
+aov <- aov(avg_erc ~ repo_status, data = df_clean_repo)
+summary_aov <- summary(aov)
+kable(summary_aov[[1]])
+```
+
+ANOVA results comparing ERC subfield by reproductive status was significant.
+
+```{r}
+#T-test of subfield by sex
+ttest <- t.test(avg_erc ~ sex, data = df_clean)
+ttest
+```
+
+T-test results comparing ERC subfield by sex was significant.
 
 
 ### Hormone Correlation by Reproductive Status
@@ -1403,7 +1655,7 @@ c3
 
 ## PHC
 
-Subject 438: average volume of 1.432311
+Subject 438: average volume of 1.676401
 
 ### Structural Comparison
 
@@ -1459,6 +1711,23 @@ p3 <- ggplot(data = df_clean, aes(x = avg_phc)) +
 #Combine
 (p1+p2)/p3
 ```
+
+```{r}
+#ANOVA of subfield by repo stage
+aov <- aov(avg_phc ~ repo_status, data = df_clean_repo)
+summary_aov <- summary(aov)
+kable(summary_aov[[1]])
+```
+
+ANOVA results comparing PHC subfield by reproductive status was not significant.
+
+```{r}
+#T-test of subfield by sex
+ttest <- t.test(avg_phc ~ sex, data = df_clean)
+ttest
+```
+
+T-test results comparing PHC subfield by sex was significant.
 
 
 ### Hormone Correlation by Reproductive Status
@@ -1722,7 +1991,7 @@ c3
 
 ## PRC
 
-Subject 438: average volume of 1.574246
+Subject 438: average volume of 1.842525
 
 ### Structural Comparison
 
@@ -1778,6 +2047,22 @@ p3 <- ggplot(data = df_clean, aes(x = avg_prc)) +
 #Combine
 (p1+p2)/p3
 ```
+```{r}
+#ANOVA of subfield by repo stage
+aov <- aov(avg_prc ~ repo_status, data = df_clean_repo)
+summary_aov <- summary(aov)
+kable(summary_aov[[1]])
+```
+
+ANOVA results comparing PRC subfield by reproductive status was not significant.
+
+```{r}
+#T-test of subfield by sex
+ttest <- t.test(avg_prc ~ sex, data = df_clean)
+ttest
+```
+
+T-test results comparing PRC subfield by sex was not significant.
 
 
 ### Hormone Correlation by Reproductive Status
@@ -2044,7 +2329,7 @@ c3
 
 ## SUB
 
-Subject 438: average volume of 0.3014333
+Subject 438: average volume of 0.3528027
 
 ### Structural Comparison
 
@@ -2100,6 +2385,24 @@ p3 <- ggplot(data = df_clean, aes(x = avg_sub)) +
 #Combine
 (p1+p2)/p3
 ```
+```{r}
+#ANOVA of subfield by repo stage
+aov <- aov(avg_sub ~ repo_status, data = df_clean_repo)
+summary_aov <- summary(aov)
+kable(summary_aov[[1]])
+```
+
+ANOVA results comparing SUB subfield by reproductive status was not significant.
+
+```{r}
+#T-test of subfield by sex
+ttest <- t.test(avg_sub ~ sex, data = df_clean)
+ttest
+```
+
+T-test results comparing SUB subfield by sex was significant.
+
+
 
 
 ### Hormone Correlation by Reproductive Status
@@ -2368,18 +2671,24 @@ c3
 # Summary
 
 
-- Subregion volumes for women and men were generally normally distributed. There appears to be two women whose SUB volumes appear to be outliers.
+- Subregion volumes for women and men were generally normally distributed. There appears to be two women whose SUB volumes appear to be outliers. Hormones were generally right skewed, so log transformations were applied to run Pearson correlations.
 
-- No significant trends seen in Pearson correlations for CA1, CA23, DG volumes.
-
-- No significant trends seen in Pearson correlations for estradiol, testosterone, or DHEAS.
+- No significant trends seen in Pearson correlations for DHEAS.
 
 - No significant trends seen in Pearson correlations for men.
 
-- For progesterone, it was significantly positively correlated with ERC volume for post-menopausal women (*p* = 0.013) and significantly negatively correlated with ERC volume for pre-menopausal women (*p* = 0.035). However, the overall correlation between progesterone and ERC volume among women altogether was not significant. Progesterone was also marginally, positively correlated with PHC volume in women (*p* = 0.052), but could just be an effect of the outlier where a peri-menopausal woman has a very highe progesterone level (driving the overall trend and significance among peris, *p* = 0.036).
+- ANOVA results comparing subfields by reproductive stage were not significant for almost all subfields. ANOVA results for ERC was significant by reproductive stage (*p* < 0.05).
 
-- For FSH, it was significantly negatively correlated with PHC volume for pre-menopausal women (*p* = 0.04), but the overall correlation between FSH and PHC olume for women was not significant.
+- T-test results comparing subfields by sex were all significant (at least *p* < 0.05) except for PRC.
 
-- For SHBG, it was significantly negatively correlated with PRC volume for pre-menopausal women (*p* = 0.045) and marginally negatively correlated with women overall (*p* = 0.068). SHBG was also marginally negatively correlated with SUB volume for post-menopausal women (*p* = 0.068).
+- For estradiol, it was significantly negatively correlated with CA1 for peris (*p* = 0.036) and with DG for peris (*p* = 0.04), and marginally negatively correlated with CA23 for peris (*p* = 0.065). 
+
+- For progesterone, it was significantly positively correlated with CA1 for posts (*p* = 0.033) and with ERC for posts (*p* = 0.015).
+
+- For FSH, it was significantly negatively correlated with ERC for posts (*p* = 0.015) and with PHC for posts (*p* = 0.045). PHC volume and FSH were marginally negatively correlated among women as a group (*p* = 0.062). FSH is also marginally negatively correlated with CA1 for posts (*p* = 0.08) and with SUB for posts (*p* = 0.074). 
+
+- For testosterone, it was marginally positively associated with DG for pres (*p* = 0.066).
+
+- For SHBG, it was significantly negatively correlated with ERC for posts (*p* < 0.01). It was also negatively correlated with PRC among women as a group (*p* = 0.028) and marginally negatively correlated with PRC for pres (*p* = 0.057).
 
 
