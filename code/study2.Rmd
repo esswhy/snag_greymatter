@@ -97,7 +97,7 @@ data_men <- data %>%
 ```
 
 
-## Correlation for Behavior and T2 Subfields
+## Correlation for Behavior and T2 Subfields {.tabset}
 
 From prior analyses, we know that the subfield volumes are generally normally distributed. We can check the distribution of the SNAG dependent variables
 
@@ -131,11 +131,11 @@ h4 <- ggplot(data = data_maze, aes(x = maze_moves)) +
   labs(x = "Number of Moves",
        y = "Count",
        title = "MAZE Raw")
-h4a <- ggplot(data = data_maze, aes(x = log(maze_moves))) +
+h4a <- ggplot(data = data_maze, aes(x = sqrt(maze_moves))) +
   geom_histogram(alpha = 0.5, color = "black", position = "identity") +
   labs(x = "Number of Moves",
        y = "Count",
-       title = "MAZE Raw")
+       title = "MAZE Log Transformed")
 
 #DSP: slight left and right skew so apply transformation
 h5 <- ggplot(data = data_dsp, aes(x = dsp_success_pct)) +
@@ -143,7 +143,7 @@ h5 <- ggplot(data = data_dsp, aes(x = dsp_success_pct)) +
   labs(x = "Wayfinding Success (%)",
        y = "Count",
        title = "DSP Raw")
-h5a <- ggplot(data = data_dsp, aes(x = log(dsp_success_pct))) +
+h5a <- ggplot(data = data_dsp, aes(x = 1/(dsp_success_pct))) +
   geom_histogram(alpha = 0.5, color = "black", position = "identity") +
   labs(x = "Wayfinding Success (%)",
        y = "Count",
@@ -179,9 +179,9 @@ data_dsp_log <- data_dsp %>%
 ```
 
 
-### LOOP
+### LOOP {.tabset}
 
-Overall (women and men) and by sex
+Pearson correlations
 
 #### Position Error
 
@@ -194,8 +194,8 @@ c1 <- ggscatter(data_loop, x = "t2hipp_vol_ca1_cor", y = "loop_pe_avg_m", color 
           conf.int = TRUE, 
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
-          xlab = "Averaged CA1 Subfield Volume", ylab = "Averaged \nPosition Error (m)") +
-    theme(legend.position = "top") 
+          xlab = "Averaged CA1 Subfield Volume", ylab = "Averaged \nPosition Error (m)", ) +
+    theme(legend.position = "top", legend.title=element_blank()) 
 
 c1a <- ggscatter(data_loop, x = "t2hipp_vol_ca1_cor", y = "loop_pe_avg_m", color = "sex",
           add = "reg.line",
@@ -205,50 +205,1060 @@ c1a <- ggscatter(data_loop, x = "t2hipp_vol_ca1_cor", y = "loop_pe_avg_m", color
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged CA1 Subfield Volume", ylab = "Averaged \nPosition Error (m)") +
-    facet_grid(. ~ sex, scale = "free") +
+    facet_wrap(. ~ sex, scale = "free", ncol = 1) +
      theme_bw() +
      theme(legend.position = "none")
 
 #CA23
+c2 <- ggscatter(data_loop, x = "t2hipp_vol_ca23_cor", y = "loop_pe_avg_m", color = "repo_status_spatial",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged CA23 Subfield Volume", ylab = "Averaged \nPosition Error (m)", ) +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+c2a <- ggscatter(data_loop, x = "t2hipp_vol_ca23_cor", y = "loop_pe_avg_m", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged CA23 Subfield Volume", ylab = "Averaged \nPosition Error (m)") +
+    facet_wrap(. ~ sex, scale = "free", ncol = 1) +
+     theme_bw() +
+     theme(legend.position = "none")
 
 #DG
+c3 <- ggscatter(data_loop, x = "t2hipp_vol_dg_cor", y = "loop_pe_avg_m", color = "repo_status_spatial",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged DG Subfield Volume", ylab = "Averaged \nPosition Error (m)", ) +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+c3a <- ggscatter(data_loop, x = "t2hipp_vol_dg_cor", y = "loop_pe_avg_m", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged DG Subfield Volume", ylab = "Averaged \nPosition Error (m)") +
+    facet_wrap(. ~ sex, scale = "free", ncol = 1) +
+     theme_bw() +
+     theme(legend.position = "none")
 
 #ERC
+c4 <- ggscatter(data_loop, x = "t2hipp_vol_erc_cor", y = "loop_pe_avg_m", color = "repo_status_spatial",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged ERC Subfield Volume", ylab = "Averaged \nPosition Error (m)", ) +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+c4a <- ggscatter(data_loop, x = "t2hipp_vol_erc_cor", y = "loop_pe_avg_m", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged ERC Subfield Volume", ylab = "Averaged \nPosition Error (m)") +
+    facet_wrap(. ~ sex, scale = "free", ncol = 1) +
+     theme_bw() +
+     theme(legend.position = "none")
 
 #PHC
+c5 <- ggscatter(data_loop, x = "t2hipp_vol_phc_cor", y = "loop_pe_avg_m", color = "repo_status_spatial",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged PHC Subfield Volume", ylab = "Averaged \nPosition Error (m)", ) +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+c5a <- ggscatter(data_loop, x = "t2hipp_vol_phc_cor", y = "loop_pe_avg_m", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged PHC Subfield Volume", ylab = "Averaged \nPosition Error (m)") +
+    facet_wrap(. ~ sex, scale = "free", ncol = 1) +
+     theme_bw() +
+     theme(legend.position = "none")
 
 #PRC
+c6 <- ggscatter(data_loop, x = "t2hipp_vol_prc_cor", y = "loop_pe_avg_m", color = "repo_status_spatial",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged PRC Subfield Volume", ylab = "Averaged \nPosition Error (m)", ) +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+c6a <- ggscatter(data_loop, x = "t2hipp_vol_prc_cor", y = "loop_pe_avg_m", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged PRC Subfield Volume", ylab = "Averaged \nPosition Error (m)") +
+    facet_wrap(. ~ sex, scale = "free", ncol = 1) +
+     theme_bw() +
+     theme(legend.position = "none")
 
 #SUB
+c7 <- ggscatter(data_loop, x = "t2hipp_vol_sub_cor", y = "loop_pe_avg_m", color = "repo_status_spatial",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged SUB Subfield Volume", ylab = "Averaged \nPosition Error (m)", ) +
+    theme(legend.position = "top", legend.title=element_blank()) 
 
+c7a <- ggscatter(data_loop, x = "t2hipp_vol_sub_cor", y = "loop_pe_avg_m", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged SUB Subfield Volume", ylab = "Averaged \nPosition Error (m)") +
+    facet_wrap(. ~ sex, scale = "free", ncol = 1) +
+     theme_bw() +
+     theme(legend.position = "none")
 
 
 #Patchwork
-c1/c1a
+c1+c1a
+c2+c2a
+c3+c3a
+c4+c4a
+c5+c5a
+c6+c6a
+c7+c7a
 ```
 
 
 #### Degrees Traveled
 
+```{r}
+#CA1
+c1 <- ggscatter(data_loop, x = "t2hipp_vol_ca1_cor", y = "loop_de_avg_degree", color = "repo_status_spatial",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged CA1 Subfield Volume", ylab = "Averaged \nDegrees Traveled", ) +
+    theme(legend.position = "top", legend.title=element_blank()) 
 
-### MAZE
+c1a <- ggscatter(data_loop, x = "t2hipp_vol_ca1_cor", y = "loop_de_avg_degree", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged CA1 Subfield Volume", ylab = "Averaged \nDegrees Traveled") +
+    facet_wrap(. ~ sex, scale = "free", ncol = 1) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#CA23
+c2 <- ggscatter(data_loop, x = "t2hipp_vol_ca23_cor", y = "loop_de_avg_degree", color = "repo_status_spatial",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged CA23 Subfield Volume", ylab = "Averaged \nDegrees Traveled", ) +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+c2a <- ggscatter(data_loop, x = "t2hipp_vol_ca23_cor", y = "loop_de_avg_degree", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged CA23 Subfield Volume", ylab = "Averaged \nDegrees Traveled") +
+    facet_wrap(. ~ sex, scale = "free", ncol = 1) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#DG
+c3 <- ggscatter(data_loop, x = "t2hipp_vol_dg_cor", y = "loop_de_avg_degree", color = "repo_status_spatial",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged DG Subfield Volume", ylab = "Averaged \nDegrees Traveled", ) +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+c3a <- ggscatter(data_loop, x = "t2hipp_vol_dg_cor", y = "loop_de_avg_degree", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged DG Subfield Volume", ylab = "Averaged \nDegrees Traveled") +
+    facet_wrap(. ~ sex, scale = "free", ncol = 1) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#ERC
+c4 <- ggscatter(data_loop, x = "t2hipp_vol_erc_cor", y = "loop_de_avg_degree", color = "repo_status_spatial",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged ERC Subfield Volume", ylab = "Averaged \nDegrees Traveled", ) +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+c4a <- ggscatter(data_loop, x = "t2hipp_vol_erc_cor", y = "loop_de_avg_degree", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged ERC Subfield Volume", ylab = "Averaged \nDegrees Traveled") +
+    facet_wrap(. ~ sex, scale = "free", ncol = 1) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#PHC
+c5 <- ggscatter(data_loop, x = "t2hipp_vol_phc_cor", y = "loop_de_avg_degree", color = "repo_status_spatial",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged PHC Subfield Volume", ylab = "Averaged \nDegrees Traveled", ) +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+c5a <- ggscatter(data_loop, x = "t2hipp_vol_phc_cor", y = "loop_de_avg_degree", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged PHC Subfield Volume", ylab = "Averaged \nDegrees Traveled") +
+    facet_wrap(. ~ sex, scale = "free", ncol = 1) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#PRC
+c6 <- ggscatter(data_loop, x = "t2hipp_vol_prc_cor", y = "loop_de_avg_degree", color = "repo_status_spatial",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged PRC Subfield Volume", ylab = "Averaged \nDegrees Traveled", ) +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+c6a <- ggscatter(data_loop, x = "t2hipp_vol_prc_cor", y = "loop_de_avg_degree", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged PRC Subfield Volume", ylab = "Averaged \nDegrees Traveled") +
+    facet_wrap(. ~ sex, scale = "free", ncol = 1) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#SUB
+c7 <- ggscatter(data_loop, x = "t2hipp_vol_sub_cor", y = "loop_de_avg_degree", color = "repo_status_spatial",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged SUB Subfield Volume", ylab = "Averaged \nDegrees Traveled", ) +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+c7a <- ggscatter(data_loop, x = "t2hipp_vol_sub_cor", y = "loop_de_avg_degree", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged SUB Subfield Volume", ylab = "Averaged \nDegrees Traveled") +
+    facet_wrap(. ~ sex, scale = "free", ncol = 1) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+
+#Patchwork
+c1+c1a
+c2+c2a
+c3+c3a
+c4+c4a
+c5+c5a
+c6+c6a
+c7+c7a
+```
+
+
+### {-}
+
+### MAZE {.tabset}
+
+Spearman rank correlations
 
 
 #### Wayfinding Success
 
-#### Number of Moves
+```{r}
+#CA1
+c1 <- ggscatter(data_maze, x = "t2hipp_vol_ca1_cor", y = "maze_accuracy_pct", color = "repo_status_spatial",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged CA1 Subfield Volume", ylab = "Averaged \nWayfinding Success (%)") +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+c1a <- ggscatter(data_maze, x = "t2hipp_vol_ca1_cor", y = "maze_accuracy_pct", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged CA1 Subfield Volume", ylab = "Averaged \nWayfinding Success (%)") +
+    facet_wrap(. ~ sex, scale = "free", ncol = 1) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#CA23
+c2 <- ggscatter(data_maze, x = "t2hipp_vol_ca23_cor", y = "maze_accuracy_pct", color = "repo_status_spatial",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged CA23 Subfield Volume", ylab = "Averaged \nWayfinding Success (%)", ) +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+c2a <- ggscatter(data_maze, x = "t2hipp_vol_ca23_cor", y = "maze_accuracy_pct", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged CA23 Subfield Volume", ylab = "Averaged \nWayfinding Success (%)") +
+    facet_wrap(. ~ sex, scale = "free", ncol = 1) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#DG
+c3 <- ggscatter(data_maze, x = "t2hipp_vol_dg_cor", y = "maze_accuracy_pct", color = "repo_status_spatial",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged DG Subfield Volume", ylab = "Averaged \nWayfinding Success (%)", ) +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+c3a <- ggscatter(data_maze, x = "t2hipp_vol_dg_cor", y = "maze_accuracy_pct", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged DG Subfield Volume", ylab = "Averaged \nWayfinding Success (%)") +
+    facet_wrap(. ~ sex, scale = "free", ncol = 1) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#ERC
+c4 <- ggscatter(data_maze, x = "t2hipp_vol_erc_cor", y = "maze_accuracy_pct", color = "repo_status_spatial",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged ERC Subfield Volume", ylab = "Averaged \nWayfinding Success (%)", ) +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+c4a <- ggscatter(data_maze, x = "t2hipp_vol_erc_cor", y = "maze_accuracy_pct", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged ERC Subfield Volume", ylab = "Averaged \nWayfinding Success (%)") +
+    facet_wrap(. ~ sex, scale = "free", ncol = 1) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#PHC
+c5 <- ggscatter(data_maze, x = "t2hipp_vol_phc_cor", y = "maze_accuracy_pct", color = "repo_status_spatial",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged PHC Subfield Volume", ylab = "Averaged \nWayfinding Success (%)", ) +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+c5a <- ggscatter(data_maze, x = "t2hipp_vol_phc_cor", y = "maze_accuracy_pct", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged PHC Subfield Volume", ylab = "Averaged \nWayfinding Success (%)") +
+    facet_wrap(. ~ sex, scale = "free", ncol = 1) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#PRC
+c6 <- ggscatter(data_maze, x = "t2hipp_vol_prc_cor", y = "maze_accuracy_pct", color = "repo_status_spatial",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged PRC Subfield Volume", ylab = "Averaged \nWayfinding Success (%)", ) +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+c6a <- ggscatter(data_maze, x = "t2hipp_vol_prc_cor", y = "maze_accuracy_pct", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged PRC Subfield Volume", ylab = "Averaged \nWayfinding Success (%)") +
+    facet_wrap(. ~ sex, scale = "free", ncol = 1) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#SUB
+c7 <- ggscatter(data_maze, x = "t2hipp_vol_sub_cor", y = "maze_accuracy_pct", color = "repo_status_spatial",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged SUB Subfield Volume", ylab = "Averaged \nWayfinding Success (%)", ) +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+c7a <- ggscatter(data_maze, x = "t2hipp_vol_sub_cor", y = "maze_accuracy_pct", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged SUB Subfield Volume", ylab = "Averaged \nWayfinding Success (%)") +
+    facet_wrap(. ~ sex, scale = "free", ncol = 1) +
+     theme_bw() +
+     theme(legend.position = "none")
 
 
-### DSP
+#Patchwork
+c1+c1a
+c2+c2a
+c3+c3a
+c4+c4a
+c5+c5a
+c6+c6a
+c7+c7a
+```
+
+
+```{r}
+#CA1
+c1 <- ggscatter(data_maze, x = "t2hipp_vol_ca1_cor", y = "maze_moves", color = "repo_status_spatial",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged CA1 Subfield Volume", ylab = "Averaged \nNumber of Moves") +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+c1a <- ggscatter(data_maze, x = "t2hipp_vol_ca1_cor", y = "maze_moves", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged CA1 Subfield Volume", ylab = "Averaged \nNumber of Moves") +
+    facet_wrap(. ~ sex, scale = "free", ncol = 1) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#CA23
+c2 <- ggscatter(data_maze, x = "t2hipp_vol_ca23_cor", y = "maze_moves", color = "repo_status_spatial",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged CA23 Subfield Volume", ylab = "Averaged \nNumber of Moves", ) +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+c2a <- ggscatter(data_maze, x = "t2hipp_vol_ca23_cor", y = "maze_moves", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged CA23 Subfield Volume", ylab = "Averaged \nNumber of Moves") +
+    facet_wrap(. ~ sex, scale = "free", ncol = 1) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#DG
+c3 <- ggscatter(data_maze, x = "t2hipp_vol_dg_cor", y = "maze_moves", color = "repo_status_spatial",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged DG Subfield Volume", ylab = "Averaged \nNumber of Moves", ) +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+c3a <- ggscatter(data_maze, x = "t2hipp_vol_dg_cor", y = "maze_moves", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged DG Subfield Volume", ylab = "Averaged \nNumber of Moves") +
+    facet_wrap(. ~ sex, scale = "free", ncol = 1) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#ERC
+c4 <- ggscatter(data_maze, x = "t2hipp_vol_erc_cor", y = "maze_moves", color = "repo_status_spatial",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged ERC Subfield Volume", ylab = "Averaged \nNumber of Moves", ) +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+c4a <- ggscatter(data_maze, x = "t2hipp_vol_erc_cor", y = "maze_moves", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged ERC Subfield Volume", ylab = "Averaged \nNumber of Moves") +
+    facet_wrap(. ~ sex, scale = "free", ncol = 1) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#PHC
+c5 <- ggscatter(data_maze, x = "t2hipp_vol_phc_cor", y = "maze_moves", color = "repo_status_spatial",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged PHC Subfield Volume", ylab = "Averaged \nNumber of Moves", ) +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+c5a <- ggscatter(data_maze, x = "t2hipp_vol_phc_cor", y = "maze_moves", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged PHC Subfield Volume", ylab = "Averaged \nNumber of Moves") +
+    facet_wrap(. ~ sex, scale = "free", ncol = 1) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#PRC
+c6 <- ggscatter(data_maze, x = "t2hipp_vol_prc_cor", y = "maze_moves", color = "repo_status_spatial",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged PRC Subfield Volume", ylab = "Averaged \nNumber of Moves", ) +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+c6a <- ggscatter(data_maze, x = "t2hipp_vol_prc_cor", y = "maze_moves", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged PRC Subfield Volume", ylab = "Averaged \nNumber of Moves") +
+    facet_wrap(. ~ sex, scale = "free", ncol = 1) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#SUB
+c7 <- ggscatter(data_maze, x = "t2hipp_vol_sub_cor", y = "maze_moves", color = "repo_status_spatial",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged SUB Subfield Volume", ylab = "Averaged \nNumber of Moves", ) +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+c7a <- ggscatter(data_maze, x = "t2hipp_vol_sub_cor", y = "maze_moves", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged SUB Subfield Volume", ylab = "Averaged \nNumber of Moves") +
+    facet_wrap(. ~ sex, scale = "free", ncol = 1) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+
+#Patchwork
+c1+c1a
+c2+c2a
+c3+c3a
+c4+c4a
+c5+c5a
+c6+c6a
+c7+c7a
+```
+
+
+### {-}
+
+
+### DSP {.tabset}
+
+Spearman rank correlations
 
 #### Wayfinding Success
+
+```{r}
+#CA1
+c1 <- ggscatter(data_dsp, x = "t2hipp_vol_ca1_cor", y = "dsp_success_pct", color = "repo_status_spatial",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged CA1 Subfield Volume", ylab = "Averaged \nWayfinding Success (%)") +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+c1a <- ggscatter(data_dsp, x = "t2hipp_vol_ca1_cor", y = "dsp_success_pct", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged CA1 Subfield Volume", ylab = "Averaged \nWayfinding Success (%)") +
+    facet_wrap(. ~ sex, scale = "free", ncol = 1) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#CA23
+c2 <- ggscatter(data_dsp, x = "t2hipp_vol_ca23_cor", y = "dsp_success_pct", color = "repo_status_spatial",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged CA23 Subfield Volume", ylab = "Averaged \nWayfinding Success (%)", ) +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+c2a <- ggscatter(data_dsp, x = "t2hipp_vol_ca23_cor", y = "dsp_success_pct", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged CA23 Subfield Volume", ylab = "Averaged \nWayfinding Success (%)") +
+    facet_wrap(. ~ sex, scale = "free", ncol = 1) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#DG
+c3 <- ggscatter(data_dsp, x = "t2hipp_vol_dg_cor", y = "dsp_success_pct", color = "repo_status_spatial",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged DG Subfield Volume", ylab = "Averaged \nWayfinding Success (%)", ) +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+c3a <- ggscatter(data_dsp, x = "t2hipp_vol_dg_cor", y = "dsp_success_pct", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged DG Subfield Volume", ylab = "Averaged \nWayfinding Success (%)") +
+    facet_wrap(. ~ sex, scale = "free", ncol = 1) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#ERC
+c4 <- ggscatter(data_dsp, x = "t2hipp_vol_erc_cor", y = "dsp_success_pct", color = "repo_status_spatial",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged ERC Subfield Volume", ylab = "Averaged \nWayfinding Success (%)", ) +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+c4a <- ggscatter(data_dsp, x = "t2hipp_vol_erc_cor", y = "dsp_success_pct", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged ERC Subfield Volume", ylab = "Averaged \nWayfinding Success (%)") +
+    facet_wrap(. ~ sex, scale = "free", ncol = 1) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#PHC
+c5 <- ggscatter(data_dsp, x = "t2hipp_vol_phc_cor", y = "dsp_success_pct", color = "repo_status_spatial",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged PHC Subfield Volume", ylab = "Averaged \nWayfinding Success (%)", ) +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+c5a <- ggscatter(data_dsp, x = "t2hipp_vol_phc_cor", y = "dsp_success_pct", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged PHC Subfield Volume", ylab = "Averaged \nWayfinding Success (%)") +
+    facet_wrap(. ~ sex, scale = "free", ncol = 1) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#PRC
+c6 <- ggscatter(data_dsp, x = "t2hipp_vol_prc_cor", y = "dsp_success_pct", color = "repo_status_spatial",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged PRC Subfield Volume", ylab = "Averaged \nWayfinding Success (%)", ) +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+c6a <- ggscatter(data_dsp, x = "t2hipp_vol_prc_cor", y = "dsp_success_pct", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged PRC Subfield Volume", ylab = "Averaged \nWayfinding Success (%)") +
+    facet_wrap(. ~ sex, scale = "free", ncol = 1) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#SUB
+c7 <- ggscatter(data_dsp, x = "t2hipp_vol_sub_cor", y = "dsp_success_pct", color = "repo_status_spatial",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged SUB Subfield Volume", ylab = "Averaged \nWayfinding Success (%)", ) +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+c7a <- ggscatter(data_dsp, x = "t2hipp_vol_sub_cor", y = "dsp_success_pct", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged SUB Subfield Volume", ylab = "Averaged \nWayfinding Success (%)") +
+    facet_wrap(. ~ sex, scale = "free", ncol = 1) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+
+#Patchwork
+c1+c1a
+c2+c2a
+c3+c3a
+c4+c4a
+c5+c5a
+c6+c6a
+c7+c7a
+```
 
 #### Solution Index
 
+```{r}
+#CA1
+c1 <- ggscatter(data_dsp, x = "t2hipp_vol_ca1_cor", y = "dsp_si_true_pct", color = "repo_status_spatial",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged CA1 Subfield Volume", ylab = "Averaged \nSolution Index (%)") +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+c1a <- ggscatter(data_dsp, x = "t2hipp_vol_ca1_cor", y = "dsp_si_true_pct", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged CA1 Subfield Volume", ylab = "Averaged \nSolution Index (%)") +
+    facet_wrap(. ~ sex, scale = "free", ncol = 1) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#CA23
+c2 <- ggscatter(data_dsp, x = "t2hipp_vol_ca23_cor", y = "dsp_si_true_pct", color = "repo_status_spatial",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged CA23 Subfield Volume", ylab = "Averaged \nSolution Index (%)", ) +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+c2a <- ggscatter(data_dsp, x = "t2hipp_vol_ca23_cor", y = "dsp_si_true_pct", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged CA23 Subfield Volume", ylab = "Averaged \nSolution Index (%)") +
+    facet_wrap(. ~ sex, scale = "free", ncol = 1) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#DG
+c3 <- ggscatter(data_dsp, x = "t2hipp_vol_dg_cor", y = "dsp_si_true_pct", color = "repo_status_spatial",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged DG Subfield Volume", ylab = "Averaged \nSolution Index (%)", ) +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+c3a <- ggscatter(data_dsp, x = "t2hipp_vol_dg_cor", y = "dsp_si_true_pct", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged DG Subfield Volume", ylab = "Averaged \nSolution Index (%)") +
+    facet_wrap(. ~ sex, scale = "free", ncol = 1) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#ERC
+c4 <- ggscatter(data_dsp, x = "t2hipp_vol_erc_cor", y = "dsp_si_true_pct", color = "repo_status_spatial",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged ERC Subfield Volume", ylab = "Averaged \nSolution Index (%)", ) +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+c4a <- ggscatter(data_dsp, x = "t2hipp_vol_erc_cor", y = "dsp_si_true_pct", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged ERC Subfield Volume", ylab = "Averaged \nSolution Index (%)") +
+    facet_wrap(. ~ sex, scale = "free", ncol = 1) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#PHC
+c5 <- ggscatter(data_dsp, x = "t2hipp_vol_phc_cor", y = "dsp_si_true_pct", color = "repo_status_spatial",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged PHC Subfield Volume", ylab = "Averaged \nSolution Index (%)", ) +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+c5a <- ggscatter(data_dsp, x = "t2hipp_vol_phc_cor", y = "dsp_si_true_pct", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged PHC Subfield Volume", ylab = "Averaged \nSolution Index (%)") +
+    facet_wrap(. ~ sex, scale = "free", ncol = 1) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#PRC
+c6 <- ggscatter(data_dsp, x = "t2hipp_vol_prc_cor", y = "dsp_si_true_pct", color = "repo_status_spatial",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged PRC Subfield Volume", ylab = "Averaged \nSolution Index (%)", ) +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+c6a <- ggscatter(data_dsp, x = "t2hipp_vol_prc_cor", y = "dsp_si_true_pct", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged PRC Subfield Volume", ylab = "Averaged \nSolution Index (%)") +
+    facet_wrap(. ~ sex, scale = "free", ncol = 1) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#SUB
+c7 <- ggscatter(data_dsp, x = "t2hipp_vol_sub_cor", y = "dsp_si_true_pct", color = "repo_status_spatial",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged SUB Subfield Volume", ylab = "Averaged \nSolution Index (%)", ) +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+c7a <- ggscatter(data_dsp, x = "t2hipp_vol_sub_cor", y = "dsp_si_true_pct", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged SUB Subfield Volume", ylab = "Averaged \nSolution Index (%)") +
+    facet_wrap(. ~ sex, scale = "free", ncol = 1) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+
+#Patchwork
+c1+c1a
+c2+c2a
+c3+c3a
+c4+c4a
+c5+c5a
+c6+c6a
+c7+c7a
+```
+
+
+### {-}
 
 
 
+## {-}
 
+# Summary
+
+- For LOOP, 
 
 
 
