@@ -1,5 +1,5 @@
 ---
-title: 'Study 2: Brain, Behavior, Hormones'
+title: 'Study 2: T2 Subfield, Spatial Behavior, Sex Hormones'
 author: "Shuying Yu"
 date: "8/5/2022"
 output: html_document
@@ -23,25 +23,27 @@ library(readr)
 ```
 
 
-# Overview
+# Introduction
 
 Study 1 has shown that there is a correlation between sex hormones and spatial navigation strategy, such that higher estradiol is positively associated with higher use of shortcuts in the DSP task (higher solution index). Higher FSH, on the other hand, was marginally negatively associated with shortcut use (lower solution index) using Spearman rank correlations.
 
-Here, I determine whether there are associations between T2 high-resolution hippocampal subregion volume and spatial navigation behaviors, and sex hormones and subregion volume.
+Here, I determine whether there are associations between T2 high-resolution hippocampal subfield volume and spatial navigation behaviors, and sex hormones and subfield volume. Later, I determine how subfield volume mediates the relationship between sex hormones and behavior for navigation strategy.
 
-Later, I determine how subregion volume mediates the relationship between sex hormones and behavior for navigation strategy.
+Prior exploratory analysis for relationships between sex hormones and subfield volume reveal certain significant relationships (`correlation_greymatter_hormones_corrected.Rmd`).
+
+Here, I will explore whether there are any relationships between spatial navigation behaviors and T2 subfield volumes. Next, I plan to apply causal mediation analysis to investigate whether the effect of sex hormones (IV) on spatial behavior (DV) is mediated by participants' subfield volume (mediator, T2 subfield).
 
 
-# Introduction
+# Data Analysis
 
 I cleaned some of the data prior to analyses. I had to:
 
 1) Filter for midlife participants that have T2 subfield data (subject 333 and over)
 2) Select sex hormone measures from when scan was conducted
-3) Correct for subfield volumes using TIV, which is a combination of GMV, WMV, CSF. Divide the volumes by TIV
-4) No need to average left and right volumes to get an average measure for each subfield and brain region, since the reported data from CT (August 2022) is already averaged bilaterally. However, these have not been manually refined/corrected yet.
+3) Correct for subfield volumes using TIV, which is a combination of GMV, WMV, CSF. Divide the volumes by TIV variable (`t2hipp_vol_tiv`)
+4) Average left and right volumes to get an average measure for each subfield and brain region
 
-For example: `t2hipp_vol_ca1`, `t2hipp_vol_ca23`... `t2hipp_vol_csf` before correction and `t2hipp_vol_ca1_cor`, `t2hipp_vol_ca23_cor`... `t2hipp_vol_csf_cor`after correction
+
 
 ```{r}
 #Read in the data
@@ -53,34 +55,205 @@ data <- data %>%
          completed_spatial == "Yes",
          t2hipp_status == "Yes") %>% 
   select(subject_id, sex, age_scan_years:testosterone_spatial_ng_dl,
-         t2hipp_vol_ca1:t2hipp_vol_csf)
+         t2hipp_vol_left_ca1:t2hipp_vol_csf) %>% 
+  mutate(repo_status_spatial = fct_relevel(repo_status_spatial, 
+                                    c("Pre", "Peri", "Post")))
 
-#Correct for TIV for t2hipp bilateral volumes
+#Create function for apply to variables
+dividebyTIV <- function(x, na.rm = FALSE) (x/data$t2hipp_vol_tiv)
+
+#Correct left and right volumes with TIV
 data <- data %>% 
-  mutate(t2hipp_vol_ca1_cor = t2hipp_vol_ca1 / t2hipp_vol_tiv,
-         t2hipp_vol_ca23_cor = t2hipp_vol_ca23 / t2hipp_vol_tiv,
-         t2hipp_vol_dg_cor = t2hipp_vol_dg / t2hipp_vol_tiv,
-         t2hipp_vol_erc_cor = t2hipp_vol_erc / t2hipp_vol_tiv,
-         t2hipp_vol_phc_cor = t2hipp_vol_phc / t2hipp_vol_tiv,
-         t2hipp_vol_prc_cor = t2hipp_vol_prc / t2hipp_vol_tiv,
-         t2hipp_vol_sub_cor = t2hipp_vol_sub / t2hipp_vol_tiv,
-         t2hipp_vol_totalhipp_cor = t2hipp_vol_totalhipp / t2hipp_vol_tiv,
-         t2hipp_vol_phg_cor = t2hipp_vol_phg / t2hipp_vol_tiv,
-         t2hipp_vol_mtl_cor = t2hipp_vol_mtl / t2hipp_vol_tiv)
+  mutate_at(vars(t2hipp_vol_left_ca1:t2hipp_vol_right_sub),
+            dividebyTIV)
 
+#Average left and right volumes
+data <- data %>% 
+  mutate(t2hipp_vol_ca1_cor = (t2hipp_vol_left_ca1+t2hipp_vol_right_ca1) / 2,
+         t2hipp_vol_ca23_cor = (t2hipp_vol_left_ca23+t2hipp_vol_right_ca23) / 2,
+         t2hipp_vol_dg_cor = (t2hipp_vol_left_dg+t2hipp_vol_right_dg) / 2,
+         t2hipp_vol_erc_cor = (t2hipp_vol_left_erc+t2hipp_vol_right_erc) / 2,
+         t2hipp_vol_phc_cor = (t2hipp_vol_left_phc+t2hipp_vol_right_phc) / 2,
+         t2hipp_vol_prc_cor = (t2hipp_vol_left_prc+t2hipp_vol_right_prc) / 2,
+         t2hipp_vol_sub_cor = (t2hipp_vol_left_sub+t2hipp_vol_right_sub) / 2
+         # t2hipp_vol_totalhipp_cor = t2hipp_vol_totalhipp / 2,
+         # t2hipp_vol_phg_cor = t2hipp_vol_phg / 2,
+         # t2hipp_vol_mtl_cor = t2hipp_vol_mtl / 2
+         )
+
+#Separate for SNAG
+data_loop <- data %>% 
+  filter(loop_useable == "Yes")
+data_maze <- data %>% 
+  filter(maze_useable == "Yes")
+data_dsp <- data %>% 
+  filter(dsp_useable == "Yes")
 
 #Separate for women and men
 data_women <- data %>% 
-  filter(sex == "Female", dsp_useable == "Yes")
+  filter(sex == "Female", dsp_useable == "Yes") 
 data_men <- data %>% 
   filter(sex == "Male", dsp_useable == "Yes")
 ```
 
 
-# Data Analysis
+## Correlation for Behavior and T2 Subfields
+
+From prior analyses, we know that the subfield volumes are generally normally distributed. We can check the distribution of the SNAG dependent variables
 
 
-## Total Effect (Hormones -> DV)
+```{r}
+#LOOP: normally distributed, no need to transform
+h1 <- ggplot(data = data_loop, aes(x = loop_pe_avg_m)) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Average Position Error (m)",
+       y = "Count",
+       title = "LOOP Raw")
+h2 <- ggplot(data = data_loop, aes(x = loop_de_avg_degree)) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Average Degrees Traveled",
+       y = "Count",
+       title = "LOOP Raw")
+
+#MAZE:right and left skewed, log transform
+h3 <- ggplot(data = data_maze, aes(x = maze_accuracy_pct)) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Wayfinding Success (%)",
+       y = "Count",
+       title = "MAZE Raw")
+h3a <- ggplot(data = data_maze, aes(x = log(maze_accuracy_pct))) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Wayfinding Success (%)",
+       y = "Count",
+       title = "MAZE Log Transformed")
+h4 <- ggplot(data = data_maze, aes(x = maze_moves)) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Number of Moves",
+       y = "Count",
+       title = "MAZE Raw")
+h4a <- ggplot(data = data_maze, aes(x = log(maze_moves))) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Number of Moves",
+       y = "Count",
+       title = "MAZE Raw")
+
+#DSP: slight left and right skew so apply transformation
+h5 <- ggplot(data = data_dsp, aes(x = dsp_success_pct)) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Wayfinding Success (%)",
+       y = "Count",
+       title = "DSP Raw")
+h5a <- ggplot(data = data_dsp, aes(x = log(dsp_success_pct))) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Wayfinding Success (%)",
+       y = "Count",
+       title = "DSP Log Transformed")
+h6 <- ggplot(data = data_dsp, aes(x = dsp_si_true_pct)) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Solution Index (%)",
+       y = "Count",
+       title = "DSP Raw")
+h6a <- ggplot(data = data_dsp, aes(x = log(dsp_si_true_pct))) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Solution Index (%)",
+       y = "Count",
+       title = "DSP Log Transformed")
+
+
+#Present
+(h1+h2)
+(h3+h3a)/(h4+h4a)
+(h5+h5a)/(h6+h6a)
+```
+
+LOOP dependent variables are normally distributed, but MAZE and DSP variables have slight skews. I applied log transformation to these variables to allow for exploratory Pearson correlations, but skew remains. For MAZE and DSP, I'll use Spearman rank correlations.
+
+
+
+```{r log-transformation}
+data_maze_log <- data_maze %>% 
+  mutate_at(vars(maze_accuracy_pct,maze_moves), log)
+
+data_dsp_log <- data_dsp %>% 
+  mutate_at(vars(dsp_success_pct, dsp_si_true_pct), log)
+```
+
+
+### LOOP
+
+Overall (women and men) and by sex
+
+#### Position Error
+
+```{r}
+#CA1
+c1 <- ggscatter(data_loop, x = "t2hipp_vol_ca1_cor", y = "loop_pe_avg_m", color = "repo_status_spatial",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged CA1 Subfield Volume", ylab = "Averaged \nPosition Error (m)") +
+    theme(legend.position = "top") 
+
+c1a <- ggscatter(data_loop, x = "t2hipp_vol_ca1_cor", y = "loop_pe_avg_m", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged CA1 Subfield Volume", ylab = "Averaged \nPosition Error (m)") +
+    facet_grid(. ~ sex, scale = "free") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#CA23
+
+#DG
+
+#ERC
+
+#PHC
+
+#PRC
+
+#SUB
+
+
+
+#Patchwork
+c1/c1a
+```
+
+
+#### Degrees Traveled
+
+
+### MAZE
+
+
+#### Wayfinding Success
+
+#### Number of Moves
+
+
+### DSP
+
+#### Wayfinding Success
+
+#### Solution Index
+
+
+
+
+
+
+
+
+
+## Total Effect (Hormones -> Behavior)
 
 
 ```{r}
@@ -99,7 +272,7 @@ summary(fit.totaleffect)
 
 There doesn’t necessarily have to be a significant relationship between the iv and the dv. Just as correlation doesn’t prove causation, no correlation does not disprove causation 
 
-## IV on mediator
+## IV on Mediator
 
 ```{r}
 
@@ -217,113 +390,8 @@ cor.test(data_women$t2hipp_vol_totalhipp_cor,
 ```
 
 
-## Effect of hormones on subregion volume
 
 
-```{r}
-#Hormones
-par(mfrow=c(2,2))
-hist(data_women$estradiol_scan_pg_ml)
-hist(data_women$progesterone_scan_ng_ml)
-hist(data_women$testosterone_scan_ng_dl)
-hist(data_women$fsh_scan_miu_ml)
-```
-
-
-```{r}
-#log transform
-par(mfrow=c(2,2))
-hist(log(data_women$estradiol_scan_pg_ml))
-hist(log(data_women$progesterone_scan_ng_ml))
-hist(log(data_women$testosterone_scan_ng_dl))
-hist(log(data_women$fsh_scan_miu_ml))
-
-#inverse
-par(mfrow=c(2,2))
-hist((data_women$estradiol_scan_pg_ml)^-1)
-hist((data_women$progesterone_scan_ng_ml)^-1)
-hist((data_women$testosterone_scan_ng_dl)^-1)
-hist((data_women$fsh_scan_miu_ml)^-1)
-
-#square root
-par(mfrow=c(2,2))
-hist(sqrt(data_women$estradiol_scan_pg_ml))
-hist(sqrt(data_women$progesterone_scan_ng_ml))
-hist(sqrt(data_women$testosterone_scan_ng_dl))
-hist(sqrt(data_women$fsh_scan_miu_ml))
-```
-
-Log transformation appears to be the best for normalizing the hormone data.
-
-
-### Estradiol
-
-```{r}
-#Correlations: estradiol and CA1, CS23, MTL, totalhipp
-
-########## Spearman for estradiol
-
-#CA1
-cor.test(data_women$t2hipp_vol_ca1_cor,
-         log(data_women$estradiol_scan_pg_ml),
-         conf.level = 0.95,
-         method = "pearson")
-
-#CA23
-cor.test(data_women$t2hipp_vol_ca23_cor,
-         log(data_women$estradiol_scan_pg_ml),
-         conf.level = 0.95,
-         method = "pearson")
-
-#MTL
-cor.test(data_women$t2hipp_vol_mtl_cor,
-         log(data_women$estradiol_scan_pg_ml),
-         conf.level = 0.95,
-         method = "pearson")
-
-#Total hipp
-cor.test(data_women$t2hipp_vol_totalhipp_cor,
-         log(data_women$estradiol_scan_pg_ml),
-         conf.level = 0.95,
-         method = "pearson")
-```
-
-
-### FSH
-
-```{r}
-#Correlations: FSH and CA1, CS23, MTL, totalhipp
-
-########## Spearman for FSH
-
-#CA1
-cor.test(data_women$t2hipp_vol_ca1_cor,
-         log(data_women$fsh_scan_miu_ml),
-         conf.level = 0.95,
-         method = "pearson")
-
-#CA23
-cor.test(data_women$t2hipp_vol_ca23_cor,
-         log(data_women$fsh_scan_miu_ml),
-         conf.level = 0.95,
-         method = "pearson")
-
-#MTL
-cor.test(data_women$t2hipp_vol_mtl_cor,
-         log(data_women$fsh_scan_miu_ml),
-         conf.level = 0.95,
-         method = "pearson")
-
-#Total hipp
-cor.test(data_women$t2hipp_vol_totalhipp_cor,
-         log(data_women$fsh_scan_miu_ml),
-         conf.level = 0.95,
-         method = "pearson")
-```
-
-
-
-## Causal Mediation Analysis
 
 
 
