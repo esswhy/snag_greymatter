@@ -106,9 +106,121 @@ df_clean_repo <- df_clean %>%
   filter(sex == "Female") %>% 
   mutate(repo_status = fct_relevel(repo_status, 
                                     c("Pre", "Peri", "Post")))
+
+#Subset for men
+df_clean_men <- df_clean %>% 
+  filter(sex == "Male")
 ```
 
+# Structural Distributions 
+
+```{r shapiro-tests, include=FALSE}
+#is DV significantly difference from normal?
+
+#CA1
+shapiro.test(df_clean$avg_ca1) #no
+shapiro.test(df_clean_repo$avg_ca1) #no
+shapiro.test(df_clean_men$avg_ca1) #no
+
+#CA23
+shapiro.test(df_clean$avg_ca23) #no
+shapiro.test(df_clean_repo$avg_ca23) #no
+shapiro.test(df_clean_men$avg_ca23) #yes
+
+#DG
+shapiro.test(df_clean$avg_dg) #no
+shapiro.test(df_clean_repo$avg_dg) #no
+shapiro.test(df_clean_men$avg_dg) #no
+
+#ERC
+shapiro.test(df_clean$avg_erc) #no
+shapiro.test(df_clean_repo$avg_erc) #no
+shapiro.test(df_clean_men$avg_erc) #no
+
+#PHC
+shapiro.test(df_clean$avg_phc) #no
+shapiro.test(df_clean_repo$avg_phc) #no
+shapiro.test(df_clean_men$avg_phc) #no
+
+#PRC
+shapiro.test(df_clean$avg_prc) #no
+shapiro.test(df_clean_repo$avg_prc) #no
+shapiro.test(df_clean_men$avg_prc) #no
+
+#SUB
+shapiro.test(df_clean$avg_sub) #yes
+shapiro.test(df_clean_repo$avg_sub) #yes
+shapiro.test(df_clean_men$avg_sub) #no
+```
+
+Shapiro-Wilk's test reveal that CA23 for men, and SUB overall and SUB for men were not normally distributed.
+
+
 # Hormone Distributions {.tabset}
+
+```{r}
+#RAW
+
+#Estradiol
+shapiro.test(df_clean$estradiol_pg_m_l) #yes
+shapiro.test(df_clean_repo$estradiol_pg_m_l) #yes
+
+#Progesterone
+shapiro.test(df_clean$progesterone_ng_m_l) #yes
+shapiro.test(df_clean_repo$progesterone_ng_m_l) #yes
+
+#FSH
+shapiro.test(df_clean$fsh_m_iu_m_l) #yes
+shapiro.test(df_clean_repo$fsh_m_iu_m_l) #yes
+
+#DHES
+shapiro.test(df_clean$dhea_s_ug_d_l) #yes
+shapiro.test(df_clean_repo$dhea_s_ug_d_l) #yes
+shapiro.test(df_clean_men$dhea_s_ug_d_l) #no
+
+#SHBG
+shapiro.test(df_clean$shbg_nmol_l) #yes
+shapiro.test(df_clean_repo$shbg_nmol_l) #yes
+shapiro.test(df_clean_men$shbg_nmol_l) #yes
+
+#Testosterone
+shapiro.test(df_clean$total_testosterone_ng_d_l) #yes
+shapiro.test(df_clean_repo$total_testosterone_ng_d_l) #yes
+shapiro.test(df_clean_men$total_testosterone_ng_d_l) #no
+```
+
+```{r}
+#LOGGED
+
+#Estradiol
+shapiro.test(log(df_clean$estradiol_pg_m_l)) #yes
+shapiro.test(log(df_clean_repo$estradiol_pg_m_l)) #yes
+
+#Progesterone
+shapiro.test(log(df_clean$progesterone_ng_m_l)) #no
+shapiro.test(log(df_clean_repo$progesterone_ng_m_l)) #no
+
+#FSH
+shapiro.test(log(df_clean$fsh_m_iu_m_l)) #yes
+shapiro.test(log(df_clean_repo$fsh_m_iu_m_l)) #yes
+
+#DHEAS
+shapiro.test(log(df_clean$dhea_s_ug_d_l)) #no
+shapiro.test(log(df_clean_repo$dhea_s_ug_d_l)) #no
+shapiro.test(log(df_clean_men$dhea_s_ug_d_l)) #no
+
+#SHBG
+shapiro.test(log(df_clean$shbg_nmol_l)) #no
+shapiro.test(log(df_clean_repo$shbg_nmol_l)) #no
+shapiro.test(log(df_clean_men$shbg_nmol_l)) #no
+
+#Testosterone
+shapiro.test(log(df_clean$total_testosterone_ng_d_l)) #yes
+shapiro.test(log(df_clean_repo$total_testosterone_ng_d_l)) #yes
+shapiro.test(log(df_clean_men$total_testosterone_ng_d_l)) #no
+```
+
+
 
 ## Reproductive Status
 

@@ -97,76 +97,173 @@ data_men <- data %>%
 ```
 
 
-## Correlation for Behavior and T2 Subfields {.tabset}
+## Correlations for Behavior and T2 Subfields {.tabset}
+
+### Behavioral Distributions
 
 From prior analyses, we know that the subfield volumes are generally normally distributed. We can check the distribution of the SNAG dependent variables
 
 
-```{r}
+```{r distributions-qqplots}
 #LOOP: normally distributed, no need to transform
 h1 <- ggplot(data = data_loop, aes(x = loop_pe_avg_m)) +
   geom_histogram(alpha = 0.5, color = "black", position = "identity") +
   labs(x = "Average Position Error (m)",
        y = "Count",
-       title = "LOOP Raw")
+       title = "LOOP: Histogram \nPosition Error")
 h2 <- ggplot(data = data_loop, aes(x = loop_de_avg_degree)) +
   geom_histogram(alpha = 0.5, color = "black", position = "identity") +
   labs(x = "Average Degrees Traveled",
        y = "Count",
-       title = "LOOP Raw")
+       title = "LOOP: Histogram \nDegrees Traveled")
+h1q <- ggqqplot(data = data_loop$loop_pe_avg_m) +
+  labs(title = "LOOP: QQ-plot \nPosition Error")
+h2q <- ggqqplot(data = data_loop$loop_de_avg_degree) +
+  labs(title = "LOOP: QQ-plot \nDegrees Traveled")
+
 
 #MAZE:right and left skewed, log transform
 h3 <- ggplot(data = data_maze, aes(x = maze_accuracy_pct)) +
   geom_histogram(alpha = 0.5, color = "black", position = "identity") +
   labs(x = "Wayfinding Success (%)",
        y = "Count",
-       title = "MAZE Raw")
+       title = "MAZE: Histogram \nAccuracy")
 h3a <- ggplot(data = data_maze, aes(x = log(maze_accuracy_pct))) +
   geom_histogram(alpha = 0.5, color = "black", position = "identity") +
   labs(x = "Wayfinding Success (%)",
        y = "Count",
-       title = "MAZE Log Transformed")
+       title = "MAZE: Histogram \nLog Accuracy")
+h3b <- ggplot(data = data_maze, aes(x = sqrt(maze_accuracy_pct))) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Wayfinding Success (%)",
+       y = "Count",
+       title = "MAZE: Histogram \nSqrt Accuracy")
+h3q <- ggqqplot(data = data_maze$maze_accuracy_pct) +
+  labs(title = "MAZE: QQ-plot \nAccuracy")
+h3aq <- ggqqplot(data = log(data_maze$maze_accuracy_pct)) +
+  labs(title = "MAZE: QQ-plot \nLog Accuracy")
+h3bq <- ggqqplot(data = sqrt(data_maze$maze_accuracy_pct)) +
+  labs(title = "MAZE: QQ-plot \nSqrt Accuracy")
+
 h4 <- ggplot(data = data_maze, aes(x = maze_moves)) +
   geom_histogram(alpha = 0.5, color = "black", position = "identity") +
   labs(x = "Number of Moves",
        y = "Count",
-       title = "MAZE Raw")
-h4a <- ggplot(data = data_maze, aes(x = sqrt(maze_moves))) +
+       title = "MAZE: Histogram \nMoves")
+h4a <- ggplot(data = data_maze, aes(x = log(maze_moves))) +
   geom_histogram(alpha = 0.5, color = "black", position = "identity") +
   labs(x = "Number of Moves",
        y = "Count",
-       title = "MAZE Log Transformed")
+       title = "MAZE: Histogram \nLog Moves")
+h4b <- ggplot(data = data_maze, aes(x = sqrt(maze_moves))) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Number of Moves",
+       y = "Count",
+       title = "MAZE: Histogram \nSqrt Moves")
+h4q <- ggqqplot(data = data_maze$maze_moves) +
+  labs(title = "MAZE: QQ-plot \nMoves")
+h4aq <- ggqqplot(data = log(data_maze$maze_moves)) +
+  labs(title = "MAZE: QQ-plot \nLog Moves")
+h4bq <- ggqqplot(data = sqrt(data_maze$maze_moves)) +
+  labs(title = "MAZE: QQ-plot \nSqrt Moves")
+
+
 
 #DSP: slight left and right skew so apply transformation
 h5 <- ggplot(data = data_dsp, aes(x = dsp_success_pct)) +
   geom_histogram(alpha = 0.5, color = "black", position = "identity") +
   labs(x = "Wayfinding Success (%)",
        y = "Count",
-       title = "DSP Raw")
-h5a <- ggplot(data = data_dsp, aes(x = 1/(dsp_success_pct))) +
+       title = "DSP: Histogram \nSuccess")
+h5a <- ggplot(data = data_dsp, aes(x = log(dsp_success_pct))) +
   geom_histogram(alpha = 0.5, color = "black", position = "identity") +
   labs(x = "Wayfinding Success (%)",
        y = "Count",
-       title = "DSP Log Transformed")
+       title = "DSP: Histogram \nLog Success")
+h5b <- ggplot(data = data_dsp, aes(x = sqrt(dsp_success_pct))) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Wayfinding Success (%)",
+       y = "Count",
+       title = "DSP: Histogram \nSqrt Success")
+h5q <- ggqqplot(data = data_dsp$dsp_success_pct) +
+  labs(title = "DSP: QQ-plot \nSuccess")
+h5aq <- ggqqplot(data = log(data_dsp$dsp_success_pct)) +
+  labs(title = "DSP: QQ-plot \nLog Success")
+h5bq <- ggqqplot(data = sqrt(data_dsp$dsp_success_pct)) +
+  labs(title = "DSP: QQ-plot \nSqrt Success")
+
+
 h6 <- ggplot(data = data_dsp, aes(x = dsp_si_true_pct)) +
   geom_histogram(alpha = 0.5, color = "black", position = "identity") +
   labs(x = "Solution Index (%)",
        y = "Count",
-       title = "DSP Raw")
+       title = "DSP: Histogram \nSolution Index")
 h6a <- ggplot(data = data_dsp, aes(x = log(dsp_si_true_pct))) +
   geom_histogram(alpha = 0.5, color = "black", position = "identity") +
   labs(x = "Solution Index (%)",
        y = "Count",
-       title = "DSP Log Transformed")
-
+       title = "DSP: Histogram \nLog Solution Index")
+h6b <- ggplot(data = data_dsp, aes(x = sqrt(dsp_si_true_pct))) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Solution Index (%)",
+       y = "Count",
+       title = "DSP: Histogram \nSqrt Solution Index")
+h6q <- ggqqplot(data = data_dsp$dsp_si_true_pct) +
+  labs(title = "DSP: QQ-plot \nSolution Index")
+h6aq <- ggqqplot(data = log(data_dsp$dsp_si_true_pct)) +
+  labs(title = "DSP: QQ-plot \nLog Solution Index")
+h6bq <- ggqqplot(data = sqrt(data_dsp$dsp_si_true_pct)) +
+  labs(title = "DSP: QQ-plot \nSqrt Solution Index")
 
 #Present
-(h1+h2)
-(h3+h3a)/(h4+h4a)
-(h5+h5a)/(h6+h6a)
+
+#LOOP
+(h1+h2)/(h1a+h2a)
+#MAZE
+(h3+h3a+h3b)/(h3q+h3aq+h3bq)
+(h4+h4a+h4b)/(h4q+h4aq+h4bq)
+#DSP
+(h5+h5a+h5b)/(h5q+h5aq+h5bq)
+(h6+h6a+h6b)/(h6q+h6aq+h6bq)
 ```
 
-LOOP dependent variables are normally distributed, but MAZE and DSP variables have slight skews. I applied log transformation to these variables to allow for exploratory Pearson correlations, but skew remains. For MAZE and DSP, I'll use Spearman rank correlations.
+LOOP dependent variables are normally distributed, but MAZE and DSP variables have slight skews. I applied log and square root transformations to these variables in MAZE and DSP to allow for exploratory Pearson correlations.
+
+Transformations for MAZE appear to not do much, and DSP wayfinding success. The square root transformation for DSP solution index makes it look more normal.
+
+We can also look at the QQ plots
+
+We can check Shapiro-Wilk's to see if normality is still violated.
+
+```{r shapiro-check}
+## is the DV significantly diffrent than normal?
+
+#LOOP
+shapiro.test(data_loop$loop_pe_avg_m) #no
+shapiro.test(data_loop$loop_de_avg_degree) #no
+
+#MAZE
+shapiro.test(data_maze$maze_accuracy_pct) #yes
+shapiro.test(data_maze$maze_moves) #yes
+
+shapiro.test(log(data_maze$maze_accuracy_pct)) #yes
+shapiro.test(log(data_maze$maze_moves)) #yes
+
+shapiro.test(sqrt(data_maze$maze_accuracy_pct)) #yes
+shapiro.test(sqrt(data_maze$maze_moves)) #yes
+
+
+#DSP
+shapiro.test(data_dsp$dsp_success_pct) #yes
+shapiro.test(data_dsp$dsp_si_true_pct) #yes
+
+shapiro.test(log(data_dsp$dsp_success_pct)) #yes
+shapiro.test(log(data_dsp$dsp_si_true_pct)) #yes
+
+shapiro.test(sqrt(data_dsp$dsp_success_pct)) #yes
+shapiro.test(sqrt(data_dsp$dsp_si_true_pct)) #yes
+```
+
 
 
 
