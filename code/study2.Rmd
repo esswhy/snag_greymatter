@@ -2,12 +2,17 @@
 title: 'Study 2: T2 Subfield, Spatial Behavior, Sex Hormones'
 author: "Shuying Yu"
 date: "8/5/2022"
-output: html_document
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 4
+    theme: flatly
 ---
 
 ```{r setup, include=FALSE, warning = FALSE, message = FALSE}
-knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE,
-                      include = FALSE)
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE,
+                      fig.align = "center")
 
 #Attach libraries
 library(tidyverse)
@@ -90,9 +95,18 @@ data_dsp <- data %>%
   filter(dsp_useable == "Yes")
 
 #Separate for women and men
-data_women <- data %>% 
+data_loop_women <- data %>% 
+  filter(sex == "Female", loop_useable == "Yes") 
+data_maze_women <- data %>% 
+  filter(sex == "Female", maze_useable == "Yes") 
+data_dsp_women <- data %>% 
   filter(sex == "Female", dsp_useable == "Yes") 
-data_men <- data %>% 
+
+data_loop_men <- data %>% 
+  filter(sex == "Male", loop_useable == "Yes")
+data_maze_men <- data %>% 
+  filter(sex == "Male", maze_useable == "Yes")
+data_dsp_men <- data %>% 
   filter(sex == "Male", dsp_useable == "Yes")
 ```
 
@@ -101,7 +115,11 @@ data_men <- data %>%
 
 ### Behavioral Distributions
 
-From prior analyses, we know that the subfield volumes are generally normally distributed. We can check the distribution of the SNAG dependent variables
+#### Overall
+
+From prior analyses, we know that the subfield volumes are generally normally distributed, with the exception of CA23 in men and SUB in women and overall. 
+
+We can check the distribution of the SNAG dependent variables
 
 
 ```{r distributions-qqplots}
@@ -116,9 +134,9 @@ h2 <- ggplot(data = data_loop, aes(x = loop_de_avg_degree)) +
   labs(x = "Average Degrees Traveled",
        y = "Count",
        title = "LOOP: Histogram \nDegrees Traveled")
-h1q <- ggqqplot(data = data_loop$loop_pe_avg_m) +
+h1a <- ggqqplot(data = data_loop$loop_pe_avg_m) +
   labs(title = "LOOP: QQ-plot \nPosition Error")
-h2q <- ggqqplot(data = data_loop$loop_de_avg_degree) +
+h2a <- ggqqplot(data = data_loop$loop_de_avg_degree) +
   labs(title = "LOOP: QQ-plot \nDegrees Traveled")
 
 
@@ -227,15 +245,11 @@ h6bq <- ggqqplot(data = sqrt(data_dsp$dsp_si_true_pct)) +
 (h6+h6a+h6b)/(h6q+h6aq+h6bq)
 ```
 
-LOOP dependent variables are normally distributed, but MAZE and DSP variables have slight skews. I applied log and square root transformations to these variables in MAZE and DSP to allow for exploratory Pearson correlations.
+LOOP dependent variables appear normally distributed, but MAZE and DSP variables have slight skews. I applied log and square root transformations to these variables in MAZE and DSP to see whether the observed distribution looks normal.
 
-Transformations for MAZE appear to not do much, and DSP wayfinding success. The square root transformation for DSP solution index makes it look more normal.
+We can check Shapiro-Wilk's to see if normality is violated for raw values and after transformation using log and square root.
 
-We can also look at the QQ plots
-
-We can check Shapiro-Wilk's to see if normality is still violated.
-
-```{r shapiro-check}
+```{r shapiro-check, results='hide'}
 ## is the DV significantly diffrent than normal?
 
 #LOOP
@@ -252,7 +266,6 @@ shapiro.test(log(data_maze$maze_moves)) #yes
 shapiro.test(sqrt(data_maze$maze_accuracy_pct)) #yes
 shapiro.test(sqrt(data_maze$maze_moves)) #yes
 
-
 #DSP
 shapiro.test(data_dsp$dsp_success_pct) #yes
 shapiro.test(data_dsp$dsp_si_true_pct) #yes
@@ -264,7 +277,7 @@ shapiro.test(sqrt(data_dsp$dsp_success_pct)) #yes
 shapiro.test(sqrt(data_dsp$dsp_si_true_pct)) #yes
 ```
 
-
+Shapiro-Wilk's test reveal that LOOP dependent variables are normally distributed, but MAZE and DSP dependent variables are not even after log and square root transformations. Thus, all correlations with subfields for these DV will be spearman rank correlations.
 
 
 ```{r log-transformation}
@@ -276,11 +289,323 @@ data_dsp_log <- data_dsp %>%
 ```
 
 
+#### By Women
+
+```{r women-distributions-qqplots}
+#LOOP: normally distributed, no need to transform
+h1 <- ggplot(data = data_loop_women, aes(x = loop_pe_avg_m)) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Average Position Error (m)",
+       y = "Count",
+       title = "LOOP: Histogram \nPosition Error")
+h2 <- ggplot(data = data_loop_women, aes(x = loop_de_avg_degree)) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Average Degrees Traveled",
+       y = "Count",
+       title = "LOOP: Histogram \nDegrees Traveled")
+h1a <- ggqqplot(data = data_loop_women$loop_pe_avg_m) +
+  labs(title = "LOOP: QQ-plot \nPosition Error")
+h2a <- ggqqplot(data = data_loop_women$loop_de_avg_degree) +
+  labs(title = "LOOP: QQ-plot \nDegrees Traveled")
+
+
+#MAZE:right and left skewed, log transform
+h3 <- ggplot(data = data_maze_women, aes(x = maze_accuracy_pct)) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Wayfinding Success (%)",
+       y = "Count",
+       title = "MAZE: Histogram \nAccuracy")
+h3a <- ggplot(data = data_maze_women, aes(x = log(maze_accuracy_pct))) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Wayfinding Success (%)",
+       y = "Count",
+       title = "MAZE: Histogram \nLog Accuracy")
+h3b <- ggplot(data = data_maze_women, aes(x = sqrt(maze_accuracy_pct))) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Wayfinding Success (%)",
+       y = "Count",
+       title = "MAZE: Histogram \nSqrt Accuracy")
+h3q <- ggqqplot(data = data_maze_women$maze_accuracy_pct) +
+  labs(title = "MAZE: QQ-plot \nAccuracy")
+h3aq <- ggqqplot(data = log(data_maze_women$maze_accuracy_pct)) +
+  labs(title = "MAZE: QQ-plot \nLog Accuracy")
+h3bq <- ggqqplot(data = sqrt(data_maze_women$maze_accuracy_pct)) +
+  labs(title = "MAZE: QQ-plot \nSqrt Accuracy")
+
+h4 <- ggplot(data = data_maze_women, aes(x = maze_moves)) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Number of Moves",
+       y = "Count",
+       title = "MAZE: Histogram \nMoves")
+h4a <- ggplot(data = data_maze_women, aes(x = log(maze_moves))) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Number of Moves",
+       y = "Count",
+       title = "MAZE: Histogram \nLog Moves")
+h4b <- ggplot(data = data_maze_women, aes(x = sqrt(maze_moves))) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Number of Moves",
+       y = "Count",
+       title = "MAZE: Histogram \nSqrt Moves")
+h4q <- ggqqplot(data = data_maze_women$maze_moves) +
+  labs(title = "MAZE: QQ-plot \nMoves")
+h4aq <- ggqqplot(data = log(data_maze_women$maze_moves)) +
+  labs(title = "MAZE: QQ-plot \nLog Moves")
+h4bq <- ggqqplot(data = sqrt(data_maze_women$maze_moves)) +
+  labs(title = "MAZE: QQ-plot \nSqrt Moves")
+
+
+
+#DSP: slight left and right skew so apply transformation
+h5 <- ggplot(data = data_dsp_women, aes(x = dsp_success_pct)) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Wayfinding Success (%)",
+       y = "Count",
+       title = "DSP: Histogram \nSuccess")
+h5a <- ggplot(data = data_dsp_women, aes(x = log(dsp_success_pct))) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Wayfinding Success (%)",
+       y = "Count",
+       title = "DSP: Histogram \nLog Success")
+h5b <- ggplot(data = data_dsp_women, aes(x = sqrt(dsp_success_pct))) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Wayfinding Success (%)",
+       y = "Count",
+       title = "DSP: Histogram \nSqrt Success")
+h5q <- ggqqplot(data = data_dsp_women$dsp_success_pct) +
+  labs(title = "DSP: QQ-plot \nSuccess")
+h5aq <- ggqqplot(data = log(data_dsp_women$dsp_success_pct)) +
+  labs(title = "DSP: QQ-plot \nLog Success")
+h5bq <- ggqqplot(data = sqrt(data_dsp_women$dsp_success_pct)) +
+  labs(title = "DSP: QQ-plot \nSqrt Success")
+
+
+h6 <- ggplot(data = data_dsp_women, aes(x = dsp_si_true_pct)) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Solution Index (%)",
+       y = "Count",
+       title = "DSP: Histogram \nSolution Index")
+h6a <- ggplot(data = data_dsp_women, aes(x = log(dsp_si_true_pct))) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Solution Index (%)",
+       y = "Count",
+       title = "DSP: Histogram \nLog Solution Index")
+h6b <- ggplot(data = data_dsp_women, aes(x = sqrt(dsp_si_true_pct))) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Solution Index (%)",
+       y = "Count",
+       title = "DSP: Histogram \nSqrt Solution Index")
+h6q <- ggqqplot(data = data_dsp_women$dsp_si_true_pct) +
+  labs(title = "DSP: QQ-plot \nSolution Index")
+h6aq <- ggqqplot(data = log(data_dsp_women$dsp_si_true_pct)) +
+  labs(title = "DSP: QQ-plot \nLog Solution Index")
+h6bq <- ggqqplot(data = sqrt(data_dsp_women$dsp_si_true_pct)) +
+  labs(title = "DSP: QQ-plot \nSqrt Solution Index")
+
+#Present
+
+#LOOP
+(h1+h2)/(h1a+h2a)
+#MAZE
+(h3+h3a+h3b)/(h3q+h3aq+h3bq)
+(h4+h4a+h4b)/(h4q+h4aq+h4bq)
+#DSP
+(h5+h5a+h5b)/(h5q+h5aq+h5bq)
+(h6+h6a+h6b)/(h6q+h6aq+h6bq)
+```
+
+Like the overall distributions, LOOP DVs look normal but MAZE and DSP variables appear skewed.
+
+We can check Shapiro-Wilk's to see if normality is violated for raw values and after transformation using log and square root.
+
+```{r women-shapiro-check, results='hide'}
+## is the DV significantly diffrent than normal?
+
+#LOOP
+shapiro.test(data_loop_women$loop_pe_avg_m) #no
+shapiro.test(data_loop_women$loop_de_avg_degree) #no
+
+#MAZE
+shapiro.test(data_maze_women$maze_accuracy_pct) #yes
+shapiro.test(data_maze_women$maze_moves) #yes
+
+shapiro.test(log(data_maze_women$maze_accuracy_pct)) #yes
+shapiro.test(log(data_maze_women$maze_moves)) #yes
+
+shapiro.test(sqrt(data_maze_women$maze_accuracy_pct)) #yes
+shapiro.test(sqrt(data_maze_women$maze_moves)) #yes
+
+#DSP
+shapiro.test(data_dsp_women$dsp_success_pct) #no
+shapiro.test(data_dsp_women$dsp_si_true_pct) #yes
+
+shapiro.test(log(data_dsp_women$dsp_success_pct)) #yes
+shapiro.test(log(data_dsp_women$dsp_si_true_pct)) #yes
+
+shapiro.test(sqrt(data_dsp_women$dsp_success_pct)) #yes
+shapiro.test(sqrt(data_dsp_women$dsp_si_true_pct)) #yes
+```
+
+LOOP and DSP wayfinding succss was not significantly different than normal. DSP solution index was still skewed after transformations, so correlations with MAZE varaibles and DSP solution index for women will be using Spearman rank correlation.
+
+
+#### By Men
+
+```{r men-distributions-qqplots}
+#LOOP: normally distributed, no need to transform
+h1 <- ggplot(data = data_loop_men, aes(x = loop_pe_avg_m)) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Average Position Error (m)",
+       y = "Count",
+       title = "LOOP: Histogram \nPosition Error")
+h2 <- ggplot(data = data_loop_men, aes(x = loop_de_avg_degree)) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Average Degrees Traveled",
+       y = "Count",
+       title = "LOOP: Histogram \nDegrees Traveled")
+h1a <- ggqqplot(data = data_loop_men$loop_pe_avg_m) +
+  labs(title = "LOOP: QQ-plot \nPosition Error")
+h2a <- ggqqplot(data = data_loop_men$loop_de_avg_degree) +
+  labs(title = "LOOP: QQ-plot \nDegrees Traveled")
+
+
+#MAZE:right and left skewed, log transform
+h3 <- ggplot(data = data_maze_men, aes(x = maze_accuracy_pct)) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Wayfinding Success (%)",
+       y = "Count",
+       title = "MAZE: Histogram \nAccuracy")
+h3a <- ggplot(data = data_maze_men, aes(x = log(maze_accuracy_pct))) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Wayfinding Success (%)",
+       y = "Count",
+       title = "MAZE: Histogram \nLog Accuracy")
+h3b <- ggplot(data = data_maze_men, aes(x = sqrt(maze_accuracy_pct))) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Wayfinding Success (%)",
+       y = "Count",
+       title = "MAZE: Histogram \nSqrt Accuracy")
+h3q <- ggqqplot(data = data_maze_men$maze_accuracy_pct) +
+  labs(title = "MAZE: QQ-plot \nAccuracy")
+h3aq <- ggqqplot(data = log(data_maze_men$maze_accuracy_pct)) +
+  labs(title = "MAZE: QQ-plot \nLog Accuracy")
+h3bq <- ggqqplot(data = sqrt(data_maze_men$maze_accuracy_pct)) +
+  labs(title = "MAZE: QQ-plot \nSqrt Accuracy")
+
+h4 <- ggplot(data = data_maze_men, aes(x = maze_moves)) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Number of Moves",
+       y = "Count",
+       title = "MAZE: Histogram \nMoves")
+h4a <- ggplot(data = data_maze_men, aes(x = log(maze_moves))) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Number of Moves",
+       y = "Count",
+       title = "MAZE: Histogram \nLog Moves")
+h4b <- ggplot(data = data_maze_men, aes(x = sqrt(maze_moves))) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Number of Moves",
+       y = "Count",
+       title = "MAZE: Histogram \nSqrt Moves")
+h4q <- ggqqplot(data = data_maze_men$maze_moves) +
+  labs(title = "MAZE: QQ-plot \nMoves")
+h4aq <- ggqqplot(data = log(data_maze_men$maze_moves)) +
+  labs(title = "MAZE: QQ-plot \nLog Moves")
+h4bq <- ggqqplot(data = sqrt(data_maze_men$maze_moves)) +
+  labs(title = "MAZE: QQ-plot \nSqrt Moves")
+
+
+
+#DSP: slight left and right skew so apply transformation
+h5 <- ggplot(data = data_dsp_men, aes(x = dsp_success_pct)) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Wayfinding Success (%)",
+       y = "Count",
+       title = "DSP: Histogram \nSuccess")
+h5a <- ggplot(data = data_dsp_men, aes(x = log(dsp_success_pct))) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Wayfinding Success (%)",
+       y = "Count",
+       title = "DSP: Histogram \nLog Success")
+h5b <- ggplot(data = data_dsp_men, aes(x = sqrt(dsp_success_pct))) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Wayfinding Success (%)",
+       y = "Count",
+       title = "DSP: Histogram \nSqrt Success")
+h5q <- ggqqplot(data = data_dsp_men$dsp_success_pct) +
+  labs(title = "DSP: QQ-plot \nSuccess")
+h5aq <- ggqqplot(data = log(data_dsp_men$dsp_success_pct)) +
+  labs(title = "DSP: QQ-plot \nLog Success")
+h5bq <- ggqqplot(data = sqrt(data_dsp_men$dsp_success_pct)) +
+  labs(title = "DSP: QQ-plot \nSqrt Success")
+
+
+h6 <- ggplot(data = data_dsp_men, aes(x = dsp_si_true_pct)) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Solution Index (%)",
+       y = "Count",
+       title = "DSP: Histogram \nSolution Index")
+h6a <- ggplot(data = data_dsp_men, aes(x = log(dsp_si_true_pct))) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Solution Index (%)",
+       y = "Count",
+       title = "DSP: Histogram \nLog Solution Index")
+h6b <- ggplot(data = data_dsp_men, aes(x = sqrt(dsp_si_true_pct))) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Solution Index (%)",
+       y = "Count",
+       title = "DSP: Histogram \nSqrt Solution Index")
+h6q <- ggqqplot(data = data_dsp_men$dsp_si_true_pct) +
+  labs(title = "DSP: QQ-plot \nSolution Index")
+h6aq <- ggqqplot(data = log(data_dsp_men$dsp_si_true_pct)) +
+  labs(title = "DSP: QQ-plot \nLog Solution Index")
+h6bq <- ggqqplot(data = sqrt(data_dsp_men$dsp_si_true_pct)) +
+  labs(title = "DSP: QQ-plot \nSqrt Solution Index")
+
+#Present
+
+#LOOP
+(h1+h2)/(h1a+h2a)
+#MAZE
+(h3+h3a+h3b)/(h3q+h3aq+h3bq)
+(h4+h4a+h4b)/(h4q+h4aq+h4bq)
+#DSP
+(h5+h5a+h5b)/(h5q+h5aq+h5bq)
+(h6+h6a+h6b)/(h6q+h6aq+h6bq)
+```
+
+Like the overall distributions, LOOP DVs look normal but MAZE and DSP variables appear skewed.
+
+
+```{r men-shapiro-check, results='hide'}
+## is the DV significantly diffrent than normal?
+
+#LOOP
+shapiro.test(data_loop_men$loop_pe_avg_m) #no
+shapiro.test(data_loop_men$loop_de_avg_degree) #no
+
+#MAZE
+shapiro.test(data_maze_men$maze_accuracy_pct) #yes
+shapiro.test(data_maze_men$maze_moves) #no
+
+shapiro.test(log(data_maze_men$maze_accuracy_pct)) #yes
+shapiro.test(log(data_maze_men$maze_moves)) #yes
+
+shapiro.test(sqrt(data_maze_men$maze_accuracy_pct)) #yes
+shapiro.test(sqrt(data_maze_men$maze_moves)) #yes
+
+#DSP
+shapiro.test(data_dsp_men$dsp_success_pct) #no
+shapiro.test(data_dsp_men$dsp_si_true_pct) #no
+```
+
+LOOP and DSP and MAZE moves variables were not significantly different than normal, but MAZE accuracy was. Despite transformations, MAZE accuracy was still pretty skewed so Spearman rank correlations will be applied for associations with subfields for men here.
+
 ### LOOP {.tabset}
 
-Pearson correlations
 
 #### Position Error
+
 
 ```{r}
 #CA1
@@ -317,7 +642,7 @@ c2 <- ggscatter(data_loop, x = "t2hipp_vol_ca23_cor", y = "loop_pe_avg_m", color
           xlab = "Averaged CA23 Subfield Volume", ylab = "Averaged \nPosition Error (m)", ) +
     theme(legend.position = "top", legend.title=element_blank()) 
 
-c2a <- ggscatter(data_loop, x = "t2hipp_vol_ca23_cor", y = "loop_pe_avg_m", color = "sex",
+c2aw <- ggscatter(data_loop_women, x = "t2hipp_vol_ca23_cor", y = "loop_pe_avg_m", color = "red",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -325,7 +650,16 @@ c2a <- ggscatter(data_loop, x = "t2hipp_vol_ca23_cor", y = "loop_pe_avg_m", colo
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged CA23 Subfield Volume", ylab = "Averaged \nPosition Error (m)") +
-    facet_wrap(. ~ sex, scale = "free", ncol = 1) +
+     theme_bw() +
+     theme(legend.position = "none")
+c2am <- ggscatter(data_loop_men, x = "t2hipp_vol_ca23_cor", y = "loop_pe_avg_m", color = "cyan3",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged CA23 Subfield Volume", ylab = "Averaged \nPosition Error (m)") +
      theme_bw() +
      theme(legend.position = "none")
 
@@ -427,12 +761,23 @@ c7 <- ggscatter(data_loop, x = "t2hipp_vol_sub_cor", y = "loop_pe_avg_m", color 
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
           conf.int = TRUE, 
-          cor.method = "pearson",
+          cor.method = "spearman",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged SUB Subfield Volume", ylab = "Averaged \nPosition Error (m)", ) +
     theme(legend.position = "top", legend.title=element_blank()) 
 
-c7a <- ggscatter(data_loop, x = "t2hipp_vol_sub_cor", y = "loop_pe_avg_m", color = "sex",
+c7aw <- ggscatter(data_loop_women, x = "t2hipp_vol_sub_cor", y = "loop_pe_avg_m", color = "red",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged SUB Subfield Volume", ylab = "Averaged \nPosition Error (m)") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+c7am <- ggscatter(data_loop_men, x = "t2hipp_vol_sub_cor", y = "loop_pe_avg_m", color = "cyan3",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -440,21 +785,22 @@ c7a <- ggscatter(data_loop, x = "t2hipp_vol_sub_cor", y = "loop_pe_avg_m", color
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged SUB Subfield Volume", ylab = "Averaged \nPosition Error (m)") +
-    facet_wrap(. ~ sex, scale = "free", ncol = 1) +
      theme_bw() +
      theme(legend.position = "none")
 
 
 #Patchwork
 c1+c1a
-c2+c2a
+c2+(c2aw/c2am)
 c3+c3a
 c4+c4a
 c5+c5a
 c6+c6a
-c7+c7a
+c7+(c7aw/c7am)
 ```
 
+
+CA23 men and SUB overall and women were Spearman rank correlations. All others are Pearson correlations.
 
 #### Degrees Traveled
 
@@ -493,7 +839,7 @@ c2 <- ggscatter(data_loop, x = "t2hipp_vol_ca23_cor", y = "loop_de_avg_degree", 
           xlab = "Averaged CA23 Subfield Volume", ylab = "Averaged \nDegrees Traveled", ) +
     theme(legend.position = "top", legend.title=element_blank()) 
 
-c2a <- ggscatter(data_loop, x = "t2hipp_vol_ca23_cor", y = "loop_de_avg_degree", color = "sex",
+c2aw <- ggscatter(data_loop_women, x = "t2hipp_vol_ca23_cor", y = "loop_de_avg_degree", color = "red",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -501,7 +847,17 @@ c2a <- ggscatter(data_loop, x = "t2hipp_vol_ca23_cor", y = "loop_de_avg_degree",
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged CA23 Subfield Volume", ylab = "Averaged \nDegrees Traveled") +
-    facet_wrap(. ~ sex, scale = "free", ncol = 1) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+c2am <- ggscatter(data_loop_men, x = "t2hipp_vol_ca23_cor", y = "loop_de_avg_degree", color = "cyan3",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged CA23 Subfield Volume", ylab = "Averaged \nDegrees Traveled") +
      theme_bw() +
      theme(legend.position = "none")
 
@@ -603,12 +959,23 @@ c7 <- ggscatter(data_loop, x = "t2hipp_vol_sub_cor", y = "loop_de_avg_degree", c
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
           conf.int = TRUE, 
-          cor.method = "pearson",
+          cor.method = "spearman",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged SUB Subfield Volume", ylab = "Averaged \nDegrees Traveled", ) +
     theme(legend.position = "top", legend.title=element_blank()) 
 
-c7a <- ggscatter(data_loop, x = "t2hipp_vol_sub_cor", y = "loop_de_avg_degree", color = "sex",
+c7aw <- ggscatter(data_loop_women, x = "t2hipp_vol_sub_cor", y = "loop_de_avg_degree", color = "red",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged SUB Subfield Volume", ylab = "Averaged \nDegrees Traveled") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+c7am <- ggscatter(data_loop_men, x = "t2hipp_vol_sub_cor", y = "loop_de_avg_degree", color = "cyan3",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -616,30 +983,31 @@ c7a <- ggscatter(data_loop, x = "t2hipp_vol_sub_cor", y = "loop_de_avg_degree", 
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged SUB Subfield Volume", ylab = "Averaged \nDegrees Traveled") +
-    facet_wrap(. ~ sex, scale = "free", ncol = 1) +
      theme_bw() +
      theme(legend.position = "none")
 
 
 #Patchwork
 c1+c1a
-c2+c2a
+c2+(c2aw/c2am)
 c3+c3a
 c4+c4a
 c5+c5a
 c6+c6a
-c7+c7a
+c7+(c7aw/c7am)
 ```
 
 
+CA23 men and SUB overall and women were Spearman rank correlations. All others are Pearson correlations.
+
 ### {-}
+
 
 ### MAZE {.tabset}
 
-Spearman rank correlations
-
 
 #### Wayfinding Success
+
 
 ```{r}
 #CA1
@@ -814,6 +1182,9 @@ c6+c6a
 c7+c7a
 ```
 
+All Spearman rank correlations.
+
+#### Moves
 
 ```{r}
 #CA1
@@ -988,13 +1359,12 @@ c6+c6a
 c7+c7a
 ```
 
+All Spearman rank correlations.
 
 ### {-}
 
 
 ### DSP {.tabset}
-
-Spearman rank correlations
 
 #### Wayfinding Success
 
@@ -1170,6 +1540,9 @@ c5+c5a
 c6+c6a
 c7+c7a
 ```
+
+
+All Spearman rank correlations.
 
 #### Solution Index
 
@@ -1347,23 +1720,34 @@ c7+c7a
 ```
 
 
-### {-}
+All Spearman rank correlations.
 
+### {-}
 
 
 ## {-}
 
 # Summary
 
-- For LOOP, 
+- From previous analyses, CA23 in men and SUB overall and in women were not normally distributed. All correlations comapring these specific subfields were using Spearman rank correlations.
+
+- Overall with women and men, LOOP variables were normally distributed, but MAZE and DSP variables were not. Among women, MAZE variables and DSP solution index were not normally distributed. Among mwn, MAZE accuracy was not normally distributed. LOOP mainly used Pearson correlations (other than at CA23 and SUB), while all correlations with MAZE and DSP variables were Spearman rank.
+
+- For LOOP, position error was negatively correlated with PHC overall (*p* = 0.038, Pearson) and among women (*p* = 0.011, Pearson). Position error was also negatively correlated with SUB in men (*p* = 0.047, Spearman) and was marginally negatively correlated with ERC in men (*p* = 0.073, Pearson).
+
+- For MAZE, there were no significant associations between subfields and accuracy, or between subfields and number of moves made.
+
+- For DSP, there were no significant associations between subfields and wayfinding success. Solution index was marginally negatively associated with DG in men (*p* = 0.056, Spearman)
+
+
+# TBD
 
 
 
+```{r, eval=FALSE}
 
 ## Total Effect (Hormones -> Behavior)
 
-
-```{r}
 #Estradiol
 
 #wayfinding success
@@ -1375,29 +1759,27 @@ summary(fit.totaleffect)
 fit.totaleffect <- lm(dsp_si_true_pct ~ estradiol_spatial_pg_ml,
                      data = data_women)
 summary(fit.totaleffect)
+
+
+
+# There doesn’t necessarily have to be a significant relationship between the iv and the dv. Just as correlation doesn’t prove causation, no correlation does not disprove causation 
 ```
 
-There doesn’t necessarily have to be a significant relationship between the iv and the dv. Just as correlation doesn’t prove causation, no correlation does not disprove causation 
 
+
+
+
+
+
+```{r, eval=FALSE}
 ## IV on Mediator
-
-```{r}
-
-```
-
-
-
-
-
-
-
 
 ## Subregion Volume and Spatial Behavior
 
 
-Assessing any relationships between subregion volume and SNAG behavior, specifically with DSP. First, check normality of the volume data
+#Assessing any relationships between subregion volume and SNAG behavior, specifically with DSP. First, check normality of the volume data
 
-```{r}
+
 #Subregions
 par(mfrow=c(2,2))
 hist(data_women$t2hipp_vol_ca1_cor)
@@ -1410,12 +1792,17 @@ hist(data_women$t2hipp_vol_totalhipp_cor)
 par(mfrow=c(1,2))
 hist(data_women$dsp_success_pct)
 hist(data_women$dsp_si_true_pct)
+
+
+
+
+#Subregion volumes appear to be normally distributed. There is an outlier wirh the MTL corrected subregion volume (max 20997.82 compared to mean of 7986.304).
+
+#For DSP, wayfinding success if left skewed and solution index is right skewed. I try to see if I can take the log of these dependent variables to normalize them for Pearson correlation
 ```
-Subregion volumes appear to be normally distributed. There is an outlier wirh the MTL corrected subregion volume (max 20997.82 compared to mean of 7986.304).
 
-For DSP, wayfinding success if left skewed and solution index is right skewed. I try to see if I can take the log of these dependent variables to normalize them for Pearson correlation
 
-```{r}
+```{r, eval=FALSE}
 #log transform
 par(mfrow=c(1,2))
 hist(log(data_women$dsp_success_pct))
@@ -1430,12 +1817,15 @@ hist((data_women$dsp_si_true_pct)^-1)
 par(mfrow=c(1,2))
 hist(sqrt(data_women$dsp_success_pct))
 hist(sqrt(data_women$dsp_si_true_pct))
+
+
+#Log transformation and square root makes the DSP dependent variable more normally distributed, moreso for solution index than for wayfinding success. Use spearman rank correlation instead.
 ```
 
-Log transformation and square root makes the DSP dependent variable more normally distributed, moreso for solution index than for wayfinding success. Use spearman rank correlation instead.
 
 
-```{r}
+
+```{r, eval=FALSE}
 #Correlations: wayfinding success and CA1, CS23, MTL, totalhipp
 
 ########## Spearman for wayfinding success
@@ -1466,7 +1856,7 @@ cor.test(data_women$t2hipp_vol_totalhipp_cor,
 ```
 
 
-```{r}
+```{r, eval=FALSE}
 #Correlations: solution index and CA1, CS23, MTL, totalhipp
 
 ########## Spearman for solution index
@@ -1495,33 +1885,6 @@ cor.test(data_women$t2hipp_vol_totalhipp_cor,
          conf.level = 0.95,
          method = "spearman")
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
