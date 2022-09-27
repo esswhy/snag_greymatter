@@ -41,9 +41,9 @@ This report provides exploratory and preliminary correlation analyses between se
 4) Average left and right volumes to get an average measure for each subfield region
 
 
-*Hippocampal Grey Matter Volume:*
+*Total Grey Matter Volume:*
 
-1) Filter participants that have GMV from ASHS
+1) Filter participants that have total brain GMV from ASHS
 
 2) Select sex hormone measures from when scan was conducted
 
@@ -52,9 +52,17 @@ This report provides exploratory and preliminary correlation analyses between se
 
 *Total Hippocampal Volume:*
 
-1) After left and right T2 subfields were corrected for TIV, sum up left and right total hipp 
+1) After left and right T2 subfields were corrected for TIV, sum up left and right total hipp (CA1, CA23, DG, SUB)
 
 2) Average left and right volumes to get an average measure 
+
+
+*Total MTL:*
+
+1) After left and right T2 subfields were corrected for TIV, sum up left and right MTL (CA1, CA23, DG, SUB, ERC, PHC, PRC)
+
+2) Average left and right volumes to get an average measure 
+
 
 
 Sample size:
@@ -116,9 +124,14 @@ df_avg <- df %>%
          avg_sub = (lsub + rsub)/2) %>% 
   
   #Calculate total left and right hipp
-  mutate(total_l_hipp = (lca1 + lca23 + ldg + lerc + lphc + lprc + lsub),
-         total_r_hipp = (rca1 + rca23 + rdg + rerc + rphc + rprc + rsub),
-         avg_total_hipp = (total_l_hipp + total_r_hipp)/2)
+  mutate(total_l_hipp = (lca1 + lca23 + ldg + lsub),
+         total_r_hipp = (rca1 + rca23 + rdg + rsub),
+         avg_total_hipp = (total_l_hipp + total_r_hipp)/2) %>% 
+  
+  #Calculate left and right MTL
+  mutate(lmtl = (lca1 + lca23 + ldg + lsub + lerc + lphc + lprc),
+         rmtl = (rca1 + rca23 + rdg + rsub + rerc + rphc + rprc),
+         avg_mtl = (lmtl + rmtl)/2)
 
 
 #Save 438 as own df and clean the rest without her
@@ -151,6 +164,12 @@ shapiro.test(df_clean_men$gmv) #no
 shapiro.test(df_clean$avg_total_hipp) #yes
 shapiro.test(df_clean_repo$avg_total_hipp) #yes
 shapiro.test(df_clean_men$avg_total_hipp) #no
+
+#MTL
+shapiro.test(df_clean$avg_mtl) #yes
+shapiro.test(df_clean_repo$avg_mtl) #yes
+shapiro.test(df_clean_men$avg_mtl) #no
+
 
 #CA1
 shapiro.test(df_clean$avg_ca1) #no
@@ -188,7 +207,7 @@ shapiro.test(df_clean_repo$avg_sub) #yes
 shapiro.test(df_clean_men$avg_sub) #no
 ```
 
-Shapiro-Wilk's test reveal that CA23 for men, and SUB overall and SUB for women were not normally distributed. Also, total hipp for overall and for women were not normally distributed. Hormone and subfield associations for these subfields will be using Spearman rank correlation.
+Shapiro-Wilk's test reveal that CA23 for men, and SUB overall and SUB for women were not normally distributed. Also, total hipp and MTL for overall and for women were not normally distributed. Hormone and subfield/volume associations for these subfields will be using Spearman rank correlation.
 
 
 # Hormone Distributions {.tabset}
@@ -436,7 +455,7 @@ df_438 <- df_438 %>%
 
 # {-}
 
-# Hippocampal GMV
+# Total GMV
 
 
 ## Structural Comparison
@@ -552,7 +571,7 @@ c2 <- ggscatter(df_clean_repo, x = "progesterone_ng_m_l", y = "gmv", color = "re
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
           conf.int = TRUE, 
-          cor.method = "pearson",
+          cor.method = "spearman",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Progesterone (ng/mL)", ylab = "Grey Matter Volume") +
     theme(legend.position = "none") 
@@ -563,7 +582,7 @@ c2a <- ggscatter(df_clean_repo, x = "progesterone_ng_m_l", y = "gmv", color = "r
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
           conf.int = TRUE, 
-          cor.method = "pearson",
+          cor.method = "spearman",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Progesterone (ng/mL)", ylab = "Grey Matter Volume") +
     facet_grid(repo_status ~ ., scale = "free") +
@@ -600,7 +619,7 @@ c4 <- ggscatter(df_clean_repo, x = "shbg_nmol_l", y = "gmv", color = "repo_statu
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
           conf.int = TRUE, 
-          cor.method = "pearson",
+          cor.method = "spearman",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "SHBG (nmol/L)", ylab = "Grey Matter Volume") +
     theme(legend.position = "none")
@@ -611,7 +630,7 @@ c4a <- ggscatter(df_clean_repo, x = "shbg_nmol_l", y = "gmv", color = "repo_stat
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
           conf.int = TRUE, 
-          cor.method = "pearson",
+          cor.method = "spearman",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "SHBG (nmol/L)", ylab = "Grey Matter Volume") +
     facet_grid(repo_status ~ ., scale = "free") +
@@ -625,7 +644,7 @@ c5 <- ggscatter(df_clean_repo, x = "dhea_s_ug_d_l", y = "gmv", color = "repo_sta
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
           conf.int = TRUE, 
-          cor.method = "pearson",
+          cor.method = "spearman",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "DHEAS (ug/dL)", ylab = "Grey Matter Volume") +
     theme(legend.position = "none")
@@ -637,7 +656,7 @@ c5a <- ggscatter(df_clean_repo, x = "dhea_s_ug_d_l", y = "gmv", color = "repo_st
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
           conf.int = TRUE, 
-          cor.method = "pearson",
+          cor.method = "spearman",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "DHEAS (ug/dL)", ylab = "Grey Matter Volume") +
     facet_grid(repo_status ~ ., scale = "free") +
@@ -680,7 +699,7 @@ c6a <- ggscatter(df_clean_repo, x = "total_testosterone_ng_d_l", y = "gmv", colo
 (c6 + c6a)
 ```
 
-Correlations for estradiol, FSH, and testosterone were Spearman rank. All others were Pearson.
+Correlations are all Spearman.
 
 
 ## Hormone Correlation by Men
@@ -776,7 +795,7 @@ p3 <- ggplot(data = df_clean, aes(x = avg_total_hipp)) +
 (p1+p2)/p3
 ```
 
-Slight right skew in total hipp volume
+Still slight right skew in total hipp volume
 
 ```{r}
 df_clean_repo %>% 
