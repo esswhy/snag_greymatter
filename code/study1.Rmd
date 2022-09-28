@@ -46,7 +46,7 @@ Another aim is to characterize the change in spatial navigation behavior for men
 
 ## Participants
 
-Adults
+Midlife Adults
 
 ```{r}
 #Table for final sample and age mean, sd for Aim 1
@@ -136,6 +136,8 @@ ya <- df_all %>% filter(completed_spatial == "Yes",
 
 Same as in *Yu et al. (2021)*, with focus on Dual-Solution Paradigm (DSP) and Maze Learning Task (MAZE).
 
+Hormones are testosterone for men, and estradiol and FSH for women. Hormones are taken during time of spatial navigation task.
+
 
 # Results
 
@@ -150,15 +152,19 @@ aim1_men <- aim1 %>% filter(sex == "Male")
 
 
 ```{r normality-check-men}
-shapiro.test(aim1_men$dsp_si_true_pct)
-shapiro.test(aim1_men$dsp_success_pct)
-shapiro.test(aim1_men$maze_accuracy_pct)
-shapiro.test(aim1_men$maze_moves)
-shapiro.test(aim1_men$loop_pe_avg_m)
-shapiro.test(aim1_men$loop_de_avg_degree)
-shapiro.test(aim1_men$testosterone_spatial_ng_dl)
+shapiro.test(aim1_men$dsp_si_true_pct) #yes
+shapiro.test(aim1_men$dsp_success_pct) #no
+shapiro.test(aim1_men$maze_accuracy_pct) #yes
+shapiro.test(aim1_men$maze_moves) #no
+shapiro.test(aim1_men$loop_pe_avg_m) #no
+shapiro.test(aim1_men$loop_de_avg_degree) #no
+shapiro.test(aim1_men$testosterone_spatial_ng_dl) #no
 ```
-Spearman rank correlation needed for DSP solution index, MAZE accuracy
+
+
+Spearman rank correlation needed for DSP solution index, MAZE accuracy.
+
+Here, only testosterone was tested for men (normally distributed).
  
  
 ### LOOP
@@ -170,8 +176,6 @@ cor.test(aim1_men$testosterone_spatial_ng_dl,
          conf.level = 0.95,
          method = "pearson")
 
-
-
 ########## Pearson for degrees traveled
 cor.test(aim1_men$testosterone_spatial_ng_dl,
          aim1_men$loop_de_avg_degree,
@@ -180,6 +184,23 @@ cor.test(aim1_men$testosterone_spatial_ng_dl,
 
 ```
 No correlations for position error and degrees traveled 
+
+```{r men-loop-log}
+########## Pearson for position error
+cor.test(log(aim1_men$testosterone_spatial_ng_dl),
+         aim1_men$loop_pe_avg_m,
+         conf.level = 0.95,
+         method = "pearson")
+
+########## Pearson for degrees traveled
+cor.test(log(aim1_men$testosterone_spatial_ng_dl),
+         aim1_men$loop_de_avg_degree,
+         conf.level = 0.95,
+         method = "pearson")
+
+```
+
+When testosterone was logged, no correlations for LOOP.
 
 ### MAZE
 
@@ -191,9 +212,26 @@ cor.test(aim1_men$testosterone_spatial_ng_dl,
          method = "spearman")
 
 
-
 ########## Pearson for moves
 cor.test(aim1_men$testosterone_spatial_ng_dl,
+         aim1_men$maze_moves,
+         conf.level = 0.95,
+         method = "pearson")
+```
+
+No correlations for accuracy or moves
+
+
+```{r men-maze-log}
+########## spearman for accuracy
+cor.test(log(aim1_men$testosterone_spatial_ng_dl),
+         aim1_men$maze_accuracy_pct,
+         conf.level = 0.95,
+         method = "spearman")
+
+
+########## Pearson for moves
+cor.test(log(aim1_men$testosterone_spatial_ng_dl),
          aim1_men$maze_moves,
          conf.level = 0.95,
          method = "pearson")
@@ -210,15 +248,27 @@ cor.test(aim1_men$testosterone_spatial_ng_dl,
          conf.level = 0.95,
          method = "pearson")
 
-
-
 ########## spearman for si
 cor.test(aim1_men$testosterone_spatial_ng_dl,
          aim1_men$dsp_si_true_pct,
          conf.level = 0.95,
          method = "spearman")
 ```
+No correlations for wayfinding success or SI
 
+```{r men-dsp-log}
+########## pearson for wayfinding success
+cor.test(log(aim1_men$testosterone_spatial_ng_dl),
+         aim1_men$dsp_success_pct,
+         conf.level = 0.95,
+         method = "pearson")
+
+########## spearman for si
+cor.test(log(aim1_men$testosterone_spatial_ng_dl),
+         aim1_men$dsp_si_true_pct,
+         conf.level = 0.95,
+         method = "spearman")
+```
 
 
 
@@ -343,14 +393,14 @@ Estradiol is statistivcally significant between all pairs of reproductive groups
 
 
 ```{r normality-check-women}
-shapiro.test(aim1_women$dsp_si_true_pct)
-shapiro.test(aim1_women$dsp_success_pct)
-shapiro.test(aim1_women$maze_accuracy_pct)
-shapiro.test(aim1_women$maze_moves)
-shapiro.test(aim1_women$loop_pe_avg_m)
-shapiro.test(aim1_women$loop_de_avg_degree)
-shapiro.test(aim1_women$estradiol_spatial_pg_ml)
-shapiro.test(aim1_women$fsh_spatial_miu_ml)
+shapiro.test(aim1_women$dsp_si_true_pct) #yes
+shapiro.test(aim1_women$dsp_success_pct) #no
+shapiro.test(aim1_women$maze_accuracy_pct) #yes
+shapiro.test(aim1_women$maze_moves) #yes
+shapiro.test(aim1_women$loop_pe_avg_m) #no
+shapiro.test(aim1_women$loop_de_avg_degree) #no
+shapiro.test(aim1_women$estradiol_spatial_pg_ml) #yes
+shapiro.test(aim1_women$fsh_spatial_miu_ml) #yes
 ```
 
 
@@ -361,32 +411,59 @@ LOOP dependent variables were not significant as well as DSP wayfinding success,
 
 
 ```{r}
-########## Pearson for position error
+########## Spearman for position error
 cor.test(aim1_women$estradiol_spatial_pg_ml,
          aim1_women$loop_pe_avg_m,
          conf.level = 0.95,
-         method = "pearson")
+         method = "spearman")
 
 #FSH
 cor.test(aim1_women$fsh_spatial_miu_ml,
          aim1_women$loop_pe_avg_m,
          conf.level = 0.95,
-         method = "pearson")
+         method = "spearman")
 
 
-########## Pearson for degrees traveled
+########## Spearman for degrees traveled
 cor.test(aim1_women$estradiol_spatial_pg_ml,
          aim1_women$loop_de_avg_degree,
          conf.level = 0.95,
-         method = "pearson")
+         method = "spearman")
 
 #FSH
 cor.test(aim1_women$fsh_spatial_miu_ml,
          aim1_women$loop_de_avg_degree,
          conf.level = 0.95,
-         method = "pearson")
+         method = "spearman")
 ```
 No correlations for position error and degrees traveled
+
+```{r women-loop-log}
+########## Spearman for position error
+cor.test(log(aim1_women$estradiol_spatial_pg_ml),
+         aim1_women$loop_pe_avg_m,
+         conf.level = 0.95,
+         method = "spearman")
+
+#FSH
+cor.test(log(aim1_women$fsh_spatial_miu_ml),
+         aim1_women$loop_pe_avg_m,
+         conf.level = 0.95,
+         method = "spearman")
+
+
+########## Spearman for degrees traveled
+cor.test(log(aim1_women$estradiol_spatial_pg_ml),
+         aim1_women$loop_de_avg_degree,
+         conf.level = 0.95,
+         method = "spearman")
+
+#FSH
+cor.test(log(aim1_women$fsh_spatial_miu_ml),
+         aim1_women$loop_de_avg_degree,
+         conf.level = 0.95,
+         method = "spearman")
+```
 
 
 ### MAZE
@@ -407,7 +484,7 @@ cor.test(aim1_women$fsh_spatial_miu_ml,
          method = "spearman")
 
 
-########## Spearman for solution index
+########## Spearman for moves
 
 #Estradiol
 cor.test(aim1_women$estradiol_spatial_pg_ml,
@@ -423,6 +500,40 @@ cor.test(aim1_women$fsh_spatial_miu_ml,
 ```
 No correlations for accuracy or moves made
 
+
+```{r women-maze-log}
+########## Spearman for wayfinding success
+
+#Estradiol
+cor.test(log(aim1_women$estradiol_spatial_pg_ml),
+         aim1_women$maze_accuracy_pct,
+         conf.level = 0.95,
+         method = "spearman")
+
+#FSH
+cor.test(log(aim1_women$fsh_spatial_miu_ml),
+         aim1_women$maze_accuracy_pct,
+         conf.level = 0.95,
+         method = "spearman")
+
+
+########## Spearman for moves
+
+#Estradiol
+cor.test(log(aim1_women$estradiol_spatial_pg_ml),
+         aim1_women$maze_moves,
+         conf.level = 0.95,
+         method = "spearman")
+
+#FSH
+cor.test(log(aim1_women$fsh_spatial_miu_ml),
+         aim1_women$maze_moves,
+         conf.level = 0.95,
+         method = "spearman")
+```
+
+
+Still no significant correlations
 
 ### DSP
 
@@ -457,11 +568,13 @@ cor.test(aim1_women$fsh_spatial_miu_ml,
          conf.level = 0.95,
          method = "spearman")
 ```
+
+
 No correlation for wayfinding success, but significant correlation for solution index.
 
 
 
-```{r}
+```{r dsp-plot}
 #Filter for DSP
 aim1_women_dsp <- aim1 %>% 
   filter(sex == "Female", dsp_useable == "Yes") %>% 
@@ -547,7 +660,450 @@ combined + plot_layout(guides = "collect")
 
 
 
-## Estradiol to FSH ratio in Midlife Women
+```{r women-dsp-log}
+
+########## Spearman for wayfinding success
+
+#Estradiol
+cor.test(log(aim1_women$estradiol_spatial_pg_ml),
+         aim1_women$dsp_success_pct,
+         conf.level = 0.95,
+         method = "spearman")
+
+#FSH
+cor.test(log(aim1_women$fsh_spatial_miu_ml),
+         aim1_women$dsp_success_pct,
+         conf.level = 0.95,
+         method = "spearman")
+
+
+########## Spearman for solution index
+
+#Estradiol
+cor.test(log(aim1_women$estradiol_spatial_pg_ml),
+         aim1_women$dsp_si_true_pct,
+         conf.level = 0.95,
+         method = "spearman")
+
+#FSH
+cor.test(log(aim1_women$fsh_spatial_miu_ml),
+         aim1_women$dsp_si_true_pct,
+         conf.level = 0.95,
+         method = "spearman")
+```
+
+When estradiol and FSH are logged, and then Spearman rank correlation administered, the results for solution index remained significant for estradiol and marginal for FSH.
+
+
+## Women: Hormone (Scan) and Behavior Correlations
+
+Hormones bar plot
+
+```{r}
+#Filter for women
+aim1_women <- aim1 %>% 
+  filter(sex == "Female") %>% 
+  #Reorder repo status
+  mutate(repo_status_scan = fct_relevel(repo_status_scan, 
+                                         c("Pre", "Peri", "Post")))
+
+
+#Summary of hormones
+ehormones_fig <- aim1_women %>% 
+  group_by(repo_status_scan) %>% 
+  summarize(mean_estradiol = mean(estradiol_scan_pg_ml),
+            sd_estradiol = sd(estradiol_scan_pg_ml),
+            n_estradiol = n(),
+            se_estradiol = sd(estradiol_scan_pg_ml)/sqrt(n()), 
+            .groups = "keep")
+
+fhormones_fig <- aim1_women %>% 
+  group_by(repo_status_scan) %>% 
+  summarize(mean_estradiol = mean(fsh_scan_miu_ml),
+            sd_estradiol = sd(fsh_scan_miu_ml),
+            n_estradiol = n(),
+            se_estradiol = sd(fsh_scan_miu_ml)/sqrt(n()), 
+            .groups = "keep")
+```
+
+
+```{r hormone-plot}
+#Estradiol plot
+ggplot(data = aim1_women, aes(x = repo_status_scan, 
+                            y = estradiol_scan_pg_ml, 
+                            fill = repo_status_scan))+
+  
+  #Define bar plot by mean
+  geom_bar(stat="summary", fun= "mean",
+           show.legend = FALSE)+ 
+  
+  #Add SEM errorbar
+  stat_summary(geom = "errorbar", 
+               fun.data = mean_se,
+               width = 0.15, size = 0.7)+
+  
+  #Change labels
+  labs(x = "Reproductive Status",
+       y = expression(atop(paste(bold("17"),
+                                 bold(beta),
+                                 bold("-Estradiol (pg/mL)")),
+                           )),
+       tag = "A") +
+  
+  #Change colors of bars
+  #Reverse color scale
+  scale_fill_brewer(palette = "RdPu",
+                    direction = -1)+
+  
+  #Change theme
+  theme_classic() +
+  
+  #Customize theme
+  theme(axis.title = element_text(size = 11, face = "bold"), 
+        axis.text = element_text(size= 10))
+
+#ggsave("estradiol_bar.png")
+
+
+#FSH plot
+ggplot(data = aim1_women, aes(x = repo_status_scan, 
+                            y = fsh_scan_miu_ml, 
+                            fill = repo_status_scan))+
+  
+  #Define bar plot by mean
+  geom_bar(stat="summary", fun= "mean",
+           show.legend = FALSE)+ 
+  
+  #Add SEM errorbar
+  stat_summary(geom = "errorbar", 
+               fun.data = mean_se,
+               width = 0.15, size = 0.7)+
+  
+  #Change labels
+  labs(x = "Reproductive Status",
+       y = "FSH (mIU/mL)\n",
+       tag = "B") +
+  
+  #Change colors of bars
+  #Reverse color scale
+  scale_fill_brewer(palette = "RdPu",
+                    direction = -1)+
+  
+  #Change theme
+  theme_classic() +
+  
+  #Customize theme
+  theme(axis.title = element_text(size = 11, face = "bold"), 
+        axis.text = element_text(size= 10))
+
+#ggsave("fsh_bar.png")
+```
+
+
+```{r}
+#ANOVA of hormones
+hormone_mod <- aov(estradiol_scan_pg_ml ~ repo_status_scan,
+      data = aim1_women)
+TukeyHSD(hormone_mod)
+
+hormone_mod2 <- aov(fsh_scan_miu_ml ~ repo_status_scan,
+      data = aim1_women)
+TukeyHSD(hormone_mod2)
+```
+Estradiol is statistivcally significant between all pairs of reproductive groups except (pre and peri), as well as FSH.
+
+
+
+```{r normality-check-women-scan}
+shapiro.test(aim1_women$estradiol_scan_pg_ml) #yes
+shapiro.test(aim1_women$fsh_scan_miu_ml) #yes
+```
+
+### LOOP
+
+
+```{r}
+########## Spearman for position error
+cor.test(aim1_women$estradiol_scan_pg_ml,
+         aim1_women$loop_pe_avg_m,
+         conf.level = 0.95,
+         method = "spearman")
+
+#FSH
+cor.test(aim1_women$fsh_scan_miu_ml,
+         aim1_women$loop_pe_avg_m,
+         conf.level = 0.95,
+         method = "spearman")
+
+
+########## Spearman for degrees traveled
+cor.test(aim1_women$estradiol_scan_pg_ml,
+         aim1_women$loop_de_avg_degree,
+         conf.level = 0.95,
+         method = "spearman")
+
+#FSH
+cor.test(aim1_women$fsh_scan_miu_ml,
+         aim1_women$loop_de_avg_degree,
+         conf.level = 0.95,
+         method = "spearman")
+```
+
+```{r women-loop-log2}
+########## Spearman for position error
+cor.test(log(aim1_women$estradiol_scan_pg_ml),
+         aim1_women$loop_pe_avg_m,
+         conf.level = 0.95,
+         method = "spearman")
+
+#FSH
+cor.test(log(aim1_women$fsh_scan_miu_ml),
+         aim1_women$loop_pe_avg_m,
+         conf.level = 0.95,
+         method = "spearman")
+
+
+########## Spearman for degrees traveled
+cor.test(log(aim1_women$estradiol_scan_pg_ml),
+         aim1_women$loop_de_avg_degree,
+         conf.level = 0.95,
+         method = "spearman")
+
+#FSH
+cor.test(log(aim1_women$fsh_scan_miu_ml),
+         aim1_women$loop_de_avg_degree,
+         conf.level = 0.95,
+         method = "spearman")
+```
+No correlations for LOOP.
+
+
+### MAZE
+
+
+```{r}
+########## Spearman for wayfinding success
+
+#Estradiol
+cor.test(aim1_women$estradiol_scan_pg_ml,
+         aim1_women$maze_accuracy_pct,
+         conf.level = 0.95,
+         method = "spearman")
+
+#FSH
+cor.test(aim1_women$fsh_scan_miu_ml,
+         aim1_women$maze_accuracy_pct,
+         conf.level = 0.95,
+         method = "spearman")
+
+
+########## Spearman for moves
+
+#Estradiol
+cor.test(aim1_women$estradiol_scan_pg_ml,
+         aim1_women$maze_moves,
+         conf.level = 0.95,
+         method = "spearman")
+
+#FSH
+cor.test(aim1_women$fsh_scan_miu_ml,
+         aim1_women$maze_moves,
+         conf.level = 0.95,
+         method = "spearman")
+```
+
+```{r women-maze-log2}
+########## Spearman for wayfinding success
+
+#Estradiol
+cor.test(log(aim1_women$estradiol_scan_pg_ml),
+         aim1_women$maze_accuracy_pct,
+         conf.level = 0.95,
+         method = "spearman")
+
+#FSH
+cor.test(log(aim1_women$fsh_scan_miu_ml),
+         aim1_women$maze_accuracy_pct,
+         conf.level = 0.95,
+         method = "spearman")
+
+
+########## Spearman for moves
+
+#Estradiol
+cor.test(log(aim1_women$estradiol_scan_pg_ml),
+         aim1_women$maze_moves,
+         conf.level = 0.95,
+         method = "spearman")
+
+#FSH
+cor.test(log(aim1_women$fsh_scan_miu_ml),
+         aim1_women$maze_moves,
+         conf.level = 0.95,
+         method = "spearman")
+```
+
+
+Still no significant correlations
+
+### DSP
+
+```{r}
+
+########## Spearman for wayfinding success
+
+#Estradiol
+cor.test(aim1_women$estradiol_scan_pg_ml,
+         aim1_women$dsp_success_pct,
+         conf.level = 0.95,
+         method = "spearman")
+
+#FSH
+cor.test(aim1_women$fsh_scan_miu_ml,
+         aim1_women$dsp_success_pct,
+         conf.level = 0.95,
+         method = "spearman")
+
+
+########## Spearman for solution index
+
+#Estradiol
+cor.test(aim1_women$estradiol_scan_pg_ml,
+         aim1_women$dsp_si_true_pct,
+         conf.level = 0.95,
+         method = "spearman")
+
+#FSH
+cor.test(aim1_women$fsh_scan_miu_ml,
+         aim1_women$dsp_si_true_pct,
+         conf.level = 0.95,
+         method = "spearman")
+```
+DSP solution index with estradiol from scan remains significant, and marginal with FSH from scan.
+
+
+
+```{r dsp-plot2}
+#Filter for DSP
+aim1_women_dsp <- aim1 %>% 
+  filter(sex == "Female", dsp_useable == "Yes") %>% 
+  #Reorder repo status
+  mutate(repo_status_scan = fct_relevel(repo_status_scan, 
+                                         c("Pre", "Peri", "Post"))) 
+
+
+
+#E and FSH plot with SI
+a <- ggplot(data = aim1_women_dsp, aes(x = estradiol_scan_pg_ml,
+                                        y = dsp_si_true_pct)) +
+  
+  #Define scatter, change size and alpha
+  geom_point(aes(color = repo_status_scan),
+             size = 3, alpha = 0.6, show.legend = FALSE) +
+  
+  #Add LM line
+  geom_smooth(method = "lm", se = FALSE,
+              color = "grey50") +
+  
+  #Change labels
+  labs(x = expression(paste(bold("17"),
+                                 bold(beta),
+                                 bold("-Estradiol (pg/mL)")),
+                           ),
+       y = "Solution Index (%)\n",
+       color = "Reproductive Status") +
+  
+  #Change color of points
+  scale_color_manual(values = c("cadetblue4", "mediumvioletred", "darkorange")) +
+  
+  theme_minimal() +
+  
+  #Customize theme
+  theme(axis.title = element_text(size = 11, face = "bold"), 
+        axis.title.x = element_text(vjust = -0.5),
+        axis.text = element_text(size= 10))
+
+
+
+b <- ggplot(data = aim1_women_dsp, aes(x = fsh_scan_miu_ml,
+                            y = dsp_si_true_pct,
+                            color = repo_status_scan)) +
+  
+  #Define scatter, change size and alpha
+  geom_point(aes(color = repo_status_scan),
+             size = 3, alpha = 0.6) +
+  
+  #Add LM line
+  geom_smooth(method = "lm", se = FALSE,
+              color = "grey50") +
+  
+  #Change labels
+  labs(x = "\nFollicle Stimulating Hormone (mIU/mL)",
+       y = " ",
+       color = "Reproductive Status") +
+  
+  #Change color of points
+  scale_color_manual(values = c("cadetblue4", "mediumvioletred", "darkorange")) +
+  
+  theme_minimal() +
+  
+  #Customize theme
+  theme(axis.title = element_text(size = 11, face = "bold"),
+        axis.title.x = element_text(vjust = 2),
+        axis.text = element_text(size= 10),
+        
+        #Legend
+        #legend.title = element_text(face = "bold"),
+        legend.position = "top"
+        
+        )
+
+
+#Combine
+combined <- a + b & theme(legend.position = "top")
+combined + plot_layout(guides = "collect")
+
+#save
+#ggsave("study1_dsp_si_e_fsh.png")
+```
+
+
+
+```{r women-dsp-log2}
+
+########## Spearman for wayfinding success
+
+#Estradiol
+cor.test(log(aim1_women$estradiol_scan_pg_ml),
+         aim1_women$dsp_success_pct,
+         conf.level = 0.95,
+         method = "spearman")
+
+#FSH
+cor.test(log(aim1_women$fsh_scan_miu_ml),
+         aim1_women$dsp_success_pct,
+         conf.level = 0.95,
+         method = "spearman")
+
+
+########## Spearman for solution index
+
+#Estradiol
+cor.test(log(aim1_women$estradiol_scan_pg_ml),
+         aim1_women$dsp_si_true_pct,
+         conf.level = 0.95,
+         method = "spearman")
+
+#FSH
+cor.test(log(aim1_women$fsh_scan_miu_ml),
+         aim1_women$dsp_si_true_pct,
+         conf.level = 0.95,
+         method = "spearman")
+```
+
+
+
+## Estradiol to FSH ratio (spatial) in Midlife Women
 
 ```{r}
 
@@ -555,10 +1111,19 @@ combined + plot_layout(guides = "collect")
 
 #Create new column with ratio
 aim1_women <- aim1_women %>% 
-  mutate(e_fsh_ratio = estradiol_spatial_pg_ml/fsh_spatial_miu_ml)
+  mutate(e_fsh_ratio = estradiol_spatial_pg_ml/fsh_spatial_miu_ml,
+         fsh_e_ratio = fsh_spatial_miu_ml/estradiol_spatial_pg_ml)
 
 
-#Plot ratio x soltuion index
+#Filter for DSP
+aim1_women_dsp <- aim1_women %>% 
+  filter(sex == "Female", dsp_useable == "Yes") %>% 
+  #Reorder repo status
+  mutate(repo_status_spatial = fct_relevel(repo_status_spatial, 
+                                         c("Pre", "Peri", "Post"))) 
+  
+
+#Plot E:FSH ratio and solution index
 ggplot(data = aim1_women_dsp, aes(x = e_fsh_ratio,
                             y = dsp_si_true_pct,
                             text = subject_id)) +
@@ -590,25 +1155,84 @@ ggplot(data = aim1_women_dsp, aes(x = e_fsh_ratio,
         #legend.title = element_text(face = "bold"),
         legend.position = "top")
 
+
+
+
+#Plot FSH:E ratio and solution index
+ggplot(data = aim1_women_dsp, aes(x = fsh_e_ratio,
+                            y = dsp_si_true_pct,
+                            text = subject_id)) +
+  
+  #Define scatter, change size and alpha
+  geom_point(aes(color = repo_status_spatial),
+             size = 3, alpha = 0.6) +
+  
+  #Add LM line
+  geom_smooth(method = "lm", se = FALSE,
+              color = "grey50") +
+  
+  #Change labels
+  labs(x = "\nFSH to Estradiol Ratio",
+       y = "Solution Index",
+       color = "Reproductive Status") +
+  
+  #Change color of points
+  scale_color_manual(values = c("cadetblue4", "mediumvioletred", "darkorange")) +
+  
+  theme_minimal() +
+  
+  #Customize theme
+  theme(axis.title = element_text(size = 11, face = "bold"),
+        axis.title.x = element_text(vjust = 2),
+        axis.text = element_text(size= 10),
+        
+        #Legend
+        #legend.title = element_text(face = "bold"),
+        legend.position = "top")
+
 ```
+
+
+```{r}
+#Check distribution of E:FSH ratio (probably not normal)
+shapiro.test(aim1_women$e_fsh_ratio) #yes
+shapiro.test(log(aim1_women$e_fsh_ratio)) #yes
+
+shapiro.test(aim1_women$fsh_e_ratio) #yes
+shapiro.test(log(aim1_women$fsh_e_ratio)) #yes
+```
+
+
+All correlations need to be Spearman rank.
+
 
 ### LOOP
 
 ```{r}
-#Correlation with E:FSH ratio
+#Correlation with E:FSH and FSH:E ratio
 
-########## Spearman for wayfinding success
+########## Spearman for position error
 
 cor.test(aim1_women$e_fsh_ratio,
          aim1_women$loop_pe_avg_m,
          conf.level = 0.95,
          method = "spearman")
 
+cor.test(aim1_women$fsh_e_ratio,
+         aim1_women$loop_pe_avg_m,
+         conf.level = 0.95,
+         method = "spearman")
 
-########## Spearman for solution index
+
+########## Spearman for degrees traveled
 
 
 cor.test(aim1_women$e_fsh_ratio,
+         aim1_women$loop_de_avg_degree,
+         conf.level = 0.95,
+         method = "spearman")
+
+cor.test(aim1_women$fsh_e_ratio,
          aim1_women$loop_de_avg_degree,
          conf.level = 0.95,
          method = "spearman")
@@ -626,11 +1250,21 @@ cor.test(aim1_women$e_fsh_ratio,
          conf.level = 0.95,
          method = "spearman")
 
+cor.test(aim1_women$fsh_e_ratio,
+         aim1_women$maze_accuracy_pct,
+         conf.level = 0.95,
+         method = "spearman")
+
 
 ########## Spearman for solution index
 
 
 cor.test(aim1_women$e_fsh_ratio,
+         aim1_women$maze_moves,
+         conf.level = 0.95,
+         method = "spearman")
+
+cor.test(aim1_women$fsh_e_ratio,
          aim1_women$maze_moves,
          conf.level = 0.95,
          method = "spearman")
@@ -648,6 +1282,10 @@ cor.test(aim1_women$e_fsh_ratio,
          conf.level = 0.95,
          method = "spearman")
 
+cor.test(aim1_women$fsh_e_ratio,
+         aim1_women$dsp_success_pct,
+         conf.level = 0.95,
+         method = "spearman")
 
 ########## Spearman for solution index
 
@@ -656,9 +1294,226 @@ cor.test(aim1_women$e_fsh_ratio,
          aim1_women$dsp_si_true_pct,
          conf.level = 0.95,
          method = "spearman")
+
+cor.test(aim1_women$fsh_e_ratio,
+         aim1_women$dsp_si_true_pct,
+         conf.level = 0.95,
+         method = "spearman")
 ```
 
-Solution index is still significant
+Solution index is still significant with the ratios 
+
+
+
+## Estradiol to FSH ratio (scan) in Midlife Women
+
+```{r}
+
+#Midlife women
+aim1_women <- aim1 %>% 
+  filter(sex == "Female") %>% 
+  #Reorder repo status
+  mutate(repo_status_scan = fct_relevel(repo_status_scan, 
+                                         c("Pre", "Peri", "Post")))
+
+#Create new column with ratio
+aim1_women <- aim1_women %>% 
+  mutate(e_fsh_ratio = estradiol_scan_pg_ml/fsh_scan_miu_ml,
+         fsh_e_ratio = fsh_scan_miu_ml/estradiol_scan_pg_ml)
+
+
+#Filter for DSP
+aim1_women_dsp <- aim1_women %>% 
+  filter(sex == "Female", dsp_useable == "Yes") %>% 
+  #Reorder repo status
+  mutate(repo_status_scan = fct_relevel(repo_status_scan, 
+                                         c("Pre", "Peri", "Post"))) 
+  
+
+#Plot E:FSH ratio and solution index
+ggplot(data = aim1_women_dsp, aes(x = e_fsh_ratio,
+                            y = dsp_si_true_pct,
+                            text = subject_id)) +
+  
+  #Define scatter, change size and alpha
+  geom_point(aes(color = repo_status_scan),
+             size = 3, alpha = 0.6) +
+  
+  #Add LM line
+  geom_smooth(method = "lm", se = FALSE,
+              color = "grey50") +
+  
+  #Change labels
+  labs(x = "\nEstradiol to FSH Ratio",
+       y = "Solution Index",
+       color = "Reproductive Status") +
+  
+  #Change color of points
+  scale_color_manual(values = c("cadetblue4", "mediumvioletred", "darkorange")) +
+  
+  theme_minimal() +
+  
+  #Customize theme
+  theme(axis.title = element_text(size = 11, face = "bold"),
+        axis.title.x = element_text(vjust = 2),
+        axis.text = element_text(size= 10),
+        
+        #Legend
+        #legend.title = element_text(face = "bold"),
+        legend.position = "top")
+
+
+
+
+#Plot FSH:E ratio and solution index
+ggplot(data = aim1_women_dsp, aes(x = fsh_e_ratio,
+                            y = dsp_si_true_pct,
+                            text = subject_id)) +
+  
+  #Define scatter, change size and alpha
+  geom_point(aes(color = repo_status_scan),
+             size = 3, alpha = 0.6) +
+  
+  #Add LM line
+  geom_smooth(method = "lm", se = FALSE,
+              color = "grey50") +
+  
+  #Change labels
+  labs(x = "\nFSH to Estradiol Ratio",
+       y = "Solution Index",
+       color = "Reproductive Status") +
+  
+  #Change color of points
+  scale_color_manual(values = c("cadetblue4", "mediumvioletred", "darkorange")) +
+  
+  theme_minimal() +
+  
+  #Customize theme
+  theme(axis.title = element_text(size = 11, face = "bold"),
+        axis.title.x = element_text(vjust = 2),
+        axis.text = element_text(size= 10),
+        
+        #Legend
+        #legend.title = element_text(face = "bold"),
+        legend.position = "top")
+
+```
+
+
+```{r}
+#Check distribution of E:FSH ratio (probably not normal)
+shapiro.test(aim1_women$e_fsh_ratio) #yes
+shapiro.test(log(aim1_women$e_fsh_ratio)) #yes
+
+shapiro.test(aim1_women$fsh_e_ratio) #yes
+shapiro.test(log(aim1_women$fsh_e_ratio)) #yes
+```
+
+
+All correlations need to be Spearman rank.
+
+
+### LOOP
+
+```{r}
+#Correlation with E:FSH and FSH:E ratio
+
+########## Spearman for position error
+
+cor.test(aim1_women$e_fsh_ratio,
+         aim1_women$loop_pe_avg_m,
+         conf.level = 0.95,
+         method = "spearman")
+
+cor.test(aim1_women$fsh_e_ratio,
+         aim1_women$loop_pe_avg_m,
+         conf.level = 0.95,
+         method = "spearman")
+
+
+########## Spearman for degrees traveled
+
+
+cor.test(aim1_women$e_fsh_ratio,
+         aim1_women$loop_de_avg_degree,
+         conf.level = 0.95,
+         method = "spearman")
+
+cor.test(aim1_women$fsh_e_ratio,
+         aim1_women$loop_de_avg_degree,
+         conf.level = 0.95,
+         method = "spearman")
+```
+
+### MAZE
+
+```{r}
+#Correlation with E:FSH ratio
+
+########## Spearman for wayfinding success
+
+cor.test(aim1_women$e_fsh_ratio,
+         aim1_women$maze_accuracy_pct,
+         conf.level = 0.95,
+         method = "spearman")
+
+cor.test(aim1_women$fsh_e_ratio,
+         aim1_women$maze_accuracy_pct,
+         conf.level = 0.95,
+         method = "spearman")
+
+
+########## Spearman for solution index
+
+
+cor.test(aim1_women$e_fsh_ratio,
+         aim1_women$maze_moves,
+         conf.level = 0.95,
+         method = "spearman")
+
+cor.test(aim1_women$fsh_e_ratio,
+         aim1_women$maze_moves,
+         conf.level = 0.95,
+         method = "spearman")
+```
+
+### DSP
+
+```{r}
+#Correlation with E:FSH ratio
+
+########## Spearman for wayfinding success
+
+cor.test(aim1_women$e_fsh_ratio,
+         aim1_women$dsp_success_pct,
+         conf.level = 0.95,
+         method = "spearman")
+
+cor.test(aim1_women$fsh_e_ratio,
+         aim1_women$dsp_success_pct,
+         conf.level = 0.95,
+         method = "spearman")
+
+########## Spearman for solution index
+
+
+cor.test(aim1_women$e_fsh_ratio,
+         aim1_women$dsp_si_true_pct,
+         conf.level = 0.95,
+         method = "spearman")
+
+cor.test(aim1_women$fsh_e_ratio,
+         aim1_women$dsp_si_true_pct,
+         conf.level = 0.95,
+         method = "spearman")
+```
+
+Solution index is still significant with the ratios 
+
+
+
+
+
 
 ## Behavior for Young and Midlife
 
@@ -778,14 +1633,18 @@ a1+a2
 # Summary
 
 
-Future directions for this analysis will incorporate 
+- Men were tested separately for the relationship between testosterone and spatial navigation behaviors, while women were tested for the relationships between estradiol/FSH and spatial navigation behaviors.
 
+- No significant correlations among men.
 
-# References
+- Estradiol and FSH were skewed, so the hormones were log transformed and associations with these hormones were using Spearman rank correlations.
 
+- No significant correlations for MAZE among women.
 
+- While there were no significant correlations for DSP wayfinding success, there was a positive correlation between estradiol and solution index (*p* = 0.018, Spearman), and a marginal negative association between FSH and solution index (*p* = 0.058, Spearman). This was true when using hormone measurements from both spatial and scan timepoints. The statistics reported in this summary are using the hormones from the scan. 
 
+- When using spatial hormones, positive correlation between estradiol and solution index (*p* < 0.01, Spearman), and a marginal negative association between FSH and solution index (*p* = 0.058, Spearman) show to have similar results.
 
-
+- When using estradiol to FSH ratio (or FSH to estradiol ratio) as a measure of hormones, DSP solution index remained significant (for both spatial and scan hormones).
 
 
