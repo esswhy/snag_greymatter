@@ -25,7 +25,14 @@ library(foreign)
 library(RColorBrewer)
 library(plotly)
 library(readr)
+library(broom)
+library(GGally)
+library(psych)
+
+#Medaition packages
 library(lavaan)
+library(mediation)
+library(blavaan)
 ```
 
 
@@ -41,15 +48,24 @@ Study 1 (aka "Study 2, part 1") has shown that there is a correlation between se
 
 Prior exploratory analysis for relationships between sex hormones and T2 subfield volume reveal certain significant relationships (`correlation_greymatter_hormones_corrected.Rmd`). Highlights of the results include estradiol negatively associated with CA1 for peris and with SUB for pres, and marginally negatively correlated with CA23 (all Spearman correlations). For progesterone, it was significantly positively correlated with CA1 for posts and with ERC for posts (both Pearson correlations). FSH was significantly negatively correlated with ERC and SUB for posts, negatively correlated with PHC for women overall, and marginally negatively associated with CA1 for posts (all Spearman correlations).
 
+For other brain structures, there were no structures for GMV. However, total hippocampal volume was negatively correlated with estradiol for pres (Spearman) and MTL was marginally negatively correlated with FSH for posts (Spearman).
+
 Significant effect of hormones, specifically estradiol and FSH, on the mediator (T2 subfields) is an absolute prerequisite for mediation being possible.
+
 
 **Other**
 
 
-Following the correlations between hormones and brain structure,I explored the associations between brain structure and spatial navigation behaviors (`correlation_greymatter_behavior.Rmd`). Results revealed that position error was negatively correlated with PHC (Pearson), and solution index was marginally negatively associated with DG in men (Spearman).
+Following the correlations between hormones and brain structure, I explored the associations between brain structure and spatial navigation behaviors (`correlation_greymatter_behavior.Rmd`). Results revealed that position error was negatively correlated with PHC (Pearson), and solution index was marginally negatively associated with DG in men (Spearman).
 
 
-## Methods
+
+# Research Question
+
+
+I am interested in the indirect effects 
+
+# Methods
 
 Here, I determine how T2 subfield volume mediates the relationship between sex hormones and behavior for navigation strategy. I will investigate whether there are any relationships between spatial navigation behaviors and T2 subfield volumes. I plan to apply causal mediation analysis to investigate whether the effect of sex hormones (IV, predictor) on spatial behavior (DV, outcome) is mediated by participants' T2 subfield volume (mediator).
 
@@ -63,13 +79,16 @@ To account for missing data, I will use full information max likelihood.
 ##### EVENTUALLY UPDATE T2 HIPP RESULTS
 data <- read_csv(here("data", "HAS_SNAG_mastersheet_tidy.csv"))
 
-#Filter for midlife, has snag data, has t2hipp data
+#Filter for midlife women, has dsp data, has t2hipp data
 data <- data %>% 
   filter(age_group == "Midlife", 
-         completed_spatial == "Yes",
-         t2hipp_status == "Yes") %>% 
-  select(subject_id, sex, age_scan_years:testosterone_spatial_ng_dl,
-         t2hipp_vol_left_ca1:t2hipp_vol_csf) %>% 
+         sex == "Female",
+         t2hipp_status == "Yes",
+         dsp_useable == "Yes") %>% 
+  dplyr::select(subject_id, sex, 
+         age_scan_years:testosterone_spatial_ng_dl,
+         t2hipp_vol_left_ca1:t2hipp_vol_right_sub,
+         t2hipp_vol_tiv, whole_vol_gmv:whole_vol_csf) %>% 
   mutate(repo_status_spatial = fct_relevel(repo_status_spatial, 
                                     c("Pre", "Peri", "Post")))
 
@@ -78,178 +97,227 @@ dividebyTIV <- function(x, na.rm = FALSE) (x/data$t2hipp_vol_tiv)
 
 #Correct left and right volumes with TIV
 data <- data %>% 
-  mutate_at(vars(t2hipp_vol_left_ca1:t2hipp_vol_right_sub),
-            dividebyTIV)
+  
+  #Correct using TIV from SPM
+  #CA1, CA23, DG, ERC,PHC, PRC, SUB, GMV
+  mutate_at(vars(t2hipp_vol_left_ca1:t2hipp_vol_right_sub, whole_vol_gmv),
+            dividebyTIV) %>% 
+  
+  #Average left and right subfields
+  mutate(avg_ca1 = (t2hipp_vol_left_ca1+t2hipp_vol_right_ca1) / 2,
+         avg_ca23 = (t2hipp_vol_left_ca23+t2hipp_vol_right_ca23) / 2,
+         avg_dg = (t2hipp_vol_left_dg+t2hipp_vol_right_dg) / 2,
+         avg_erc = (t2hipp_vol_left_erc+t2hipp_vol_right_erc) / 2,
+         avg_phc = (t2hipp_vol_left_phc+t2hipp_vol_right_phc) / 2,
+         avg_prc = (t2hipp_vol_left_prc+t2hipp_vol_right_prc) / 2,
+         avg_sub = (t2hipp_vol_left_sub+t2hipp_vol_right_sub) / 2) %>% 
+  
+  #Calculate total left and right hipp
+  mutate(total_l_hipp = (t2hipp_vol_left_ca1 + 
+                         t2hipp_vol_left_ca23 +
+                         t2hipp_vol_left_dg + 
+                         t2hipp_vol_left_sub),
+         total_r_hipp = (t2hipp_vol_right_ca1 + 
+                         t2hipp_vol_right_ca23 + 
+                         t2hipp_vol_right_dg + 
+                         t2hipp_vol_right_sub),
+         avg_total_hipp = (total_l_hipp + total_r_hipp)/2) %>% 
+  
+  #Calculate left and right MTL
+  mutate(lmtl = (t2hipp_vol_left_ca1 + 
+                 t2hipp_vol_left_ca23 +
+                 t2hipp_vol_left_dg + 
+                 t2hipp_vol_left_sub + 
+                 t2hipp_vol_left_erc + 
+                 t2hipp_vol_left_phc + 
+                 t2hipp_vol_left_prc),
+         rmtl = (t2hipp_vol_right_ca1 + 
+                 t2hipp_vol_right_ca23 +
+                 t2hipp_vol_right_dg + 
+                 t2hipp_vol_right_sub + 
+                 t2hipp_vol_right_erc + 
+                 t2hipp_vol_right_phc + 
+                 t2hipp_vol_right_prc),
+         avg_mtl = (lmtl + rmtl)/2)
+```
 
-#Average left and right volumes
+
+## EDA
+
+```{r distributions}
+data_select <- data %>% 
+  dplyr::select(estradiol_scan_pg_ml,
+         avg_ca1, dsp_si_true_pct)
+
+ggpairs(data_select,  
+        lower = list(continuous = "smooth")) + theme_bw()
+```
+
+
+Estradiol looks exponentially distributed, and SI is right-skewed
+
+
+```{r descriptive-raw-vars}
+#Descriptive stats
+describe(data_select)
+```
+
+
+```{r boxcox}
+##### Estradiol
+
+#Check histogram and normality
+hist(data$estradiol_scan_pg_ml)
+shapiro.test(data$estradiol_scan_pg_ml) #yes
+
+#Box-Cox transformation plot
+bc <- MASS::boxcox(data$estradiol_scan_pg_ml ~ 1, 
+                   plotit = TRUE)
+
+#However, log transformation for estradiol doesn't fix normality
+hist(log(data$estradiol_scan_pg_ml))
+shapiro.test(log(data$estradiol_scan_pg_ml)) #yes
+shapiro.test(sqrt(data$estradiol_scan_pg_ml)) #yes
+shapiro.test(1/(data$estradiol_scan_pg_ml)) #yes
+
+#Extract exact lambda from plot
+lambda_e <- bc$x[which.max(bc$y)]
+lambda_e #0.02020202
+
+#New estradiol
 data <- data %>% 
-  mutate(t2hipp_vol_ca1_cor = (t2hipp_vol_left_ca1+t2hipp_vol_right_ca1) / 2,
-         t2hipp_vol_ca23_cor = (t2hipp_vol_left_ca23+t2hipp_vol_right_ca23) / 2,
-         t2hipp_vol_dg_cor = (t2hipp_vol_left_dg+t2hipp_vol_right_dg) / 2,
-         t2hipp_vol_erc_cor = (t2hipp_vol_left_erc+t2hipp_vol_right_erc) / 2,
-         t2hipp_vol_phc_cor = (t2hipp_vol_left_phc+t2hipp_vol_right_phc) / 2,
-         t2hipp_vol_prc_cor = (t2hipp_vol_left_prc+t2hipp_vol_right_prc) / 2,
-         t2hipp_vol_sub_cor = (t2hipp_vol_left_sub+t2hipp_vol_right_sub) / 2
+  mutate(new_estradiol = ((estradiol_scan_pg_ml^lambda_e) - 1) / lambda_e)
+
+#Check transformed histogram
+hist(data$new_estradiol)
+shapiro.test(data$new_estradiol) #yes, p = 0.03883
+
+
+##### CA1
+#Check histogram
+hist(data$avg_ca1)
+shapiro.test(data$avg_ca1) #no
+
+
+##### DSP Solution Index
+hist(data$dsp_si_true_pct)
+shapiro.test(data$dsp_si_true_pct) #yes
+shapiro.test(log(data$dsp_si_true_pct)) #yes
+shapiro.test(sqrt(data$dsp_si_true_pct)) #yes
+
+#Make solution index positive
+data_dsp <- data %>% 
+  filter(dsp_useable == "Yes") %>% 
+  mutate(dsp_si_pos = dsp_si_true_pct * 100)
+
+#Box-Cox transformation plot
+#Can't run with 0 in dataset, so use
+
+hist(log(data$dsp_si_true_pct))
+```
+
+## Frequentist
+
+
+### Using `mediation`
+
+With regards to mediation, bootstrapping is often used where normality does not seem like a reasonable assumption. We can do so using `mediation` package.
+
+
+1. Estradiol predicting Solution Index
+
+Total effect
+
+```{r}
+fit.totaleffect <- lm(dsp_si_true_pct ~ estradiol_scan_pg_ml, data=data)
+tidy(fit.totaleffect)
+```
+
+
+2. Estradiol predicting CA1
+
+Effect of IV on mediatior
+
+```{r}
+fit.mediator <- lm(avg_ca1 ~ estradiol_scan_pg_ml, data=data)
+tidy(fit.mediator)
+```
+
+
+3. Estradiol and CA1 predicting SOlution Index
+
+Effect of mediator on DV
+
+```{r}
+fit.dv <- lm(dsp_si_true_pct ~ estradiol_scan_pg_ml + avg_ca1, data=data)
+tidy(fit.dv)
+```
+
+
+```{r}
+results <- mediate(fit.mediator, 
+                   fit.dv, 
+                   treat = 'estradiol_scan_pg_ml', 
+                   mediator = 'avg_ca23', 
+                   SI = TRUE, # sequential ignorability assumption
+                   boot = TRUE, sims = 100)
+summary(results)
 ```
 
 
 
+### Using `lavaan`
 
-# Solution Index
+```{r}
+model <- ' # direct effect
+             dsp_si_true_pct ~ c*estradiol_scan_pg_ml
+           # mediator
+             avg_ca1 ~ a*estradiol_scan_pg_ml
+             dsp_si_true_pct ~ b*avg_ca1
+           # indirect effect (a*b)
+             ab := a*b
+           # total effect
+             total := c + (a*b)
+         '
+# fit <- sem(model, data = data,
+#            std.ov = TRUE, #standardize variables
+#            meanstructure = TRUE,
+#            #se = 'robust.mlr', #incomplete data
+#            missing = "fiml")
+# summary(fit)
 
-## E2 and 
+fit <- sem(model, data = data,
+           std.ov = TRUE, #standardize variables
+           meanstructure = TRUE,
+           se = 'bootstrap',
+           bootstrap = 100,
+           missing = "fiml")
+summary(fit)
+```
 
-## FSH and 
+```{r}
+#Boostrap test statistics
 
+# bootstrap test statistic + compute p-value
+T.boot <- bootstrapLavaan(fit, R=10, type="nonparametric",
+                          FUN=fitMeasures, fit.measures="chisq")
+pvalue.boot <- length(which(T.boot > T.orig))/length(T.boot)
 
-## Misc
-
-
-```{r, eval=FALSE}
-
-## Total Effect (Hormones -> Behavior)
-
-#Estradiol
-
-#wayfinding success
-fit.totaleffect <- lm(dsp_success_pct ~ estradiol_spatial_pg_ml,
-                     data = data_women)
-summary(fit.totaleffect)
-
-#solution index
-fit.totaleffect <- lm(dsp_si_true_pct ~ estradiol_spatial_pg_ml,
-                     data = data_women)
-summary(fit.totaleffect)
-
-
-
-# There doesn’t necessarily have to be a significant relationship between the iv and the dv. Just as correlation doesn’t prove causation, no correlation does not disprove causation 
 ```
 
 
 
+### Robust Mediation Analysis
 
 
 
 
-```{r, eval=FALSE}
-## IV on Mediator
-
-## Subregion Volume and Spatial Behavior
+## Bayesian
 
 
-#Assessing any relationships between subregion volume and SNAG behavior, specifically with DSP. First, check normality of the volume data
+```{r}
 
-
-#Subregions
-par(mfrow=c(2,2))
-hist(data_women$t2hipp_vol_ca1_cor)
-hist(data_women$t2hipp_vol_ca23_cor)
-hist(data_women$t2hipp_vol_mtl_cor)
-hist(data_women$t2hipp_vol_totalhipp_cor)
-
-
-#DSP 
-par(mfrow=c(1,2))
-hist(data_women$dsp_success_pct)
-hist(data_women$dsp_si_true_pct)
-
-
-
-
-#Subregion volumes appear to be normally distributed. There is an outlier wirh the MTL corrected subregion volume (max 20997.82 compared to mean of 7986.304).
-
-#For DSP, wayfinding success if left skewed and solution index is right skewed. I try to see if I can take the log of these dependent variables to normalize them for Pearson correlation
 ```
-
-
-```{r, eval=FALSE}
-#log transform
-par(mfrow=c(1,2))
-hist(log(data_women$dsp_success_pct))
-hist(log(data_women$dsp_si_true_pct))
-
-#inverse
-par(mfrow=c(1,2))
-hist((data_women$dsp_success_pct)^-1)
-hist((data_women$dsp_si_true_pct)^-1)
-
-#square root
-par(mfrow=c(1,2))
-hist(sqrt(data_women$dsp_success_pct))
-hist(sqrt(data_women$dsp_si_true_pct))
-
-
-#Log transformation and square root makes the DSP dependent variable more normally distributed, moreso for solution index than for wayfinding success. Use spearman rank correlation instead.
-```
-
-
-
-
-```{r, eval=FALSE}
-#Correlations: wayfinding success and CA1, CS23, MTL, totalhipp
-
-########## Spearman for wayfinding success
-
-#CA1
-cor.test(data_women$t2hipp_vol_ca1_cor,
-         data_women$dsp_success_pct,
-         conf.level = 0.95,
-         method = "spearman")
-
-#CA23
-cor.test(data_women$t2hipp_vol_ca23_cor,
-         data_women$dsp_success_pct,
-         conf.level = 0.95,
-         method = "spearman")
-
-#MTL
-cor.test(data_women$t2hipp_vol_mtl_cor,
-         data_women$dsp_success_pct,
-         conf.level = 0.95,
-         method = "spearman")
-
-#Total hipp
-cor.test(data_women$t2hipp_vol_totalhipp_cor,
-         data_women$dsp_success_pct,
-         conf.level = 0.95,
-         method = "spearman")
-```
-
-
-```{r, eval=FALSE}
-#Correlations: solution index and CA1, CS23, MTL, totalhipp
-
-########## Spearman for solution index
-
-#CA1
-cor.test(data_women$t2hipp_vol_ca1_cor,
-         data_women$dsp_si_true_pct,
-         conf.level = 0.95,
-         method = "spearman")
-
-#CA23
-cor.test(data_women$t2hipp_vol_ca23_cor,
-         data_women$dsp_si_true_pct,
-         conf.level = 0.95,
-         method = "spearman")
-
-#MTL
-cor.test(data_women$t2hipp_vol_mtl_cor,
-         data_women$dsp_si_true_pct,
-         conf.level = 0.95,
-         method = "spearman")
-
-#Total hipp
-cor.test(data_women$t2hipp_vol_totalhipp_cor,
-         data_women$dsp_si_true_pct,
-         conf.level = 0.95,
-         method = "spearman")
-```
-
-
-
-
 
 
 

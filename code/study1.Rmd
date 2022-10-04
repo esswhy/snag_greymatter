@@ -655,7 +655,7 @@ combined <- a + b & theme(legend.position = "top")
 combined + plot_layout(guides = "collect")
 
 #save
-#ggsave("study1_dsp_si_e_fsh.png")
+ggsave("study1_dsp_si_e_fsh_spatial.png")
 ```
 
 

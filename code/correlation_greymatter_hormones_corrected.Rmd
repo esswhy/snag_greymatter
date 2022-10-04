@@ -30,7 +30,7 @@ library(purrr)
 
 This report provides exploratory and preliminary correlation analyses between sex hormones and T2 *unretouched*, raw hippocampal subfield data from the Healthy Aging Study sample (subjects 333 - 437). 
 
-*Cleaning data steps included (T2 subfields):*
+**Cleaning data steps included (T2 subfields):**
 
 1) Filter participants that have T2 subfield data from scan
 
@@ -41,7 +41,7 @@ This report provides exploratory and preliminary correlation analyses between se
 4) Average left and right volumes to get an average measure for each subfield region
 
 
-*Total Grey Matter Volume:*
+**Total Grey Matter Volume:**
 
 1) Filter participants that have total brain GMV from ASHS
 
@@ -50,14 +50,14 @@ This report provides exploratory and preliminary correlation analyses between se
 3) Correct with TIV
 
 
-*Total Hippocampal Volume:*
+**Total Hippocampal Volume:**
 
 1) After left and right T2 subfields were corrected for TIV, sum up left and right total hipp (CA1, CA23, DG, SUB)
 
 2) Average left and right volumes to get an average measure 
 
 
-*Total MTL:*
+**Total MTL:**
 
 1) After left and right T2 subfields were corrected for TIV, sum up left and right MTL (CA1, CA23, DG, SUB, ERC, PHC, PRC)
 
@@ -110,7 +110,7 @@ dividebyTIV <- function(x, na.rm = FALSE) (x/df$tiv)
 df_avg <- df %>% 
   
   #Correct using TIV from SPM
-  #CA1, CA23, DG, ERC,PHC, PRC, SUB
+  #CA1, CA23, DG, ERC,PHC, PRC, SUB, GMV
   mutate_at(vars(lca1:rsub, gmv),
             dividebyTIV) %>% 
   
@@ -275,6 +275,7 @@ shapiro.test(log(df_clean$total_testosterone_ng_d_l)) #yes
 shapiro.test(log(df_clean_repo$total_testosterone_ng_d_l)) #yes
 shapiro.test(log(df_clean_men$total_testosterone_ng_d_l)) #no
 ```
+
 Shapiro-Wilk test reveals that estradiol, FSH, and testosterone for all and for women subgroup distributions were still significantly different from normal after log transformation, so Spearman rank correlations will be applied to these hormone and subfield associations.
 
 
