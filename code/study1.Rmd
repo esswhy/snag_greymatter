@@ -400,6 +400,7 @@ shapiro.test(aim1_women$maze_moves) #yes
 shapiro.test(aim1_women$loop_pe_avg_m) #no
 shapiro.test(aim1_women$loop_de_avg_degree) #no
 shapiro.test(aim1_women$estradiol_spatial_pg_ml) #yes
+shapiro.test(aim1_women$progesterone_spatial_ng_ml) #yes
 shapiro.test(aim1_women$fsh_spatial_miu_ml) #yes
 ```
 
@@ -547,6 +548,12 @@ cor.test(aim1_women$estradiol_spatial_pg_ml,
          conf.level = 0.95,
          method = "spearman")
 
+#Progesterone
+cor.test(aim1_women$progesterone_spatial_ng_ml,
+         aim1_women$dsp_success_pct,
+         conf.level = 0.95,
+         method = "spearman")
+
 #FSH
 cor.test(aim1_women$fsh_spatial_miu_ml,
          aim1_women$dsp_success_pct,
@@ -562,6 +569,12 @@ cor.test(aim1_women$estradiol_spatial_pg_ml,
          conf.level = 0.95,
          method = "spearman")
 
+#Progesterone
+cor.test(aim1_women$progesterone_spatial_ng_ml,
+         aim1_women$dsp_si_true_pct,
+         conf.level = 0.95,
+         method = "spearman")
+
 #FSH
 cor.test(aim1_women$fsh_spatial_miu_ml,
          aim1_women$dsp_si_true_pct,
@@ -570,7 +583,7 @@ cor.test(aim1_women$fsh_spatial_miu_ml,
 ```
 
 
-No correlation for wayfinding success, but significant correlation for solution index.
+No correlation for wayfinding success, but significant correlation for solution index for E and FSH.
 
 
 
@@ -655,7 +668,7 @@ combined <- a + b & theme(legend.position = "top")
 combined + plot_layout(guides = "collect")
 
 #save
-ggsave("study1_dsp_si_e_fsh_spatial.png")
+#ggsave("study1_dsp_si_e_fsh_spatial.png")
 ```
 
 
