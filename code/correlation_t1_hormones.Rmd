@@ -5,26 +5,36 @@ date: "11/26/2022"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r setup, include=FALSE, warning = FALSE, message = FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE, fig.align = "center")
+
+#Add libraries
+library(tidyverse)
+library(here)
+library(janitor)
+library(ggpubr)
+library(patchwork)
+library(readxl)
+library(knitr)
+library(broom)
+library(purrr)
 ```
 
-## R Markdown
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+# Overview
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
-```{r cars}
-summary(cars)
-```
+This report provides exploratory and preliminary correlation analyses between sex hormones and T1 hippocampal ROI data extracted from AAL for the Healthy Aging Study sample. 
 
-## Including Plots
+**Cleaning data steps included (T1 hipp):**
 
-You can also embed plots, for example:
+1) Filter participants that have T1 data from scan
 
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
+2) Select sex hormone measures from when scan was conducted
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+3) Correct left and right volumes with TIV
+
+4) Average left and right volumes to get an average measure
+
+
+
