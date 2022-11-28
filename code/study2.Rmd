@@ -58,7 +58,7 @@ Significant effect of hormones, specifically estradiol and FSH, on the mediator 
 **Other**
 
 
-Following the correlations between hormones and brain structure, I explored the associations between brain structure and spatial navigation behaviors (`correlation_greymatter_behavior.Rmd` and `correlation_t1_hormones.Rmd`). Results revealed that position error was negatively correlated with PHC (Pearson), and solution index was marginally negatively associated with DG in men (Spearman).
+Following the correlations between hormones and brain structure, I explored the associations between brain structure and spatial navigation behaviors (`correlation_greymatter_behavior.Rmd` and `correlation_t1_hormones.Rmd`). Results revealed that position error was negatively correlated with PHC (Pearson), and solution index was marginally negatively associated with DG in men (Spearman). Total hippocampal volume from subfields revealed no significant associations.
 
 For T1 GMV, DSP solution index was positively associated with GMV in women (Spearman), and marginally overall for women and men. 
 
@@ -66,19 +66,43 @@ For T1 GMV, DSP solution index was positively associated with GMV in women (Spea
 
 # Research Question
 
-
-I am interested in the indirect effects 
+Are there indirect effects, such that hippocampal grey matter volume mediates the relationship between sex hormones and spatial navigation behavior?
 
 # Methods
 
-Here, I determine how T2 subfield volume mediates the relationship between sex hormones and behavior for navigation strategy. I will investigate whether there are any relationships between spatial navigation behaviors and T2 subfield volumes. I plan to apply causal mediation analysis to investigate whether the effect of sex hormones (IV, predictor) on spatial behavior (DV, outcome) is mediated by participants' T2 subfield volume (mediator).
+Here, I determine how T1 and T2 subfield volume mediates the relationship between sex hormones and behavior for navigation strategy. I will investigate whether there are any relationships between spatial navigation behaviors and T2 subfield volumes. I plan to apply causal mediation analysis to investigate whether the effect of sex hormones (IV, predictor) on spatial behavior (DV, outcome) is mediated by participants' T2 subfield volume (mediator).
 
 To account for missing data, I will use full information max likelihood. 
 
 
 # Data Analysis
 
-```{r data}
+
+## T1 mediation
+
+```{r t1-data}
+#Read in the data
+data <- read_csv(here("data", "HAS_SNAG_mastersheet_tidy.csv"))
+
+#Filter for midlife women, has dsp data, has t1 data
+data <- data %>% 
+  filter(age_group == "Midlife", 
+         sex == "Female",
+         t1_status == "Yes",
+         dsp_useable == "Yes") %>% 
+  dplyr::select(subject_id, sex, 
+         age_scan_years:testosterone_spatial_ng_dl,
+         t2hipp_vol_left_ca1:t2hipp_vol_right_sub,
+         t1_vbm_tiv) %>% 
+  mutate(repo_status_scan = fct_relevel(repo_status_scan, 
+                                    c("Pre", "Peri", "Post")))
+```
+
+
+
+## T2 mediation
+
+```{r t2-data}
 #Read in the data
 ##### EVENTUALLY UPDATE T2 HIPP RESULTS
 data <- read_csv(here("data", "HAS_SNAG_mastersheet_tidy.csv"))
@@ -92,19 +116,20 @@ data <- data %>%
   dplyr::select(subject_id, sex, 
          age_scan_years:testosterone_spatial_ng_dl,
          t2hipp_vol_left_ca1:t2hipp_vol_right_sub,
-         t2hipp_vol_tiv, whole_vol_gmv:whole_vol_csf) %>% 
-  mutate(repo_status_spatial = fct_relevel(repo_status_spatial, 
+         t1_vbm_tiv) %>% 
+  mutate(repo_status_scan = fct_relevel(repo_status_scan, 
                                     c("Pre", "Peri", "Post")))
 
 #Create function for apply to variables
-dividebyTIV <- function(x, na.rm = FALSE) (x/data$t2hipp_vol_tiv)
+#t2hipp_vol_tiv
+dividebyTIV <- function(x, na.rm = FALSE) (x/data$t1_vbm_tiv)
 
 #Correct left and right volumes with TIV
 data <- data %>% 
   
   #Correct using TIV from SPM
   #CA1, CA23, DG, ERC,PHC, PRC, SUB, GMV
-  mutate_at(vars(t2hipp_vol_left_ca1:t2hipp_vol_right_sub, whole_vol_gmv),
+  mutate_at(vars(t2hipp_vol_left_ca1:t2hipp_vol_right_sub),
             dividebyTIV) %>% 
   
   #Average left and right subfields
@@ -146,7 +171,7 @@ data <- data %>%
 ```
 
 
-## EDA
+### EDA
 
 ```{r distributions}
 data_select <- data %>% 
@@ -220,10 +245,10 @@ data_dsp <- data %>%
 hist(log(data$dsp_si_true_pct))
 ```
 
-## Frequentist
+### Frequentist
 
 
-### Using `mediation`
+#### Using `mediation`
 
 With regards to mediation, bootstrapping is often used where normality does not seem like a reasonable assumption. We can do so using `mediation` package.
 
@@ -270,7 +295,7 @@ summary(results)
 
 
 
-### Using `lavaan`
+#### Using `lavaan`
 
 ```{r}
 model <- ' # direct effect
@@ -311,12 +336,12 @@ pvalue.boot <- length(which(T.boot > T.orig))/length(T.boot)
 
 
 
-### Robust Mediation Analysis
+#### Robust Mediation Analysis
 
 
 
 
-## Bayesian
+### Bayesian
 
 
 ```{r}
