@@ -46,9 +46,11 @@ Study 1 (aka "Study 2, part 1") has shown that there is a correlation between se
 
 **Effect of IV (Hormone) on Mediator:**
 
-Prior exploratory analysis for relationships between sex hormones and T2 subfield volume reveal certain significant relationships (`correlation_greymatter_hormones_corrected.Rmd`). Highlights of the results include estradiol negatively associated with CA1 for peris and with SUB for pres, and marginally negatively correlated with CA23 (all Spearman correlations). For progesterone, it was significantly positively correlated with CA1 for posts and with ERC for posts (both Pearson correlations). FSH was significantly negatively correlated with ERC and SUB for posts, negatively correlated with PHC for women overall, and marginally negatively associated with CA1 for posts (all Spearman correlations).
+Prior exploratory analysis for relationships between sex hormones and T2 subfield volume reveal certain significant relationships (`correlation_greymatter_hormones_corrected.Rmd` and `correlation_t1_hormones.Rmd`). Highlights of the results include estradiol negatively associated with CA1 for peris and with SUB for pres, and marginally negatively correlated with CA23 (all Spearman correlations). For progesterone, it was significantly positively correlated with CA1 for posts and with ERC for posts (both Pearson correlations). FSH was significantly negatively correlated with ERC and SUB for posts, negatively correlated with PHC for women overall, and marginally negatively associated with CA1 for posts (all Spearman correlations).
 
 For other brain structures, there were no structures for GMV. However, total hippocampal volume was negatively correlated with estradiol for pres (Spearman) and MTL was marginally negatively correlated with FSH for posts (Spearman).
+
+For T1 GMV, there was a positive correlation with progesterone for posts (Spearman).
 
 Significant effect of hormones, specifically estradiol and FSH, on the mediator (T2 subfields) is an absolute prerequisite for mediation being possible.
 
@@ -56,7 +58,9 @@ Significant effect of hormones, specifically estradiol and FSH, on the mediator 
 **Other**
 
 
-Following the correlations between hormones and brain structure, I explored the associations between brain structure and spatial navigation behaviors (`correlation_greymatter_behavior.Rmd`). Results revealed that position error was negatively correlated with PHC (Pearson), and solution index was marginally negatively associated with DG in men (Spearman).
+Following the correlations between hormones and brain structure, I explored the associations between brain structure and spatial navigation behaviors (`correlation_greymatter_behavior.Rmd` and `correlation_t1_hormones.Rmd`). Results revealed that position error was negatively correlated with PHC (Pearson), and solution index was marginally negatively associated with DG in men (Spearman).
+
+For T1 GMV, DSP solution index was positively associated with GMV in women (Spearman), and marginally overall for women and men. 
 
 
 
