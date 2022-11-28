@@ -43,18 +43,8 @@ I cleaned some of the data prior to analyses. I had to:
 
 1) Filter for midlife participants that have T2 subfield data (subject 333 and over)
 2) Select sex hormone measures from when scan was conducted
-3) Correct for subfield volumes using TIV, which is a combination of GMV, WMV, CSF. Divide the volumes by TIV variable (`whole_vol_tiv`)
+3) Correct for subfield volumes using TIV, which is a combination of GMV, WMV, CSF. Divide the volumes by TIV variable (`t1_vbm_tiv`)
 4) Average left and right volumes to get an average measure for each subfield and brain region
-
-**Total GMV:**
-
-
-
-**Total Hippocampal Volume:**
-
-
-**MTL:**
-
 
 
 
@@ -69,12 +59,13 @@ data <- data %>%
          completed_spatial == "Yes",
          t2hipp_status == "Yes") %>% 
   select(subject_id, sex, age_scan_years:testosterone_spatial_ng_dl,
-         t2hipp_vol_left_ca1:whole_vol_csf) %>% 
-  mutate(repo_status_spatial = fct_relevel(repo_status_spatial, 
+         t1_vbm_tiv, t2hipp_vol_left_ca1:t2hipp_vol_right_sub) %>% 
+  mutate(repo_status_scan = fct_relevel(repo_status_scan, 
                                     c("Pre", "Peri", "Post")))
 
 #Create function for apply to variables
-dividebyTIV <- function(x, na.rm = FALSE) (x/data$t2hipp_vol_tiv)
+#t2hipp_vol_tiv
+dividebyTIV <- function(x, na.rm = FALSE) (x/data$t1_vbm_tiv)
 
 
 #Correct left and right volumes with TIV
@@ -82,7 +73,7 @@ data <- data %>%
   
   #Correct using TIV from SPM
   #CA1, CA23, DG, ERC,PHC, PRC, SUB, GMV
-  mutate_at(vars(t2hipp_vol_left_ca1:t2hipp_vol_right_sub, whole_vol_gmv),
+  mutate_at(vars(t2hipp_vol_left_ca1:t2hipp_vol_right_sub),
             dividebyTIV) %>% 
   
   #Average left and right subfields
@@ -654,7 +645,7 @@ LOOP and DSP and MAZE moves variables were not significantly different than norm
 
 ```{r}
 #CA1
-c1 <- ggscatter(data_loop, x = "avg_ca1", y = "loop_pe_avg_m", color = "repo_status_spatial",
+c1 <- ggscatter(data_loop, x = "avg_ca1", y = "loop_pe_avg_m", color = "repo_status_scan",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -677,7 +668,7 @@ c1a <- ggscatter(data_loop, x = "avg_ca1", y = "loop_pe_avg_m", color = "sex",
      theme(legend.position = "none")
 
 #CA23
-c2 <- ggscatter(data_loop, x = "avg_ca23", y = "loop_pe_avg_m", color = "repo_status_spatial",
+c2 <- ggscatter(data_loop, x = "avg_ca23", y = "loop_pe_avg_m", color = "repo_status_scan",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -709,7 +700,7 @@ c2am <- ggscatter(data_loop_men, x = "avg_ca23", y = "loop_pe_avg_m", color = "c
      theme(legend.position = "none")
 
 #DG
-c3 <- ggscatter(data_loop, x = "avg_dg", y = "loop_pe_avg_m", color = "repo_status_spatial",
+c3 <- ggscatter(data_loop, x = "avg_dg", y = "loop_pe_avg_m", color = "repo_status_scan",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -732,7 +723,7 @@ c3a <- ggscatter(data_loop, x = "avg_dg", y = "loop_pe_avg_m", color = "sex",
      theme(legend.position = "none")
 
 #ERC
-c4 <- ggscatter(data_loop, x = "avg_erc", y = "loop_pe_avg_m", color = "repo_status_spatial",
+c4 <- ggscatter(data_loop, x = "avg_erc", y = "loop_pe_avg_m", color = "repo_status_scan",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -755,7 +746,7 @@ c4a <- ggscatter(data_loop, x = "avg_erc", y = "loop_pe_avg_m", color = "sex",
      theme(legend.position = "none")
 
 #PHC
-c5 <- ggscatter(data_loop, x = "avg_phc", y = "loop_pe_avg_m", color = "repo_status_spatial",
+c5 <- ggscatter(data_loop, x = "avg_phc", y = "loop_pe_avg_m", color = "repo_status_scan",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -778,7 +769,7 @@ c5a <- ggscatter(data_loop, x = "avg_phc", y = "loop_pe_avg_m", color = "sex",
      theme(legend.position = "none")
 
 #PRC
-c6 <- ggscatter(data_loop, x = "avg_prc", y = "loop_pe_avg_m", color = "repo_status_spatial",
+c6 <- ggscatter(data_loop, x = "avg_prc", y = "loop_pe_avg_m", color = "repo_status_scan",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -801,7 +792,7 @@ c6a <- ggscatter(data_loop, x = "avg_prc", y = "loop_pe_avg_m", color = "sex",
      theme(legend.position = "none")
 
 #SUB
-c7 <- ggscatter(data_loop, x = "avg_sub", y = "loop_pe_avg_m", color = "repo_status_spatial",
+c7 <- ggscatter(data_loop, x = "avg_sub", y = "loop_pe_avg_m", color = "repo_status_scan",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -851,7 +842,7 @@ CA23 men and SUB overall and women were Spearman rank correlations. All others a
 
 ```{r}
 #CA1
-c1 <- ggscatter(data_loop, x = "avg_ca1", y = "loop_de_avg_degree", color = "repo_status_spatial",
+c1 <- ggscatter(data_loop, x = "avg_ca1", y = "loop_de_avg_degree", color = "repo_status_scan",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -874,7 +865,7 @@ c1a <- ggscatter(data_loop, x = "avg_ca1", y = "loop_de_avg_degree", color = "se
      theme(legend.position = "none")
 
 #CA23
-c2 <- ggscatter(data_loop, x = "avg_ca23", y = "loop_de_avg_degree", color = "repo_status_spatial",
+c2 <- ggscatter(data_loop, x = "avg_ca23", y = "loop_de_avg_degree", color = "repo_status_scan",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -907,7 +898,7 @@ c2am <- ggscatter(data_loop_men, x = "avg_ca23", y = "loop_de_avg_degree", color
      theme(legend.position = "none")
 
 #DG
-c3 <- ggscatter(data_loop, x = "avg_dg", y = "loop_de_avg_degree", color = "repo_status_spatial",
+c3 <- ggscatter(data_loop, x = "avg_dg", y = "loop_de_avg_degree", color = "repo_status_scan",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -930,7 +921,7 @@ c3a <- ggscatter(data_loop, x = "avg_dg", y = "loop_de_avg_degree", color = "sex
      theme(legend.position = "none")
 
 #ERC
-c4 <- ggscatter(data_loop, x = "avg_erc", y = "loop_de_avg_degree", color = "repo_status_spatial",
+c4 <- ggscatter(data_loop, x = "avg_erc", y = "loop_de_avg_degree", color = "repo_status_scan",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -953,7 +944,7 @@ c4a <- ggscatter(data_loop, x = "avg_erc", y = "loop_de_avg_degree", color = "se
      theme(legend.position = "none")
 
 #PHC
-c5 <- ggscatter(data_loop, x = "avg_phc", y = "loop_de_avg_degree", color = "repo_status_spatial",
+c5 <- ggscatter(data_loop, x = "avg_phc", y = "loop_de_avg_degree", color = "repo_status_scan",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -976,7 +967,7 @@ c5a <- ggscatter(data_loop, x = "avg_phc", y = "loop_de_avg_degree", color = "se
      theme(legend.position = "none")
 
 #PRC
-c6 <- ggscatter(data_loop, x = "avg_prc", y = "loop_de_avg_degree", color = "repo_status_spatial",
+c6 <- ggscatter(data_loop, x = "avg_prc", y = "loop_de_avg_degree", color = "repo_status_scan",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -999,7 +990,7 @@ c6a <- ggscatter(data_loop, x = "avg_prc", y = "loop_de_avg_degree", color = "se
      theme(legend.position = "none")
 
 #SUB
-c7 <- ggscatter(data_loop, x = "avg_sub", y = "loop_de_avg_degree", color = "repo_status_spatial",
+c7 <- ggscatter(data_loop, x = "avg_sub", y = "loop_de_avg_degree", color = "repo_status_scan",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -1055,7 +1046,7 @@ CA23 men and SUB overall and women were Spearman rank correlations. All others a
 
 ```{r}
 #CA1
-c1 <- ggscatter(data_maze, x = "avg_ca1", y = "maze_accuracy_pct", color = "repo_status_spatial",
+c1 <- ggscatter(data_maze, x = "avg_ca1", y = "maze_accuracy_pct", color = "repo_status_scan",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -1078,7 +1069,7 @@ c1a <- ggscatter(data_maze, x = "avg_ca1", y = "maze_accuracy_pct", color = "sex
      theme(legend.position = "none")
 
 #CA23
-c2 <- ggscatter(data_maze, x = "avg_ca23", y = "maze_accuracy_pct", color = "repo_status_spatial",
+c2 <- ggscatter(data_maze, x = "avg_ca23", y = "maze_accuracy_pct", color = "repo_status_scan",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -1101,7 +1092,7 @@ c2a <- ggscatter(data_maze, x = "avg_ca23", y = "maze_accuracy_pct", color = "se
      theme(legend.position = "none")
 
 #DG
-c3 <- ggscatter(data_maze, x = "avg_dg", y = "maze_accuracy_pct", color = "repo_status_spatial",
+c3 <- ggscatter(data_maze, x = "avg_dg", y = "maze_accuracy_pct", color = "repo_status_scan",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -1124,7 +1115,7 @@ c3a <- ggscatter(data_maze, x = "avg_dg", y = "maze_accuracy_pct", color = "sex"
      theme(legend.position = "none")
 
 #ERC
-c4 <- ggscatter(data_maze, x = "avg_erc", y = "maze_accuracy_pct", color = "repo_status_spatial",
+c4 <- ggscatter(data_maze, x = "avg_erc", y = "maze_accuracy_pct", color = "repo_status_scan",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -1147,7 +1138,7 @@ c4a <- ggscatter(data_maze, x = "avg_erc", y = "maze_accuracy_pct", color = "sex
      theme(legend.position = "none")
 
 #PHC
-c5 <- ggscatter(data_maze, x = "avg_phc", y = "maze_accuracy_pct", color = "repo_status_spatial",
+c5 <- ggscatter(data_maze, x = "avg_phc", y = "maze_accuracy_pct", color = "repo_status_scan",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -1170,7 +1161,7 @@ c5a <- ggscatter(data_maze, x = "avg_phc", y = "maze_accuracy_pct", color = "sex
      theme(legend.position = "none")
 
 #PRC
-c6 <- ggscatter(data_maze, x = "avg_prc", y = "maze_accuracy_pct", color = "repo_status_spatial",
+c6 <- ggscatter(data_maze, x = "avg_prc", y = "maze_accuracy_pct", color = "repo_status_scan",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -1193,7 +1184,7 @@ c6a <- ggscatter(data_maze, x = "avg_prc", y = "maze_accuracy_pct", color = "sex
      theme(legend.position = "none")
 
 #SUB
-c7 <- ggscatter(data_maze, x = "avg_sub", y = "maze_accuracy_pct", color = "repo_status_spatial",
+c7 <- ggscatter(data_maze, x = "avg_sub", y = "maze_accuracy_pct", color = "repo_status_scan",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -1232,7 +1223,7 @@ All Spearman rank correlations.
 
 ```{r}
 #CA1
-c1 <- ggscatter(data_maze, x = "avg_ca1", y = "maze_moves", color = "repo_status_spatial",
+c1 <- ggscatter(data_maze, x = "avg_ca1", y = "maze_moves", color = "repo_status_scan",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -1255,7 +1246,7 @@ c1a <- ggscatter(data_maze, x = "avg_ca1", y = "maze_moves", color = "sex",
      theme(legend.position = "none")
 
 #CA23
-c2 <- ggscatter(data_maze, x = "avg_ca23", y = "maze_moves", color = "repo_status_spatial",
+c2 <- ggscatter(data_maze, x = "avg_ca23", y = "maze_moves", color = "repo_status_scan",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -1278,7 +1269,7 @@ c2a <- ggscatter(data_maze, x = "avg_ca23", y = "maze_moves", color = "sex",
      theme(legend.position = "none")
 
 #DG
-c3 <- ggscatter(data_maze, x = "avg_dg", y = "maze_moves", color = "repo_status_spatial",
+c3 <- ggscatter(data_maze, x = "avg_dg", y = "maze_moves", color = "repo_status_scan",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -1301,7 +1292,7 @@ c3a <- ggscatter(data_maze, x = "avg_dg", y = "maze_moves", color = "sex",
      theme(legend.position = "none")
 
 #ERC
-c4 <- ggscatter(data_maze, x = "avg_erc", y = "maze_moves", color = "repo_status_spatial",
+c4 <- ggscatter(data_maze, x = "avg_erc", y = "maze_moves", color = "repo_status_scan",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -1324,7 +1315,7 @@ c4a <- ggscatter(data_maze, x = "avg_erc", y = "maze_moves", color = "sex",
      theme(legend.position = "none")
 
 #PHC
-c5 <- ggscatter(data_maze, x = "avg_phc", y = "maze_moves", color = "repo_status_spatial",
+c5 <- ggscatter(data_maze, x = "avg_phc", y = "maze_moves", color = "repo_status_scan",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -1347,7 +1338,7 @@ c5a <- ggscatter(data_maze, x = "avg_phc", y = "maze_moves", color = "sex",
      theme(legend.position = "none")
 
 #PRC
-c6 <- ggscatter(data_maze, x = "avg_prc", y = "maze_moves", color = "repo_status_spatial",
+c6 <- ggscatter(data_maze, x = "avg_prc", y = "maze_moves", color = "repo_status_scan",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -1370,7 +1361,7 @@ c6a <- ggscatter(data_maze, x = "avg_prc", y = "maze_moves", color = "sex",
      theme(legend.position = "none")
 
 #SUB
-c7 <- ggscatter(data_maze, x = "avg_sub", y = "maze_moves", color = "repo_status_spatial",
+c7 <- ggscatter(data_maze, x = "avg_sub", y = "maze_moves", color = "repo_status_scan",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -1414,7 +1405,7 @@ All Spearman rank correlations.
 
 ```{r}
 #CA1
-c1 <- ggscatter(data_dsp, x = "avg_ca1", y = "dsp_success_pct", color = "repo_status_spatial",
+c1 <- ggscatter(data_dsp, x = "avg_ca1", y = "dsp_success_pct", color = "repo_status_scan",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -1437,7 +1428,7 @@ c1a <- ggscatter(data_dsp, x = "avg_ca1", y = "dsp_success_pct", color = "sex",
      theme(legend.position = "none")
 
 #CA23
-c2 <- ggscatter(data_dsp, x = "avg_ca23", y = "dsp_success_pct", color = "repo_status_spatial",
+c2 <- ggscatter(data_dsp, x = "avg_ca23", y = "dsp_success_pct", color = "repo_status_scan",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -1460,7 +1451,7 @@ c2a <- ggscatter(data_dsp, x = "avg_ca23", y = "dsp_success_pct", color = "sex",
      theme(legend.position = "none")
 
 #DG
-c3 <- ggscatter(data_dsp, x = "avg_dg", y = "dsp_success_pct", color = "repo_status_spatial",
+c3 <- ggscatter(data_dsp, x = "avg_dg", y = "dsp_success_pct", color = "repo_status_scan",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -1483,7 +1474,7 @@ c3a <- ggscatter(data_dsp, x = "avg_dg", y = "dsp_success_pct", color = "sex",
      theme(legend.position = "none")
 
 #ERC
-c4 <- ggscatter(data_dsp, x = "avg_erc", y = "dsp_success_pct", color = "repo_status_spatial",
+c4 <- ggscatter(data_dsp, x = "avg_erc", y = "dsp_success_pct", color = "repo_status_scan",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -1506,7 +1497,7 @@ c4a <- ggscatter(data_dsp, x = "avg_erc", y = "dsp_success_pct", color = "sex",
      theme(legend.position = "none")
 
 #PHC
-c5 <- ggscatter(data_dsp, x = "avg_phc", y = "dsp_success_pct", color = "repo_status_spatial",
+c5 <- ggscatter(data_dsp, x = "avg_phc", y = "dsp_success_pct", color = "repo_status_scan",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -1529,7 +1520,7 @@ c5a <- ggscatter(data_dsp, x = "avg_phc", y = "dsp_success_pct", color = "sex",
      theme(legend.position = "none")
 
 #PRC
-c6 <- ggscatter(data_dsp, x = "avg_prc", y = "dsp_success_pct", color = "repo_status_spatial",
+c6 <- ggscatter(data_dsp, x = "avg_prc", y = "dsp_success_pct", color = "repo_status_scan",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -1552,7 +1543,7 @@ c6a <- ggscatter(data_dsp, x = "avg_prc", y = "dsp_success_pct", color = "sex",
      theme(legend.position = "none")
 
 #SUB
-c7 <- ggscatter(data_dsp, x = "avg_sub", y = "dsp_success_pct", color = "repo_status_spatial",
+c7 <- ggscatter(data_dsp, x = "avg_sub", y = "dsp_success_pct", color = "repo_status_scan",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -1592,7 +1583,7 @@ All Spearman rank correlations.
 
 ```{r}
 #CA1
-c1 <- ggscatter(data_dsp, x = "avg_ca1", y = "dsp_si_true_pct", color = "repo_status_spatial",
+c1 <- ggscatter(data_dsp, x = "avg_ca1", y = "dsp_si_true_pct", color = "repo_status_scan",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -1615,7 +1606,7 @@ c1a <- ggscatter(data_dsp, x = "avg_ca1", y = "dsp_si_true_pct", color = "sex",
      theme(legend.position = "none")
 
 #CA23
-c2 <- ggscatter(data_dsp, x = "avg_ca23", y = "dsp_si_true_pct", color = "repo_status_spatial",
+c2 <- ggscatter(data_dsp, x = "avg_ca23", y = "dsp_si_true_pct", color = "repo_status_scan",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -1638,7 +1629,7 @@ c2a <- ggscatter(data_dsp, x = "avg_ca23", y = "dsp_si_true_pct", color = "sex",
      theme(legend.position = "none")
 
 #DG
-c3 <- ggscatter(data_dsp, x = "avg_dg", y = "dsp_si_true_pct", color = "repo_status_spatial",
+c3 <- ggscatter(data_dsp, x = "avg_dg", y = "dsp_si_true_pct", color = "repo_status_scan",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -1661,7 +1652,7 @@ c3a <- ggscatter(data_dsp, x = "avg_dg", y = "dsp_si_true_pct", color = "sex",
      theme(legend.position = "none")
 
 #ERC
-c4 <- ggscatter(data_dsp, x = "avg_erc", y = "dsp_si_true_pct", color = "repo_status_spatial",
+c4 <- ggscatter(data_dsp, x = "avg_erc", y = "dsp_si_true_pct", color = "repo_status_scan",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -1684,7 +1675,7 @@ c4a <- ggscatter(data_dsp, x = "avg_erc", y = "dsp_si_true_pct", color = "sex",
      theme(legend.position = "none")
 
 #PHC
-c5 <- ggscatter(data_dsp, x = "avg_phc", y = "dsp_si_true_pct", color = "repo_status_spatial",
+c5 <- ggscatter(data_dsp, x = "avg_phc", y = "dsp_si_true_pct", color = "repo_status_scan",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -1707,7 +1698,7 @@ c5a <- ggscatter(data_dsp, x = "avg_phc", y = "dsp_si_true_pct", color = "sex",
      theme(legend.position = "none")
 
 #PRC
-c6 <- ggscatter(data_dsp, x = "avg_prc", y = "dsp_si_true_pct", color = "repo_status_spatial",
+c6 <- ggscatter(data_dsp, x = "avg_prc", y = "dsp_si_true_pct", color = "repo_status_scan",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -1730,7 +1721,7 @@ c6a <- ggscatter(data_dsp, x = "avg_prc", y = "dsp_si_true_pct", color = "sex",
      theme(legend.position = "none")
 
 #SUB
-c7 <- ggscatter(data_dsp, x = "avg_sub", y = "dsp_si_true_pct", color = "repo_status_spatial",
+c7 <- ggscatter(data_dsp, x = "avg_sub", y = "dsp_si_true_pct", color = "repo_status_scan",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -1771,40 +1762,6 @@ All Spearman rank correlations.
 # {-}
 
 
-# Total GMV {.tabset}
-
-## LOOP {.tabset}
-
-### Position Error
-
-
-
-### Degrees Traveled
-
-## {-}
-
-
-## MAZE {.tabset}
-
-### Wayfinding Success
-
-### Moves
-
-
-## {-}
-
-
-## DSP {.tabset}
-
-### Wayfinding Success
-
-### Solution Index
-
-
-## {-}
-
-# {-}
-
 
 # TotalHipp {.tabset}
 
@@ -1812,7 +1769,70 @@ All Spearman rank correlations.
 
 ### Position Error
 
+```{r}
+#All
+c1 <- ggscatter(data_loop, x = "avg_total_hipp", y = "loop_pe_avg_m", color = "repo_status_scan",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged GMV Volume", ylab = "Averaged \nPosition Error (m)", ) +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+
+#By sex
+c1a <- ggscatter(data_loop, x = "avg_total_hipp", y = "loop_pe_avg_m", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged GMV Volume", ylab = "Averaged \nPosition Error (m)") +
+    facet_wrap(. ~ sex, scale = "free", ncol = 1) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+
+#Present
+c1+c1a
+```
+All others are Pearson correlations.
+
+
 ### Degrees Traveled
+
+```{r}
+#all
+c1 <- ggscatter(data_loop, x = "avg_total_hipp", y = "loop_de_avg_degree", color = "repo_status_scan",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged GMV Volume", ylab = "Averaged \nDegrees Traveled", ) +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+#sex
+c1a <- ggscatter(data_loop, x = "avg_total_hipp", y = "loop_de_avg_degree", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged GMV Volume", ylab = "Averaged \nDegrees Traveled") +
+    facet_wrap(. ~ sex, scale = "free", ncol = 1) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+c1+c1a
+```
+
+All correlations are pearson
 
 
 ## {-}
@@ -1822,8 +1842,67 @@ All Spearman rank correlations.
 
 ### Wayfinding Success
 
+```{r}
+#CA1
+c1 <- ggscatter(data_maze, x = "avg_total_hipp", y = "maze_accuracy_pct", color = "repo_status_scan",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged GMV Volume", ylab = "Averaged \nWayfinding Success (%)") +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+c1a <- ggscatter(data_maze, x = "avg_total_hipp", y = "maze_accuracy_pct", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged GMV Volume", ylab = "Averaged \nWayfinding Success (%)") +
+    facet_wrap(. ~ sex, scale = "free", ncol = 1) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+c1+c1a
+```
+
+All correlations are Spearman
 
 ### Moves
+
+
+```{r}
+#overall
+c1 <- ggscatter(data_maze, x = "avg_total_hipp", y = "maze_moves", color = "repo_status_scan",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged GMV Volume", ylab = "Averaged \nNumber of Moves") +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+#sex
+c1a <- ggscatter(data_maze, x = "avg_total_hipp", y = "maze_moves", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged GMV Subfield Volume", ylab = "Averaged \nNumber of Moves") +
+    facet_wrap(. ~ sex, scale = "free", ncol = 1) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+c1+c1a
+```
+
+All correlations were Spearman
 
 
 ## {-}
@@ -1833,45 +1912,74 @@ All Spearman rank correlations.
 
 ### Wayfinding Success
 
+```{r}
+#all
+c1 <- ggscatter(data_dsp, x = "avg_total_hipp", y = "dsp_success_pct", color = "repo_status_scan",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged GMV Volume", ylab = "Averaged \nWayfinding Success (%)") +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+#sex
+c1a <- ggscatter(data_dsp, x = "avg_total_hipp", y = "dsp_success_pct", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged GMV Volume", ylab = "Averaged \nWayfinding Success (%)") +
+    facet_wrap(. ~ sex, scale = "free", ncol = 1) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+c1+c1a
+```
+
+All correlations were spearman
+
+
 ### Solution Index
+
+```{r}
+#all
+c1 <- ggscatter(data_dsp, x = "avg_total_hipp", y = "dsp_si_true_pct", color = "repo_status_scan",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged GMV Volume", ylab = "Averaged \nSolution Index (%)") +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+#sex
+c1a <- ggscatter(data_dsp, x = "avg_total_hipp", y = "dsp_si_true_pct", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged GMV Volume", ylab = "Averaged \nSolution Index (%)") +
+    facet_wrap(. ~ sex, scale = "free", ncol = 1) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+c1+c1a
+```
+
+All correlations are spearman.
 
 
 ## {-}
 
 # {-}
 
-
-# MTL {.tabset}
-
-## LOOP {.tabset}
-
-### Position Error
-
-### Degrees Traveled
-
-
-## {-}
-
-
-## MAZE {.tabset}
-
-### Wayfinding Success
-
-### Moves
-
-## {-}
-
-
-## DSP {.tabset}
-
-### Wayfinding Success
-
-### Solution Index
-
-
-## {-}
-
-# {-}
 
 
 # Summary
@@ -1888,8 +1996,7 @@ All Spearman rank correlations.
 
 - For DSP, there were no significant associations between subfields and wayfinding success. Solution index was marginally negatively associated with DG in men (*p* = 0.056, Spearman).
 
-## Other (Total GMV, TotalHipp, MTL)
+## Other (TotalHipp)
 
-
-
+- Interestingly, there were no significant associations with total hipp volume using subfields. This is in contrast with T1 hipp volume, which did show a positive association between solution index and GMV for women (`correlation_t1_hormones.Rmd`)
 
