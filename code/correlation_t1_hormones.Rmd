@@ -24,7 +24,7 @@ library(purrr)
 # Overview
 
 
-This report provides exploratory and preliminary correlation analyses between sex hormones and T1 hippocampal ROI data extracted from AAL for the Healthy Aging Study sample. 
+This report provides exploratory and preliminary correlation analyses between sex hormones and T1 hippocampal ROI data extracted from AAL for the Healthy Aging Study sample. Mask was selected for left and right hippocampus, using 2D dilation 1 on registered (not smoothed) segmented grey matter.
 
 **Cleaning data steps included (T1 hipp):**
 
@@ -50,7 +50,16 @@ data <- data %>%
   select(subject_id, sex, age_scan_years, repo_status_scan,
          completed_scan, completed_spatial,
          loop_useable:testosterone_spatial_ng_dl,
-         t1_vbm_tiv:t1_vol_right_hipp_aal)
+         t1_vbm_tiv:t1_vol_right_hipp_aal_3d_d1_s) %>% 
+
+  #Further exclude this subject:
+  filter(!subject_id %in% c(
+    #"309", #bad participant
+    #"316", #vertigo/took Wellbutrin for mood and Lipitor for cholesterol 7 days/week of scan
+     "329", #on prednisone 7 days/week of scan
+    #"352", #current MDD/depression
+     "372" #past neuroschistosomiasis at 24 years old
+  ))
 
 
 
@@ -62,13 +71,14 @@ dividebyTIV <- function(x, na.rm = FALSE) (x/data$t1_vbm_tiv)
 data <- data %>% 
   
   #Correct using TIV from SPM VBM
-  mutate_at(vars(t1_vol_left_hipp_aal, t1_vol_right_hipp_aal),
+  mutate_at(vars(t1_vol_left_hipp_aal_2d_d1_r, 
+                 t1_vol_right_hipp_aal_2d_d1_r),
             dividebyTIV) %>%
   
   #Average left and right regions
- #No need since ROI already done?? ACCURATE???
-  mutate(avg_t1_hipp = ((t1_vol_left_hipp_aal + 
-                        t1_vol_right_hipp_aal)/2)*1000)
+  #No need to multiply since values are the same proportion
+  mutate(avg_t1_hipp = ((t1_vol_left_hipp_aal_2d_d1_r + 
+                        t1_vol_right_hipp_aal_2d_d1_r)/2)*1000)
 
 
 #Create subsets
@@ -90,14 +100,14 @@ data_men <- data %>%
 ```{r shapiro-tests, echo=FALSE, results='hide'}
 #is DV significantly difference from normal?
 
-shapiro.test(data$avg_t1_hipp) #yes
-shapiro.test(data_repo$avg_t1_hipp) #yes
+shapiro.test(data$avg_t1_hipp) #no
+shapiro.test(data_repo$avg_t1_hipp) #no
 shapiro.test(data_men$avg_t1_hipp) #no
 ```
 
-Shapiro-Wilks test reveals that the average T1 hipp volume overall and for women were skewed, while men's were normally distributed. Hormone and volume associations for women will be using Spearman rank correlation.
+Shapiro-Wilks test reveals that the average T1 hipp volume for all groups were normally distributed.
 
-## Structural Comparison
+## Structural Comparison: all with T1
 
 ```{r}
 #Reproductive status
@@ -141,6 +151,8 @@ p3 <- ggplot(data = data, aes(x = avg_t1_hipp)) +
 #Combine
 (p1+p2)/p3
 ```
+ Interestingly, women show greater T1 hippocampal GMV than men.
+
 
 ```{r}
 data_repo %>% 
@@ -153,8 +165,6 @@ data %>%
   summarize(mean_gmv = round(mean(avg_t1_hipp), digits = 3),
             std_gmv = round(sd(avg_t1_hipp), digits = 3)) %>% kable()
 ```
-
-Means and standard deviations of GMV are displayed by reproductive status and by sex.
 
 
 ```{r}
@@ -173,15 +183,34 @@ ttest
 ```
 
 
-T-test results comparing GMV by sex was significant.
+T-test results comparing GMV by sex was significant. Women have larger T1 hippocampal volume than men (*p* < 0.001)
 
 
 
 # Hormone 
 
-We know that estradiol, progesterone, and FSH are skewed, so we can either apply log transformations or move forward with Spearman rank correlations.
 
-To be consistent, for women, hormones will be log transformed to allow for Pearson correlations to run in the subsequent analyses (by reproductive stage). Estradiol, FSH, and testosterone correlations will be Spearman rank correlations for women.
+```{r echo=FALSE, results = 'hide'}
+#Estradiol
+shapiro.test(data$estradiol_scan_pg_ml) #yes
+shapiro.test(log(data$estradiol_scan_pg_ml)) #yes
+
+
+#Progesterone
+shapiro.test(data$progesterone_scan_ng_ml) #yes
+shapiro.test(log(data$progesterone_scan_ng_ml)) #yes
+
+#FSH
+shapiro.test(data$fsh_scan_miu_ml) #yes
+shapiro.test(log(data$fsh_scan_miu_ml)) #yes
+
+#Testosterone
+shapiro.test(data_men$testosterone_scan_ng_dl) #no
+```
+
+We know that estradiol, progesterone, and FSH distributions are skewed, so we can either apply log transformations or move forward with Spearman rank correlations.
+
+To be consistent, for women, all hormones will first be log transformed. Despite log transformations, hormones were still significant (different than normal), so correlations will be Spearman rank correlations with log-transformed hormones for women.
 
 ```{r}
 #Convert to log for data_repo
@@ -1053,7 +1082,7 @@ c1+c1a
 ```
 
 
-Women and men correlations are pearson. Women overall show marginal positive association between T1 hipp GMV and MAZE moves (Pearson, p = 0.08)
+Women and men correlations are pearson. 
 
 ## DSP
 
@@ -1087,7 +1116,7 @@ c1a <- ggscatter(data_dsp, x = "avg_t1_hipp", y = "dsp_success_pct", color = "se
 c1+c1a
 ```
 
-All correlations were pearson
+All correlations were pearson. Overall, lower T1 hipp GMV was associated with lower wayfinding success in DSP (*p* < 0.05). This pattern was also observed marginally in men (*p* = 0.055), but not in women (*p* = 0.89).
 
 ### Solution Index
 
@@ -1119,22 +1148,19 @@ c1a <- ggscatter(data_dsp, x = "avg_t1_hipp", y = "dsp_si_true_pct", color = "se
 c1+c1a
 ```
 
-All correlations are spearman. Overall, T1 GMV volume is marginally positively associated with SI (Pearson, p = 0.054). For women, T1 volume was significantly associated with DSP solution index.
+All correlations are spearman. For women, T1 volume was also marginally associated with DSP solution index (Spearman, *p* = 0.079).
 
 
 # Summary
 
 Results reveal that:
 
-- Sex hormones for women were log-transformed, and correlations among women were Spearman rank. All correlations with men were Pearson.
+- For all HAS participants who had a T1 scan, Based on structural comparisons and after correcting for TIV, women have larger T1 hippocampal volume than men (*p* < 0.001). Sex hormones for women were log-transformed and correlations among women were carried out using Spearman rank. All correlations with men were Pearson. No significant correlations between hormone concentrations and T1 hippocampal volume were observed for any groups.
 
-- HORMONES: For women, progesterone was positively associated with GMV for posts (Spearman, p < 0.01). There were no associations with hormones for men.
+- For LOOP, women with lower GMV correlated with lower degrees traveled (Pearson, *p* < 0.05).  Overall, lower T1 hipp GMV was associated with lower wayfinding success in DSP (Pearson, *p* < 0.05). This pattern was also observed marginally in men (Pearson, *p* = 0.055), but not in women (Pearson, *p* = 0.89). DSP solution index was marginally positively associated with women with higher GMV (Spearman, *p* = 0.079).
 
-- BEHAVIOR: For women, DSP solution index was positively associated with T1 hipp volume for women (Spearman, p = 0.04). Overall, T1 hipp volume was marginally associated with DSP solution index for women and men (Spearman, p = 0.054).
+Future:
 
-
-Future plans and follow-up questions:
-
-- Check with Caitlin on AAL ROI volumes and correcting for TIV
+- Will need to assess hormone-brain relationships among those with specific behavioral data
 
 
