@@ -46,13 +46,13 @@ Study 1 (aka "Study 2, part 1") has shown that there is a correlation between se
 
 **Effect of IV (Hormone) on Mediator:**
 
-Prior exploratory analysis for relationships between sex hormones and T2 subfield volume reveal certain significant relationships (`correlation_greymatter_hormones_corrected.Rmd` and `correlation_t1_hormones.Rmd`). Highlights of the results include estradiol negatively associated with CA1 for peris and with SUB for pres, and marginally negatively correlated with CA23 (all Spearman correlations). For progesterone, it was significantly positively correlated with CA1 for posts and with ERC for posts (both Pearson correlations). FSH was significantly negatively correlated with ERC and SUB for posts, negatively correlated with PHC for women overall, and marginally negatively associated with CA1 for posts (all Spearman correlations).
+Prior exploratory analysis for relationships between sex hormones and T2 subfield volume reveal certain significant relationships (`correlation_greymatter_hormones_corrected.Rmd`). Highlights of the results include estradiol negatively associated with CA1 for peris and with SUB for pres, and marginally negatively correlated with CA23 (all Spearman correlations). For progesterone, it was significantly positively correlated with CA1 for posts and with ERC for posts (both Pearson correlations). FSH was significantly negatively correlated with ERC and SUB for posts, negatively correlated with PHC for women overall, and marginally negatively associated with CA1 for posts (all Spearman correlations).
 
-For other brain structures, there were no structures for GMV. However, total hippocampal volume was negatively correlated with estradiol for pres (Spearman) and MTL was marginally negatively correlated with FSH for posts (Spearman).
+For other brain structures, total hippocampal volume was negatively correlated with estradiol for pres (Spearman) and MTL was marginally negatively correlated with FSH for posts (Spearman). 
 
-For T1 GMV, there was a positive correlation with progesterone for posts (Spearman).
+For T1 hippocampal volume (`correlation_t1_hormones.Rmd`), there was a positive correlation with progesterone for posts (Spearman).
 
-Significant effect of hormones, specifically estradiol and FSH, on the mediator (T2 subfields) is an absolute prerequisite for mediation being possible.
+Significant effect of hormones, specifically estradiol and FSH, on the mediator (T2 subfields or T1 hippocampal volume) is an absolute prerequisite for mediation being possible.
 
 
 **Other**
@@ -60,7 +60,7 @@ Significant effect of hormones, specifically estradiol and FSH, on the mediator 
 
 Following the correlations between hormones and brain structure, I explored the associations between brain structure and spatial navigation behaviors (`correlation_greymatter_behavior.Rmd` and `correlation_t1_hormones.Rmd`). Results revealed that position error was negatively correlated with PHC (Pearson), and solution index was marginally negatively associated with DG in men (Spearman). Total hippocampal volume from subfields revealed no significant associations.
 
-For T1 GMV, DSP solution index was positively associated with GMV in women (Spearman), and marginally overall for women and men. 
+For T1 hippocampal volume, DSP solution index was positively associated with GMV in women (Spearman), and marginally positively associated with GMV overall for women and men (Spearman).
 
 
 
@@ -70,7 +70,7 @@ Are there indirect effects, such that hippocampal grey matter volume mediates th
 
 # Methods
 
-Here, I determine how T1 and T2 subfield volume mediates the relationship between sex hormones and behavior for navigation strategy. I will investigate whether there are any relationships between spatial navigation behaviors and T2 subfield volumes. I plan to apply causal mediation analysis to investigate whether the effect of sex hormones (IV, predictor) on spatial behavior (DV, outcome) is mediated by participants' T2 subfield volume (mediator).
+Here, I determine how T1 hippocampal and T2 subfield volume mediate the relationship between sex hormones and behavior for navigation strategy. I will investigate whether there are any relationships between spatial navigation behaviors and T1 hippocampal and T2 subfield volumes. I plan to apply causal mediation analysis to investigate whether the effect of sex hormones (IV, predictor) on spatial behavior (DV, outcome) is mediated by participants' T1 hippocampal and T2 subfield volume (mediator).
 
 To account for missing data, I will use full information max likelihood. 
 
@@ -78,25 +78,259 @@ To account for missing data, I will use full information max likelihood.
 # Data Analysis
 
 
-## T1 mediation
+## T1 mediation: women
 
 ```{r t1-data}
 #Read in the data
-data <- read_csv(here("data", "HAS_SNAG_mastersheet_tidy.csv"))
+data_t1 <- read_csv(here("data", "HAS_SNAG_mastersheet_tidy.csv"))
 
 #Filter for midlife women, has dsp data, has t1 data
-data <- data %>% 
+data_t1 <- data_t1 %>% 
   filter(age_group == "Midlife", 
-         sex == "Female",
          t1_status == "Yes",
          dsp_useable == "Yes") %>% 
   dplyr::select(subject_id, sex, 
          age_scan_years:testosterone_spatial_ng_dl,
-         t2hipp_vol_left_ca1:t2hipp_vol_right_sub,
+         t1_vol_left_hipp_aal_2d_d1_r, t1_vol_right_hipp_aal_2d_d1_r,
          t1_vbm_tiv) %>% 
   mutate(repo_status_scan = fct_relevel(repo_status_scan, 
-                                    c("Pre", "Peri", "Post")))
+                                    c("Pre", "Peri", "Post", "Men"))) %>% 
+  #Further exclude these subjects:
+  filter(!subject_id %in% c(
+    #"309", #bad participant
+    #"316", #vertigo/took Wellbutrin for mood and Lipitor for cholesterol 7 days/week of scan
+     "329", #on prednisone 7 days/week of scan
+    #"352", #current MDD/depression
+     "372" #past neuroschistosomiasis at 24 years old
+  ))
+
+#Create average t1 hipp volume
+#Create function for apply to variables
+dividebyTIV <- function(x, na.rm = FALSE) (x/data_t1$t1_vbm_tiv)
+
+#Apply function to variables
+data_t1 <- data_t1 %>% 
+  
+  #Correct using TIV from SPM VBM
+  mutate_at(vars(t1_vol_left_hipp_aal_2d_d1_r, 
+                 t1_vol_right_hipp_aal_2d_d1_r),
+            dividebyTIV) %>%
+  
+  #Average left and right regions
+  mutate(avg_t1_hipp = ((t1_vol_left_hipp_aal_2d_d1_r + 
+                        t1_vol_right_hipp_aal_2d_d1_r)/2)*1000)
+
+
+#Women and men
+data_t1_women <- data_t1 %>% 
+  filter(sex == "Female") %>% 
+  mutate(repo_status_scan = fct_relevel(repo_status_scan, 
+                                    c("Pre", "Peri", "Post"))) 
+data_t1_men <- data_t1 %>% 
+  filter(sex == "Male") %>% 
+  mutate(repo_status_scan = fct_relevel(repo_status_scan, 
+                                    c("Pre", "Peri", "Post"))) 
 ```
+
+### EDA
+
+```{r}
+#Basic demo table
+data_t1 %>% 
+  group_by(sex) %>% 
+  summarize(count = n(),
+            mean_age = mean(age_scan_years),
+            sd_age = sd(age_scan_years),
+            min_age = min(age_scan_years),
+            max_age = max(age_scan_years),
+            mean_vol = mean(avg_t1_hipp),
+            sd_vol = sd(avg_t1_hipp),
+            mean_succ = mean(dsp_success_pct),
+            sd_succ = sd(dsp_success_pct),
+            mean_si = mean(dsp_si_true_pct),
+            sd_si = sd(dsp_si_true_pct)) %>% 
+  kable(
+    col.names = c("Sex", "N", "Mean Age (years)", "Std. Dev. Age",
+                      "Min. Age", "Max. Age", "Mean T1 hipp (volume)",
+                      "Std. Dev. T1 hipp", "Mean Wayfinding Success (%)",
+                      "Std. Dev Wayfinding Success", "Mean Solution Index (%)",
+                      "Std. Dev. Solution Index (%)"),
+        #Change alignment
+        align = c(rep("c", 9)),
+        #Round digits to 2
+        digits = 2,
+        #Change width of table
+        table.attr = "style='width:80%;'") %>% 
+  
+  #Make table striped and hover
+  kable_styling(bootstrap_options = c("hover", "striped"),
+                #Center table
+                position = "center")
+```
+
+
+
+```{r t1-distributions}
+data_select <- data_t1_women %>% 
+  dplyr::select(estradiol_scan_pg_ml,
+         avg_t1_hipp, dsp_si_true_pct)
+
+ggpairs(data_select,  
+        lower = list(continuous = "smooth")) + theme_bw()
+```
+Estradiol looks exponentially distributed, and SI is right-skewed
+
+
+```{r}
+describe(data_select)
+```
+
+### Using `mediation`
+
+#### E
+
+With regards to mediation, bootstrapping is often used where normality does not seem like a reasonable assumption. We can do so using `mediation` package.
+
+
+1. Estradiol predicting Solution Index
+
+Total effect
+
+```{r}
+fit.totaleffect <- lm(dsp_si_true_pct ~ estradiol_scan_pg_ml, data=data_t1_women)
+tidy(fit.totaleffect)
+```
+
+
+2. Estradiol predicting T1 hipp volume
+
+Effect of IV on mediatior
+
+```{r}
+fit.mediator <- lm(avg_t1_hipp ~ estradiol_scan_pg_ml, data=data_t1_women)
+tidy(fit.mediator)
+```
+
+
+3. Estradiol and CA1 predicting SOlution Index
+
+Effect of mediator on DV
+
+```{r}
+fit.dv <- lm(dsp_si_true_pct ~ estradiol_scan_pg_ml + avg_t1_hipp, data=data_t1_women)
+tidy(fit.dv)
+```
+
+
+```{r}
+results <- mediate(fit.mediator, 
+                   fit.dv, 
+                   treat = 'estradiol_scan_pg_ml', 
+                   mediator = 'avg_t1_hipp', 
+                   #SI = TRUE, # sequential ignorability assumption, only for missing data
+                   boot = TRUE, sims = 1000)
+summary(results)
+```
+
+
+#### P
+
+```{r}
+fit.totaleffect <- lm(dsp_si_true_pct ~ progesterone_scan_ng_ml, data=data_t1_women)
+tidy(fit.totaleffect)
+
+fit.mediator <- lm(avg_t1_hipp ~ progesterone_scan_ng_ml, data=data_t1_women)
+tidy(fit.mediator)
+
+fit.dv <- lm(dsp_si_true_pct ~ progesterone_scan_ng_ml + avg_t1_hipp, data=data_t1_women)
+tidy(fit.dv)
+```
+
+
+```{r}
+results <- mediate(fit.mediator, 
+                   fit.dv, 
+                   treat = 'progesterone_scan_ng_ml', 
+                   mediator = 'avg_t1_hipp', 
+                   #SI = TRUE, # sequential ignorability assumption
+                   boot = TRUE, sims = 1000)
+summary(results)
+```
+
+
+#### FSH
+
+```{r}
+fit.totaleffect <- lm(dsp_si_true_pct ~ fsh_scan_miu_ml, data=data_t1_women)
+tidy(fit.totaleffect)
+
+fit.mediator <- lm(avg_t1_hipp ~ fsh_scan_miu_ml, data=data_t1_women)
+tidy(fit.mediator)
+
+fit.dv <- lm(dsp_si_true_pct ~ fsh_scan_miu_ml + avg_t1_hipp, data=data_t1_women)
+tidy(fit.dv)
+```
+
+
+```{r}
+results <- mediate(fit.mediator, 
+                   fit.dv, 
+                   treat = 'fsh_scan_miu_ml', 
+                   mediator = 'avg_t1_hipp', 
+                   #SI = TRUE, # sequential ignorability assumption
+                   boot = TRUE, sims = 1000)
+summary(results)
+```
+
+
+### Using `lavaan`
+
+
+#### E
+
+```{r}
+model <- ' # direct effect
+             dsp_si_true_pct ~ c*estradiol_scan_pg_ml
+           # mediator
+             avg_t1_hipp ~ a*estradiol_scan_pg_ml
+             dsp_si_true_pct ~ b*avg_t1_hipp
+           # indirect effect (a*b)
+             ab := a*b
+           # total effect
+             total := c + (a*b)
+         '
+# fit <- sem(model, data = data,
+#            std.ov = TRUE, #standardize variables
+#            meanstructure = TRUE,
+#            #se = 'robust.mlr', #incomplete data
+#            missing = "fiml")
+# summary(fit)
+
+fit <- sem(model, data = data_t1_women,
+           std.ov = TRUE, #standardize variables
+           meanstructure = TRUE,
+           se = 'bootstrap',
+           bootstrap = 1000,
+           missing = "fiml")
+summary(fit)
+```
+
+```{r}
+#Boostrap test statistics
+
+# bootstrap test statistic + compute p-value
+T.boot <- bootstrapLavaan(fit, R=10, type="nonparametric",
+                          FUN=fitMeasures, fit.measures="chisq")
+pvalue.boot <- length(which(T.boot > T.orig))/length(T.boot)
+
+```
+
+
+
+#### Robust Mediation Analysis
+
+
+
 
 
 
