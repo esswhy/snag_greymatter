@@ -148,7 +148,8 @@ tab_final %>%
   kable_styling("striped", full_width = FALSE,
                 position = "center", 
                 font_size = 12) %>%
-  add_header_above(c("Overall" = 4, "LOOP" = 3, "MAZE" = 3, "DSP" = 3))
+  add_header_above(c(" " = 1, "Overall" = 3, 
+                     "LOOP" = 3, "MAZE" = 3, "DSP" = 3))
 ```
 
 **WOMEN**
