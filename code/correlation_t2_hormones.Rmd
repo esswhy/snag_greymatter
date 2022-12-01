@@ -1,0 +1,3556 @@
+---
+title: "Study 2, part 2: T2 Subfields and Hormones Correlations"
+author: "Shuying Yu and Caitlin Taylor"
+date: "08/24/2022"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 4
+    theme: flatly
+---
+
+```{r setup, include = FALSE, warning = FALSE, message = FALSE}
+knitr::opts_chunk$set(echo = TRUE, include = FALSE,
+                      warning = FALSE, message = FALSE, fig.align = "center")
+
+#Attach libraries
+library(tidyverse)
+library(here)
+library(janitor)
+library(kableExtra)
+library(ggpubr)
+library(patchwork)
+library(readxl)
+library(knitr)
+library(broom)
+library(purrr)
+```
+
+
+
+# Overview
+
+This report provides exploratory and preliminary correlation analyses between sex hormones and T2 *unretouched*, raw hippocampal subfield data from the Healthy Aging Study sample that have completed some portion of the spatial navigation study. 
+
+**Cleaning data steps included (T2 subfields):**
+
+1) Filter participants that have T2 subfield data from scan and completed spatial navigation behavior
+
+2) Select sex hormone measures from when scan was conducted
+
+3) Correct left and right volumes with TIV from T1 data
+
+4) Average left and right volumes to get an average measure for each subfield region
+
+
+**Calculating Total Hippocampal Volume:**
+
+1) After left and right T2 subfields were corrected for TIV, sum up left and right total hipp (CA1, CA23, DG, SUB)
+
+2) Average left and right volumes to get an average measure 
+
+
+**Calculating Total MTL:**
+
+1) After left and right T2 subfields were corrected for TIV, sum up left and right MTL (CA1, CA23, DG, SUB, ERC, PHC, PRC)
+
+2) Average left and right volumes to get an average measure 
+
+
+
+Sample size:
+
+- Men = 24
+
+- Women = 63 (24 pre, 20 peri, 19 post)
+
+
+```{r data_wrangling}
+########## Data 
+
+#Read in the data
+data <-  read_csv(here("data", "HAS_SNAG_mastersheet_tidy.csv"))
+
+#Filter for midlife, has spatial, has t2hipp data
+data <- data %>% 
+  filter(age_group == "Midlife", 
+         t2hipp_status == "Yes",
+         completed_spatial == "Yes") %>% 
+  dplyr::select(subject_id, sex, 
+         age_scan_years:testosterone_spatial_ng_dl,
+         t2hipp_vol_left_ca1:t2hipp_vol_right_sub,
+         t1_vbm_tiv) %>% 
+  mutate(repo_status = fct_relevel(repo_status_spatial, 
+                                    c("Pre", "Peri", "Post", "Men"))) %>% 
+  
+  #Further exclude this subject:
+  filter(!subject_id %in% c(
+    #"309", #bad participant
+    #"316", #vertigo/took Wellbutrin for mood and Lipitor for cholesterol 7 days/week of scan
+     "329", #on prednisone 7 days/week of scan
+    #"352", #current MDD/depression
+     "372" #past neuroschistosomiasis at 24 years old
+  ))
+
+
+########## Correct using TIV, then average left and right
+
+##### T2hipp
+
+#Create function for apply to variables
+#t2hipp_vol_tiv
+dividebyTIV <- function(x, na.rm = FALSE) (x/data$t1_vbm_tiv)
+
+#Correct left and right volumes with TIV
+data <- data %>% 
+  
+  #Correct using TIV from SPM
+  #CA1, CA23, DG, ERC,PHC, PRC, SUB, GMV
+  mutate_at(vars(t2hipp_vol_left_ca1:t2hipp_vol_right_sub),
+            dividebyTIV) %>% 
+  
+  #Average left and right subfields
+  mutate(avg_ca1 = (t2hipp_vol_left_ca1+t2hipp_vol_right_ca1) / 2,
+         avg_ca23 = (t2hipp_vol_left_ca23+t2hipp_vol_right_ca23) / 2,
+         avg_dg = (t2hipp_vol_left_dg+t2hipp_vol_right_dg) / 2,
+         avg_erc = (t2hipp_vol_left_erc+t2hipp_vol_right_erc) / 2,
+         avg_phc = (t2hipp_vol_left_phc+t2hipp_vol_right_phc) / 2,
+         avg_prc = (t2hipp_vol_left_prc+t2hipp_vol_right_prc) / 2,
+         avg_sub = (t2hipp_vol_left_sub+t2hipp_vol_right_sub) / 2) %>% 
+  
+  #Calculate total left and right hipp
+  mutate(total_l_hipp = (t2hipp_vol_left_ca1 + 
+                         t2hipp_vol_left_ca23 +
+                         t2hipp_vol_left_dg + 
+                         t2hipp_vol_left_sub),
+         total_r_hipp = (t2hipp_vol_right_ca1 + 
+                         t2hipp_vol_right_ca23 + 
+                         t2hipp_vol_right_dg + 
+                         t2hipp_vol_right_sub),
+         avg_total_hipp = (total_l_hipp + total_r_hipp)/2) %>% 
+  
+  #Calculate left and right MTL
+  mutate(lmtl = (t2hipp_vol_left_ca1 + 
+                 t2hipp_vol_left_ca23 +
+                 t2hipp_vol_left_dg + 
+                 t2hipp_vol_left_sub + 
+                 t2hipp_vol_left_erc + 
+                 t2hipp_vol_left_phc + 
+                 t2hipp_vol_left_prc),
+         rmtl = (t2hipp_vol_right_ca1 + 
+                 t2hipp_vol_right_ca23 +
+                 t2hipp_vol_right_dg + 
+                 t2hipp_vol_right_sub + 
+                 t2hipp_vol_right_erc + 
+                 t2hipp_vol_right_phc + 
+                 t2hipp_vol_right_prc),
+         avg_mtl = (lmtl + rmtl)/2)
+
+
+#Subset for women by repo status
+data_repo <- data %>% 
+  filter(sex == "Female") %>% 
+  mutate(repo_status = fct_relevel(repo_status, 
+                                    c("Pre", "Peri", "Post")))
+
+#Subset for men
+data_men <- data %>% 
+  filter(sex == "Male")
+```
+
+
+```{r demo-table, include=TRUE, echo=FALSE}
+#Table overall
+tab_overall <- data %>% 
+  group_by(sex) %>% 
+  summarize(n_subject = n(),
+            age_mean = mean(age_spatial_years),
+            age_Sd = sd(age_spatial_years))
+
+#Table LOOP
+tab_loop <- data %>% 
+  filter(loop_useable == "Yes") %>% 
+  group_by(sex) %>% 
+  summarize(n_subject = n(),
+            age_mean = mean(age_spatial_years),
+            age_Sd = sd(age_spatial_years))
+
+#Table MAZE
+tab_maze <- data %>% 
+  filter(maze_useable == "Yes") %>% 
+  group_by(sex) %>% 
+  summarize(n_subject = n(),
+            age_mean = mean(age_spatial_years),
+            age_Sd = sd(age_spatial_years))
+
+
+#Table DSP
+tab_dsp <- data %>% 
+  filter(dsp_useable == "Yes") %>% 
+  group_by(sex) %>% 
+  summarize(n_subject = n(),
+            age_mean = mean(age_spatial_years),
+            age_Sd = sd(age_spatial_years))
+
+
+#Join df based on sex
+tab1 <- merge(tab_overall, tab_loop, by = "sex")
+
+#Rename columns
+tab1 <- tab1 %>% 
+  rename(n_subject_overall = n_subject.x,
+         age_mean_overall = age_mean.x,
+         age_sd_overall = age_Sd.x,
+         n_subject_loop = n_subject.y,
+         age_mean_loop = age_mean.y,
+         age_sd_loop = age_Sd.y)
+
+#Rest of the merge
+tab2 <- merge(tab1, tab_maze, by = "sex")
+tab_final <- merge(tab2, tab_dsp, by = "sex")
+
+
+#Rename columns
+tab_final <- tab_final %>% 
+  rename(n_subject_maze = n_subject.x,
+         age_mean_maze = age_mean.x,
+         age_sd_maze = age_Sd.x,
+         n_subject_dsp = n_subject.y,
+         age_mean_dsp = age_mean.y,
+         age_sd_dsp = age_Sd.y)
+
+#Kable presentation (ideal if we had all hormones)
+tab_final %>% 
+  kable(col.names = c("Sex", "n","Mean Age","SD Age",
+                      "n","Mean Age","SD Age",
+                      "n","Mean Age","SD Age",
+                      "n","Mean Age","SD Age"),
+        caption = "Sample size and age for women and men grouped by overall completion of spatial navigation behavior with T2hipp scan.",
+        digits = 2,
+        align = c("l", rep("c", times = 11))) %>% 
+  kable_styling("striped", full_width = FALSE,
+                position = "center", 
+                font_size = 12) %>%
+  add_header_above(c(" " = 1, "Overall" = 3, 
+                     "LOOP" = 3, "MAZE" = 3, "DSP" = 3))
+```
+
+Above table shows the table of sample size and mean and standard deviation of age by sex for overall group who have completed spatial behavior and have a T2hipp scan.
+
+All sample size for T2hipp x hormone correlations for women are listed in the table above. For men, because some participants did not have all hormones evaluated (e.g, only testosterone available), the sample size for the correlations for that hormone and with T1 hipp volume will be different.
+
+For men, the accurate sample sizes would be:
+
+- LOOP: *n* = 10 DHEAS, *n* = 11 for SHBG and T
+
+- MAZE: *n* = 16 DHEAS, *n* = 17 for SHBG and T
+
+- DSP: *n* = 21 DHEAS, *n* = 22 for SHBG and T
+
+```{r}
+##### WOMEN
+#LOOP
+test <- data_repo %>% 
+  filter(loop_useable == "Yes") %>% 
+  select(subject_id,
+         estradiol_spatial_pg_ml,
+         progesterone_spatial_ng_ml,
+         fsh_spatial_miu_ml,
+         shbg_spatial_nmol_l,
+         dheas_spatial_ug_dl,
+         testosterone_spatial_ng_dl)
+#Sum of rows = sample size for each hormone x T1 correlation
+colSums(!is.na(test)) #all n=16
+
+#MAZE
+test <- data_repo %>% 
+  filter(maze_useable == "Yes") %>% 
+  select(subject_id,
+         estradiol_spatial_pg_ml,
+         progesterone_spatial_ng_ml,
+         fsh_spatial_miu_ml,
+         shbg_spatial_nmol_l,
+         dheas_spatial_ug_dl,
+         testosterone_spatial_ng_dl)
+#Sum of rows = sample size for each hormone x T1 correlation
+colSums(!is.na(test)) #all n=50
+
+#DSP
+test <- data_repo %>% 
+  filter(dsp_useable == "Yes") %>% 
+  select(subject_id,
+         estradiol_spatial_pg_ml,
+         progesterone_spatial_ng_ml,
+         fsh_spatial_miu_ml,
+         shbg_spatial_nmol_l,
+         dheas_spatial_ug_dl,
+         testosterone_spatial_ng_dl)
+#Sum of rows = sample size for each hormone x T1 correlation
+colSums(!is.na(test)) #all n=35
+
+
+#####MEN
+#LOOP
+test <- data_men %>% 
+  filter(loop_useable == "Yes") %>% 
+  select(fsh_spatial_miu_ml,
+         shbg_spatial_nmol_l,
+         dheas_spatial_ug_dl,
+         testosterone_spatial_ng_dl)
+#Sum of rows = sample size for each hormone x T1 correlation
+colSums(!is.na(test)) #DHEAS n = 10, SHBG & T n = 11
+
+#MAZE
+test <- data_men %>% 
+  filter(maze_useable == "Yes") %>% 
+  select(subject_id,
+         shbg_spatial_nmol_l,
+         dheas_spatial_ug_dl,
+         testosterone_spatial_ng_dl)
+#Sum of rows = sample size for each hormone x T1 correlation
+colSums(!is.na(test)) #DHEAS n = 16, SHBG & T n = 17
+
+#DSP
+test <- data_men %>% 
+  filter(dsp_useable == "Yes") %>% 
+  select(subject_id,
+         shbg_spatial_nmol_l,
+         dheas_spatial_ug_dl,
+         testosterone_spatial_ng_dl)
+#Sum of rows = sample size for each hormone x T1 correlation
+colSums(!is.na(test)) #DHEAS n = 21, SHBG & T n = 22
+```
+
+
+
+# Structural Distributions 
+
+```{r shapiro-tests, echo=FALSE, results='hide'}
+#is DV significantly difference from normal?
+
+
+#TotalHipp
+shapiro.test(data$avg_total_hipp) #yes
+shapiro.test(data_repo$avg_total_hipp) #yes
+shapiro.test(data_men$avg_total_hipp) #no
+
+#MTL
+shapiro.test(data$avg_mtl) #yes
+shapiro.test(data_repo$avg_mtl) #yes
+shapiro.test(data_men$avg_mtl) #no
+
+
+#CA1
+shapiro.test(data$avg_ca1) #no
+shapiro.test(data_repo$avg_ca1) #no
+shapiro.test(data_men$avg_ca1) #no
+
+#CA23
+shapiro.test(data$avg_ca23) #no
+shapiro.test(data_repo$avg_ca23) #no
+shapiro.test(data_men$avg_ca23) #yes
+
+#DG
+shapiro.test(data$avg_dg) #no
+shapiro.test(data_repo$avg_dg) #no
+shapiro.test(data_men$avg_dg) #no
+
+#ERC
+shapiro.test(data$avg_erc) #no
+shapiro.test(data_repo$avg_erc) #no
+shapiro.test(data_men$avg_erc) #no
+
+#PHC
+shapiro.test(data$avg_phc) #no
+shapiro.test(data_repo$avg_phc) #no
+shapiro.test(data_men$avg_phc) #no
+
+#PRC
+shapiro.test(data$avg_prc) #no
+shapiro.test(data_repo$avg_prc) #no
+shapiro.test(data_men$avg_prc) #no
+
+#SUB
+shapiro.test(data$avg_sub) #yes
+shapiro.test(data_repo$avg_sub) #yes
+shapiro.test(data_men$avg_sub) #no
+```
+
+Shapiro-Wilk's test reveal that CA23 for men, and SUB overall and SUB for women were not normally distributed. Also, total hipp and MTL for overall and for women were not normally distributed. Hormone and subfield/volume associations for these subfields will be using Spearman rank correlation.
+
+
+# Hormone Distributions {.tabset}
+
+```{r echo=FALSE, results='hide'}
+#RAW
+
+#Estradiol
+shapiro.test(data$estradiol_spatial_pg_ml) #yes
+shapiro.test(data_repo$estradiol_spatial_pg_ml) #yes
+
+#Progesterone
+shapiro.test(data$progesterone_spatial_ng_ml) #yes
+shapiro.test(data_repo$progesterone_spatial_ng_ml) #yes
+
+#FSH
+shapiro.test(data$fsh_spatial_miu_ml) #yes
+shapiro.test(data_repo$fsh_spatial_miu_ml) #yes
+
+#DHEAS
+shapiro.test(data$dheas_spatial_ug_dl) #yes
+shapiro.test(data_repo$dheas_spatial_ug_dl) #yes
+shapiro.test(data_men$dheas_spatial_ug_dl) #no
+
+#SHBG
+shapiro.test(data$shbg_spatial_nmol_l) #yes
+shapiro.test(data_repo$shbg_spatial_nmol_l) #yes
+shapiro.test(data_men$shbg_spatial_nmol_l) #yes
+
+#Testosterone
+shapiro.test(data$testosterone_spatial_ng_dl) #yes
+shapiro.test(data_repo$testosterone_spatial_ng_dl) #yes
+shapiro.test(data_men$testosterone_spatial_ng_dl) #no
+
+
+
+#################################################3
+
+#### LOGGED
+
+#Estradiol
+shapiro.test(log(data$estradiol_spatial_pg_ml)) #no
+shapiro.test(log(data_repo$estradiol_spatial_pg_ml)) #no
+
+#Progesterone
+shapiro.test(log(data$progesterone_spatial_ng_ml)) #no
+shapiro.test(log(data_repo$progesterone_spatial_ng_ml)) #no
+
+#FSH
+shapiro.test(log(data$fsh_spatial_miu_ml)) #yes
+shapiro.test(log(data_repo$fsh_spatial_miu_ml)) #yes
+
+#DHEAS
+shapiro.test(log(data$dheas_spatial_ug_dl)) #no
+shapiro.test(log(data_repo$dheas_spatial_ug_dl)) #no
+shapiro.test(log(data_men$dheas_spatial_ug_dl)) #no
+
+#SHBG
+shapiro.test(log(data$shbg_spatial_nmol_l)) #no
+shapiro.test(log(data_repo$shbg_spatial_nmol_l)) #no
+shapiro.test(log(data_men$shbg_spatial_nmol_l)) #no
+
+#Testosterone
+shapiro.test(log(data$testosterone_spatial_ng_dl)) #yes
+shapiro.test(log(data_repo$testosterone_spatial_ng_dl)) #yes
+shapiro.test(log(data_men$testosterone_spatial_ng_dl)) #no
+```
+
+Shapiro-Wilk tests reveal that all hormones violated normality in the overall and women group. Most hormones for women subgroup distributions were still significantly different from normal after log transformation, so Spearman rank correlations will be applied to these hormone and subfield associations.
+
+For men, only SHBG violated normality correlation with this hormone in men will be spearman rank.
+
+
+```{r}
+## Reproductive Status
+
+### Repo stage: all histograms right-skewed, so apply transformation
+h1 <- ggplot(data = data_repo, aes(x = estradiol_spatial_pg_ml)) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Estradiol (pg/mL)",
+       y = "Count",
+       title = "Raw")
+h1a <- ggplot(data = data_repo, aes(x = log(estradiol_spatial_pg_ml))) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Log Estradiol (pg/mL)",
+       y = "Count",
+       title = "Log Transformed")
+h2 <- ggplot(data = data_repo, aes(x = progesterone_spatial_ng_ml)) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Progesterone (ng/mL)",
+       y = "Count",
+       title = "Raw")
+h2a <- ggplot(data = data_repo, aes(x = log(progesterone_spatial_ng_ml))) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Log Progesterone (ng/mL)",
+       y = "Count",
+       title = "Log Transformed")
+h3 <- ggplot(data = data_repo, aes(x = fsh_spatial_miu_ml)) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "FSH (mIU/mL)",
+       y = "Count",
+       title = "Raw")
+h3a <- ggplot(data = data_repo, aes(x = log(fsh_spatial_miu_ml))) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Log FSH (mIU/mL)",
+       y = "Count",
+       title = "Log Transformed")
+h4 <- ggplot(data = data_repo, aes(x = dheas_spatial_ug_dl)) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "DHEAS (ug/dL)",
+       y = "Count",
+       title = "Raw")
+h4a <- ggplot(data = data_repo, aes(x = log(dheas_spatial_ug_dl))) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Log DHEAS (ug/dL)",
+       y = "Count",
+       title = "Log Transformed")
+h5 <- ggplot(data = data_repo, aes(x = shbg_spatial_nmol_l)) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "SHBG (nmol/L)",
+       y = "Count",
+       title = "Raw")
+h5a <- ggplot(data = data_repo, aes(x = log(shbg_spatial_nmol_l))) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Log SHBG (nmol/L)",
+       y = "Count",
+       title = "Log Transformed")
+h6 <- ggplot(data = data_repo, aes(x = testosterone_spatial_ng_dl)) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Testosterone (ng/dL)",
+       y = "Count",
+       title = "Raw")
+h6a <- ggplot(data = data_repo, aes(x = log(testosterone_spatial_ng_dl))) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Log Testosterone (ng/dL)",
+       y = "Count",
+       title = "Log Transformed")
+
+(h1+h1a)/(h2+h2a)
+(h3+h3a)/(h4+h4a)
+(h5+h5a)/(h6+h6a)
+
+
+
+
+
+
+### Men and women: all right skewed, so transform
+h4 <- ggplot(data = data, aes(x = dhea_s_ug_d_l)) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "DHEAS (ug/dL)",
+       y = "Count",
+       title = "Raw")
+h4a <- ggplot(data = data, aes(x = log(dhea_s_ug_d_l))) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Log DHEAS (ug/dL)",
+       y = "Count",
+       title = "Log Transformed")
+h5 <- ggplot(data = data, aes(x = shbg_nmol_l)) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "SHBG (nmol/L)",
+       y = "Count",
+       title = "Raw")
+h5a <- ggplot(data = data, aes(x = log(shbg_nmol_l))) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Log SHBG (nmol/L)",
+       y = "Count",
+       title = "Log Transformed")
+h6 <- ggplot(data = data, aes(x = total_testosterone_ng_d_l)) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Testosterone (ng/dL)",
+       y = "Count",
+       title = "Raw")
+h6a <- ggplot(data = data, aes(x = log(total_testosterone_ng_d_l))) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Log Testosterone (ng/dL)",
+       y = "Count",
+       title = "Log Transformed")
+
+h4+h4a
+h5+h5a
+h6+h6a
+
+
+
+### Men: DHEAS was normal, but allow all to be log transformed too
+data_men <- data %>% 
+  filter(sex == "Male")
+
+h4 <- ggplot(data = data_men, aes(x = dhea_s_ug_d_l)) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "DHEAS (ug/dL)",
+       y = "Count",
+       title = "Raw")
+h4a <- ggplot(data = data_men, aes(x = log(dhea_s_ug_d_l))) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Log DHEAS (ug/dL)",
+       y = "Count",
+       title = "Log Transformed")
+h5 <- ggplot(data = data_men, aes(x = shbg_nmol_l)) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "SHBG (nmol/L)",
+       y = "Count",
+       title = "Raw")
+h5a <- ggplot(data = data_men, aes(x = log(shbg_nmol_l))) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Log SHBG (nmol/L)",
+       y = "Count",
+       title = "Log Transformed")
+h6 <- ggplot(data = data_men, aes(x = total_testosterone_ng_d_l)) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Testosterone (ng/dL)",
+       y = "Count",
+       title = "Raw")
+h6a <- ggplot(data = data_men, aes(x = log(total_testosterone_ng_d_l))) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Log Testosterone (ng/dL)",
+       y = "Count",
+       title = "Log Transformed")
+
+h4+h4a
+h5+h5a
+h6+h6a
+
+# 
+# For just men, log transformation will also be applied in the following Pearson correlations. Testosterone correlations among men will be using Spearman rank.
+```
+
+
+
+
+```{r log-transform}
+#Transform hormones so the hormone correlations would run with Pearson
+# data_repo <- data_repo %>% 
+#   mutate_at(vars(estradiol_pg_m_l:total_testosterone_ng_d_l), log)
+# 
+# data <- data %>% 
+#   mutate_at(vars(estradiol_pg_m_l:total_testosterone_ng_d_l), log)
+# 
+# df_438 <- df_438 %>% 
+#   mutate_at(vars(estradiol_pg_m_l:total_testosterone_ng_d_l), log)
+```
+
+
+
+# Total Hippocampal Volume
+
+## Structural Comparison
+
+```{r}
+#Reproductive status
+p1 <- ggplot(data = data_repo, aes(y = avg_total_hipp,
+                                 x = repo_status,
+                                 fill = repo_status,
+                                 color = repo_status)) + 
+  geom_boxplot(alpha = 0.5, show.legend = FALSE) +
+  geom_jitter(width = 0.1, show.legend = FALSE) +
+  stat_summary(fun.y=mean, geom="point",
+               shape=20, size=3, color="black", fill="black") +
+  labs(x = "Reproductive Status",
+       y = "Average Total \nHippocampal Volume",
+       title = "Reproductive Status") + 
+  theme(legend.position = "none") 
+
+#Sex
+p2 <- ggplot(data = data, aes(y = avg_total_hipp,
+                                 x = sex,
+                                 fill = sex,
+                                 color = sex)) + 
+  geom_boxplot(alpha = 0.5,show.legend = FALSE) +
+  geom_jitter(width = 0.1, show.legend = FALSE) +
+  stat_summary(fun.y=mean, geom="point",
+               shape=20, size=3, color="black", fill="black") +
+  labs(x = "Sex",
+       y = "Average Total \nHippocampal Volume",
+       title = "Sex") + 
+  theme(legend.position = "none") 
+
+
+#Total
+p3 <- ggplot(data = data, aes(x = avg_total_hipp)) + 
+  geom_histogram(alpha = 0.5, position = "identity",
+                 show.legend = FALSE) +
+  labs(x = "Average Total \nHippocampal Volume",
+       y = "Count",
+       title = "Total") 
+
+
+#Combine
+(p1+p2)/p3
+```
+
+Still slight right skew in total hipp volume
+
+```{r}
+data_repo %>% 
+  group_by(repo_status) %>% 
+  summarize(n_total_hipp = n(),
+            mean_total_hipp = mean(avg_total_hipp, na.rm=TRUE),
+            std_total_hipp = sd(avg_total_hipp, na.rm=TRUE)) %>% 
+  kable(col.names = c("Reproductive Status", "n", "Mean Total Hipp Volume",
+                      "SD Total Hipp Volume"),
+        caption = "Sample size and means for subjects by reproductive status with T2 hipp volume and completed spatial navigation behavior",
+        digits = 2,
+        align = c("l", rep("c", times = 3))) %>% 
+  kable_styling("striped", full_width = FALSE,
+                position = "center", 
+                font_size = 12)
+
+data %>% 
+  group_by(sex) %>% 
+  summarize(n_total_hipp = n(),
+            mean_total_hipp = mean(avg_total_hipp, na.rm=TRUE),
+            std_total_hipp = sd(avg_total_hipp, na.rm=TRUE)) %>% 
+  kable(col.names = c("Sex", "n", "Mean Total Hipp Volume",
+                      "SD Total Hipp Volume"),
+        caption = "Sample size and means for subjects by sex with T2 hipp volume and completed spatial navigation behavior",
+        digits = 2,
+        align = c("l", rep("c", times = 3))) %>% 
+  kable_styling("striped", full_width = FALSE,
+                position = "center", 
+                font_size = 12)
+```
+
+Means and standard deviations of total hipp are displayed by reproductive status and by sex.
+
+
+```{r}
+#ANOVA of total hipp by repo stage
+aov <- aov(avg_total_hipp ~ repo_status, data = data_repo)
+summary_aov <- summary(aov)
+kable(summary_aov[[1]])
+```
+
+ANOVA results comparing total hipp by reproductive status was not significant.
+
+```{r}
+#T-test of total hipp by sex
+ttest <- t.test(avg_total_hipp ~ sex, data = data)
+ttest
+```
+
+
+T-test results comparing total hipp by sex was significant.
+
+
+## Hormone Correlation by Reproductive Status
+
+```{r}
+#Estradiol
+c1 <- ggscatter(data_repo, x = "estradiol_pg_m_l", y = "avg_total_hipp", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Estradiol (pg/mL)", ylab = "Average Total\n Hippocampal Volume") +
+    theme(legend.position = "none") 
+
+
+#Estradiol facet
+c1a <- ggscatter(data_repo, x = "estradiol_pg_m_l", y = "avg_total_hipp", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Estradiol (pg/mL)", ylab = "Average Total\n Hippocampal Volume") +
+    facet_grid(repo_status ~ ., scale = "free")+
+     theme_bw() +
+     theme(legend.position = "none")
+
+
+#Progesterone
+c2 <- ggscatter(data_repo, x = "progesterone_ng_m_l", y = "avg_total_hipp", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Progesterone (ng/mL)", ylab = "Average Total\n Hippocampal Volume") +
+    theme(legend.position = "none") 
+
+#Progesterone facet
+c2a <- ggscatter(data_repo, x = "progesterone_ng_m_l", y = "avg_total_hipp", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Progesterone (ng/mL)", ylab = "Average Total\n Hippocampal Volume") +
+    facet_grid(repo_status ~ ., scale = "free") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#FSH
+c3 <- ggscatter(data_repo, x = "fsh_m_iu_m_l", y = "avg_total_hipp", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "FSH (mIU/mL)", ylab = "Average Total\n Hippocampal Volume") +
+    theme(legend.position = "none") 
+
+#FSH facet
+c3a <- ggscatter(data_repo, x = "fsh_m_iu_m_l", y = "avg_total_hipp", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "FSH (mIU/mL)", ylab = "Average Total\n Hippocampal Volume") +
+    facet_grid(repo_status ~ ., scale = "free") +
+    theme_bw() +
+     theme(legend.position = "none")
+
+#SHBG
+c4 <- ggscatter(data_repo, x = "shbg_nmol_l", y = "avg_total_hipp", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "SHBG (nmol/L)", ylab = "Average Total\n Hippocampal Volume") +
+    theme(legend.position = "none")
+
+#SHBG facet
+c4a <- ggscatter(data_repo, x = "shbg_nmol_l", y = "avg_total_hipp", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "SHBG (nmol/L)", ylab = "Average Total\n Hippocampal Volume") +
+    facet_grid(repo_status ~ ., scale = "free") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+
+#DHEAS
+c5 <- ggscatter(data_repo, x = "dhea_s_ug_d_l", y = "avg_total_hipp", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "DHEAS (ug/dL)", ylab = "Average Total\n Hippocampal Volume") +
+    theme(legend.position = "none")
+
+
+#DHEAS facet
+c5a <- ggscatter(data_repo, x = "dhea_s_ug_d_l", y = "avg_total_hipp", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "DHEAS (ug/dL)", ylab = "Average Total\n Hippocampal Volume") +
+    facet_grid(repo_status ~ ., scale = "free") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+
+#Testosterone
+c6 <- ggscatter(data_repo, x = "total_testosterone_ng_d_l", y = "avg_total_hipp", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Testosterone (ng/dL)", ylab = "Average Total\n Hippocampal Volume") +
+    theme(legend.position = "none")
+
+
+#Testosterone facet
+c6a <- ggscatter(data_repo, x = "total_testosterone_ng_d_l", y = "avg_total_hipp", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Testosterone (ng/dL)", ylab = "Average Total\n Hippocampal Volume") +
+    facet_grid(repo_status ~ ., scale = "free") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+
+#Present as patchwork
+(c1 + c1a)
+(c2 + c2a)
+(c3 + c3a)
+(c4 + c4a)
+(c5 + c5a)
+(c6 + c6a)
+```
+
+All correlations are spearman
+
+## Hormone Correlation by Men
+
+```{r}
+#SHBG
+c1 <- ggscatter(data_men, x = "shbg_nmol_l", y = "avg_total_hipp",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "SHBG (nmol/L)", ylab = "Averaged Total\n Hippocampal Volume") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#DHEAS
+c2 <- ggscatter(data_men, x = "dhea_s_ug_d_l", y = "avg_total_hipp",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "DHEAS (ug/dL)", ylab = "Averaged Total\n Hippocampal Volume") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#Testosterone
+c3 <- ggscatter(data_men, x = "total_testosterone_ng_d_l", y = "avg_total_hipp", 
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Testosterone (ng/dL)", ylab = "Averaged Total\n Hippocampal Volume") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+
+#Present as patchwork
+c1+c2+c3
+```
+
+All correlations are pearson
+
+
+# MTL
+
+## Structural Comparison
+
+```{r}
+#Reproductive status
+p1 <- ggplot(data = data_repo, aes(y = avg_mtl,
+                                 x = repo_status,
+                                 fill = repo_status,
+                                 color = repo_status)) + 
+  geom_boxplot(alpha = 0.5,show.legend = FALSE) +
+  geom_jitter(width = 0.1, show.legend = FALSE) +
+  stat_summary(fun.y=mean, geom="point",
+               shape=20, size=3, color="black", fill="black") +
+  labs(x = "Reproductive Status",
+       y = "Avergage MTL Volume",
+       title = "Reproductive Status") + 
+  theme(legend.position = "none") 
+
+#Sex
+p2 <- ggplot(data = data, aes(y = avg_mtl,
+                                 x = sex,
+                                 fill = sex,
+                                 color = sex)) + 
+  geom_boxplot(alpha = 0.5,show.legend = FALSE) +
+  geom_jitter(width = 0.1, show.legend = FALSE) +
+  stat_summary(fun.y=mean, geom="point",
+               shape=20, size=3, color="black", fill="black") +
+  labs(x = "Sex",
+       y = "Average MTL Volume",
+       title = "Sex") + 
+  theme(legend.position = "none") 
+
+
+#Total
+p3 <- ggplot(data = data, aes(x = avg_mtl)) + 
+  geom_histogram(alpha = 0.5, position = "identity",
+                 show.legend = FALSE) +
+  labs(x = "Average MTL Volume",
+       y = "Count",
+       title = "Total") 
+
+
+#Combine
+(p1+p2)/p3
+```
+
+Slight skew in MTL volume
+
+```{r}
+data_repo %>% 
+  group_by(repo_status) %>% 
+  summarize(mean_mtl = round(mean(avg_mtl), digits = 3),
+            std_mtl = round(sd(avg_mtl), digits = 3)) %>% kable()
+
+data %>% 
+  group_by(sex) %>% 
+  summarize(mean_mtl = round(mean(avg_mtl), digits = 3),
+            std_mtl = round(sd(avg_mtl), digits = 3)) %>% kable()
+```
+
+Means and standard deviations of MTL are displayed by reproductive status and by sex.
+
+
+```{r}
+#ANOVA of MTL by repo stage
+aov <- aov(avg_mtl ~ repo_status, data = data_repo)
+summary_aov <- summary(aov)
+kable(summary_aov[[1]])
+```
+
+ANOVA results comparing MTL by reproductive status was not significant.
+
+```{r}
+#T-test of MTL by sex
+ttest <- t.test(avg_mtl ~ sex, data = data)
+ttest
+```
+
+
+T-test results comparing MTL by sex was significant.
+
+## Hormone Correlation by Reproductive Status
+
+```{r}
+#Estradiol
+c1 <- ggscatter(data_repo, x = "estradiol_pg_m_l", y = "avg_mtl", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Estradiol (pg/mL)", ylab = "Average MTL Volume") +
+    theme(legend.position = "none") 
+
+
+#Estradiol facet
+c1a <- ggscatter(data_repo, x = "estradiol_pg_m_l", y = "avg_mtl", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Estradiol (pg/mL)", ylab = "Average MTL Volume") +
+    facet_grid(repo_status ~ ., scale = "free")+
+     theme_bw() +
+     theme(legend.position = "none")
+
+
+#Progesterone
+c2 <- ggscatter(data_repo, x = "progesterone_ng_m_l", y = "avg_mtl", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Progesterone (ng/mL)", ylab = "Average MTL Volume") +
+    theme(legend.position = "none") 
+
+#Progesterone facet
+c2a <- ggscatter(data_repo, x = "progesterone_ng_m_l", y = "avg_mtl", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Progesterone (ng/mL)", ylab = "Average MTL Volume") +
+    facet_grid(repo_status ~ ., scale = "free") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#FSH
+c3 <- ggscatter(data_repo, x = "fsh_m_iu_m_l", y = "avg_mtl", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "FSH (mIU/mL)", ylab = "Average MTL Volume") +
+    theme(legend.position = "none") 
+
+#FSH facet
+c3a <- ggscatter(data_repo, x = "fsh_m_iu_m_l", y = "avg_mtl", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "FSH (mIU/mL)", ylab = "Average MTL Volume") +
+    facet_grid(repo_status ~ ., scale = "free") +
+    theme_bw() +
+     theme(legend.position = "none")
+
+#SHBG
+c4 <- ggscatter(data_repo, x = "shbg_nmol_l", y = "avg_mtl", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "SHBG (nmol/L)", ylab = "Average MTL Volume") +
+    theme(legend.position = "none")
+
+#SHBG facet
+c4a <- ggscatter(data_repo, x = "shbg_nmol_l", y = "avg_mtl", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "SHBG (nmol/L)", ylab = "Average MTL Volume") +
+    facet_grid(repo_status ~ ., scale = "free") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+
+#DHEAS
+c5 <- ggscatter(data_repo, x = "dhea_s_ug_d_l", y = "avg_mtl", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "DHEAS (ug/dL)", ylab = "Average MTL Volume") +
+    theme(legend.position = "none")
+
+
+#DHEAS facet
+c5a <- ggscatter(data_repo, x = "dhea_s_ug_d_l", y = "avg_mtl", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "DHEAS (ug/dL)", ylab = "Average MTL Volume") +
+    facet_grid(repo_status ~ ., scale = "free") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+
+#Testosterone
+c6 <- ggscatter(data_repo, x = "total_testosterone_ng_d_l", y = "avg_mtl", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Testosterone (ng/dL)", ylab = "Average MTL Volume") +
+    theme(legend.position = "none")
+
+
+#Testosterone facet
+c6a <- ggscatter(data_repo, x = "total_testosterone_ng_d_l", y = "avg_mtl", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Testosterone (ng/dL)", ylab = "Average MTL Volume") +
+    facet_grid(repo_status ~ ., scale = "free") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+
+#Present as patchwork
+(c1 + c1a)
+(c2 + c2a)
+(c3 + c3a)
+(c4 + c4a)
+(c5 + c5a)
+(c6 + c6a)
+```
+
+
+All correlations are Spearman.
+
+
+## Hormone Correlation by Men
+
+```{r}
+#SHBG
+c1 <- ggscatter(data_men, x = "shbg_nmol_l", y = "avg_mtl",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "SHBG (nmol/L)", ylab = "Averaged MTL Volume") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#DHEAS
+c2 <- ggscatter(data_men, x = "dhea_s_ug_d_l", y = "avg_mtl",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "DHEAS (ug/dL)", ylab = "Averaged MTL Volume") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#Testosterone
+c3 <- ggscatter(data_men, x = "total_testosterone_ng_d_l", y = "avg_mtl", 
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Testosterone (ng/dL)", ylab = "Averaged MTL Volume") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+
+#Present as patchwork
+c1+c2+c3
+```
+
+
+# T2 Subfield Volume {.tabset}
+
+## CA1 
+
+### Structural Comparison
+
+```{r}
+#Reproductive status
+p1 <- ggplot(data = data_repo, aes(y = avg_ca1,
+                                 x = repo_status,
+                                 fill = repo_status,
+                                 color = repo_status)) + 
+  geom_boxplot(alpha = 0.5,show.legend = FALSE) +
+  geom_jitter(width = 0.1, show.legend = FALSE) +
+  stat_summary(fun.y=mean, geom="point",
+               shape=20, size=3, color="black", fill="black") +
+  labs(x = "Reproductive Status",
+       y = "Averaged CA1 \nSubfield Volume",
+       title = "Reproductive Status") + 
+  theme(legend.position = "none") 
+
+#Sex
+p2 <- ggplot(data = data, aes(y = avg_ca1,
+                                 x = sex,
+                                 fill = sex,
+                                 color = sex)) + 
+  geom_boxplot(alpha = 0.5,show.legend = FALSE) +
+  geom_jitter(width = 0.1, show.legend = FALSE) +
+  stat_summary(fun.y=mean, geom="point",
+               shape=20, size=3, color="black", fill="black") +
+  labs(x = "Sex",
+       y = "Averaged CA1 \nSubfield Volume",
+       title = "Sex") + 
+  theme(legend.position = "none") 
+
+
+#Total
+p3 <- ggplot(data = data, aes(x = avg_ca1)) + 
+  geom_histogram(alpha = 0.5, position = "identity",
+                 show.legend = FALSE) +
+  labs(x = "Average CA1 Subfield Volume",
+       y = "Count",
+       title = "Total") 
+
+
+#Combine
+(p1+p2)/p3
+```
+
+```{r}
+data_repo %>% 
+  group_by(repo_status) %>% 
+  summarize(mean_ca1 = round(mean(avg_ca1), digits = 3),
+            std_ca1 = round(sd(avg_ca1), digits = 3)) %>% kable()
+
+data %>% 
+  group_by(sex) %>% 
+  summarize(mean_ca1 = round(mean(avg_ca1), digits = 3),
+            std_ca1 = round(sd(avg_ca1), digits = 3)) %>% kable()
+```
+
+Means and standard deviations of the subfield are displayed by reproductive status and by sex
+
+
+```{r}
+#ANOVA of subfield by repo stage
+aov <- aov(avg_ca1 ~ repo_status, data = data_repo)
+summary_aov <- summary(aov)
+kable(summary_aov[[1]])
+```
+
+ANOVA results comparing CA1 subfield by reproductive status was not significant.
+
+```{r}
+#T-test of subfield by sex
+ttest <- t.test(avg_ca1 ~ sex, data = data)
+ttest
+```
+
+
+T-test results comparing CA1 subfield by sex was significant.
+
+### Hormone Correlation by Reproductive Status
+
+```{r}
+#Estradiol
+c1 <- ggscatter(data_repo, x = "estradiol_pg_m_l", y = "avg_ca1", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Estradiol (pg/mL)", ylab = "Averaged CA1 Subfield Volume") +
+    theme(legend.position = "none") 
+
+
+#Estradiol facet
+c1a <- ggscatter(data_repo, x = "estradiol_pg_m_l", y = "avg_ca1", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Estradiol (pg/mL)", ylab = "Averaged CA1 Subfield Volume") +
+    facet_grid(repo_status ~ ., scale = "free")+
+     theme_bw() +
+     theme(legend.position = "none")
+
+
+#Progesterone
+c2 <- ggscatter(data_repo, x = "progesterone_ng_m_l", y = "avg_ca1", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Progesterone (ng/mL)", ylab = "Averaged CA1 Subfield Volume") +
+    theme(legend.position = "none") 
+
+#Progesterone facet
+c2a <- ggscatter(data_repo, x = "progesterone_ng_m_l", y = "avg_ca1", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Progesterone (ng/mL)", ylab = "Averaged CA1 Subfield Volume") +
+    facet_grid(repo_status ~ ., scale = "free") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#FSH
+c3 <- ggscatter(data_repo, x = "fsh_m_iu_m_l", y = "avg_ca1", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "FSH (mIU/mL)", ylab = "Averaged CA1 Subfield Volume") +
+    theme(legend.position = "none") 
+
+#FSH facet
+c3a <- ggscatter(data_repo, x = "fsh_m_iu_m_l", y = "avg_ca1", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "FSH (mIU/mL)", ylab = "Averaged CA1 Subfield Volume") +
+    facet_grid(repo_status ~ ., scale = "free") +
+    theme_bw() +
+     theme(legend.position = "none")
+
+#SHBG
+c4 <- ggscatter(data_repo, x = "shbg_nmol_l", y = "avg_ca1", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "SHBG (nmol/L)", ylab = "Averaged CA1 Subfield Volume") +
+    theme(legend.position = "none")
+
+#SHBG facet
+c4a <- ggscatter(data_repo, x = "shbg_nmol_l", y = "avg_ca1", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "SHBG (nmol/L)", ylab = "Averaged CA1 Subfield Volume") +
+    facet_grid(repo_status ~ ., scale = "free") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+
+#DHEAS
+c5 <- ggscatter(data_repo, x = "dhea_s_ug_d_l", y = "avg_ca1", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "DHEAS (ug/dL)", ylab = "Averaged CA1 Subfield Volume") +
+    theme(legend.position = "none")
+
+
+#DHEAS facet
+c5a <- ggscatter(data_repo, x = "dhea_s_ug_d_l", y = "avg_ca1", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "DHEAS (ug/dL)", ylab = "Averaged CA1 Subfield Volume") +
+    facet_grid(repo_status ~ ., scale = "free") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+
+#Testosterone
+c6 <- ggscatter(data_repo, x = "total_testosterone_ng_d_l", y = "avg_ca1", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Testosterone (ng/dL)", ylab = "Averaged CA1 Subfield Volume") +
+    theme(legend.position = "none")
+
+
+#Testosterone facet
+c6a <- ggscatter(data_repo, x = "total_testosterone_ng_d_l", y = "avg_ca1", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Testosterone (ng/dL)", ylab = "Averaged CA1 Subfield Volume") +
+    facet_grid(repo_status ~ ., scale = "free") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+
+#Present as patchwork
+(c1 + c1a)
+(c2 + c2a)
+(c3 + c3a)
+(c4 + c4a)
+(c5 + c5a)
+(c6 + c6a)
+```
+Correlations for estradiol, FSH, and testosterone were Spearman rank. All others were Pearson.
+
+
+### Hormone Correlation by Men
+
+```{r}
+#SHBG
+c1 <- ggscatter(data_men, x = "shbg_nmol_l", y = "avg_ca1",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "SHBG (nmol/L)", ylab = "Averaged CA1 Subfield Volume") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#DHEAS
+c2 <- ggscatter(data_men, x = "dhea_s_ug_d_l", y = "avg_ca1",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "DHEAS (ug/dL)", ylab = "Averaged CA1 Subfield Volume") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#Testosterone
+c3 <- ggscatter(data_men, x = "total_testosterone_ng_d_l", y = "avg_ca1", 
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Testosterone (ng/dL)", ylab = "Averaged CA1 Subfield Volume") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+
+#Present as patchwork
+c1+c2+c3
+```
+
+Correlations are all Pearson
+
+
+
+## CA2/3
+
+
+### Structural Comparison
+
+```{r}
+#Reproductive status
+p1 <- ggplot(data = data_repo, aes(y = avg_ca23,
+                                 x = repo_status,
+                                 fill = repo_status,
+                                 color = repo_status)) + 
+  geom_boxplot(alpha = 0.5,show.legend = FALSE) +
+  geom_jitter(width = 0.1, show.legend = FALSE) +
+  stat_summary(fun.y=mean, geom="point",
+               shape=20, size=3, color="black", fill="black") +
+  labs(x = "Reproductive Status",
+       y = "Averaged CA23 \nSubfield Volume",
+       title = "Reproductive Status") + 
+  theme(legend.position = "none") 
+
+#Sex
+p2 <- ggplot(data = data, aes(y = avg_ca23,
+                                 x = sex,
+                                 fill = sex,
+                                 color = sex)) + 
+  geom_boxplot(alpha = 0.5,show.legend = FALSE) +
+  geom_jitter(width = 0.1, show.legend = FALSE) +
+  stat_summary(fun.y=mean, geom="point",
+               shape=20, size=3, color="black", fill="black") +
+  labs(x = "Sex",
+       y = "Averaged CA23 \nSubfield Volume",
+       title = "Sex") + 
+  theme(legend.position = "none") 
+
+#Total
+p3 <- ggplot(data = data, aes(x = avg_ca23)) + 
+  geom_histogram(alpha = 0.5, position = "identity",
+                 show.legend = FALSE) +
+  labs(x = "Average CA23 Subfield Volume",
+       y = "Count",
+       title = "Total") 
+
+
+#Combine
+(p1+p2)/p3
+```
+
+```{r}
+data_repo %>% 
+  group_by(repo_status) %>% 
+  summarize(mean_ca23 = round(mean(avg_ca23), digits = 3),
+            std_ca23 = round(sd(avg_ca23), digits = 3)) %>% kable()
+
+data %>% 
+  group_by(sex) %>% 
+  summarize(mean_ca23 = round(mean(avg_ca23), digits = 3),
+            std_ca23 = round(sd(avg_ca23), digits = 3)) %>% kable()
+```
+
+Means and standard deviations of the subfield are displayed by reproductive status and by sex
+
+
+```{r}
+#ANOVA of subfield by repo stage
+aov <- aov(avg_ca23 ~ repo_status, data = data_repo)
+summary_aov <- summary(aov)
+kable(summary_aov[[1]])
+```
+
+ANOVA results comparing CA23 subfield by reproductive status was not significant.
+
+```{r}
+#T-test of subfield by sex
+ttest <- t.test(avg_ca23 ~ sex, data = data)
+ttest
+```
+
+T-test results comparing CA23 subfield by sex was significant.
+
+
+### Hormone Correlation by Reproductive Status
+
+```{r}
+#Estradiol
+c1 <- ggscatter(data_repo, x = "estradiol_pg_m_l", y = "avg_ca23", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Estradiol (pg/mL)", ylab = "Averaged CA23 Subfield Volume") +
+    theme(legend.position = "none")
+
+#Estradiol facet
+c1a <- ggscatter(data_repo, x = "estradiol_pg_m_l", y = "avg_ca23", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Estradiol (pg/mL)", ylab = "Averaged CA23 Subfield Volume") +
+    facet_grid(repo_status ~ ., scale = "free") + theme_bw() +
+    theme(legend.position = "none")
+
+#Progesterone
+c2 <- ggscatter(data_repo, x = "progesterone_ng_m_l", y = "avg_ca23", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Progesterone (ng/mL)", ylab = "Averaged CA23 Subfield Volume") +
+    theme(legend.position = "none")
+
+#Progesterone facet
+c2a <- ggscatter(data_repo, x = "progesterone_ng_m_l", y = "avg_ca23", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Progesterone (ng/mL)", ylab = "Averaged CA23 Subfield Volume") + facet_grid(repo_status ~ ., scale = "free") + theme_bw() +
+    theme(legend.position = "none")
+
+#FSH
+c3 <- ggscatter(data_repo, x = "fsh_m_iu_m_l", y = "avg_ca23", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "FSH (mIU/mL)", ylab = "Averaged CA23 Subfield Volume") +
+    theme(legend.position = "none")
+
+#FSH facet
+c3a <- ggscatter(data_repo, x = "fsh_m_iu_m_l", y = "avg_ca23", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "FSH (mIU/mL)", ylab = "Averaged CA23 Subfield Volume") +
+    facet_grid(repo_status ~ ., scale = "free") + theme_bw() +
+    theme(legend.position = "none")
+
+#SHBG
+c4 <- ggscatter(data_repo, x = "shbg_nmol_l", y = "avg_ca23", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "SHBG (nmol/L)", ylab = "Averaged CA23 Subfield Volume")+
+    theme(legend.position = "none")
+
+#SHBG facet
+c4a <- ggscatter(data_repo, x = "shbg_nmol_l", y = "avg_ca23", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "SHBG (nmol/L)", ylab = "Averaged CA23 Subfield Volume") +
+    facet_grid(repo_status ~ ., scale = "free") +
+    theme_bw() +
+    theme(legend.position = "none")
+
+
+#DHEAS
+c5 <- ggscatter(data_repo, x = "dhea_s_ug_d_l", y = "avg_ca23", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "DHEAS (ug/dL)", ylab = "Averaged CA23 Subfield Volume")+
+    theme(legend.position = "none")
+
+#DHEAS facet
+c5a <- ggscatter(data_repo, x = "dhea_s_ug_d_l", y = "avg_ca23", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "DHEAS (ug/dL)", ylab = "Averaged CA23 Subfield Volume") +
+    facet_grid(repo_status ~ ., scale = "free") +
+    theme_bw() +
+    theme(legend.position = "none")
+
+
+
+#Testosterone
+c6 <- ggscatter(data_repo, x = "total_testosterone_ng_d_l", y = "avg_ca23", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Testosterone (ng/dL)", ylab = "Averaged CA23 Subfield Volume") +
+    theme(legend.position = "none")
+
+#Testosterone facet
+c6a <- ggscatter(data_repo, x = "total_testosterone_ng_d_l", y = "avg_ca23", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Testosterone (ng/dL)", ylab = "Averaged CA23 Subfield Volume") +
+    facet_grid(repo_status ~ ., scale = "free") + theme_bw() +
+    theme(legend.position = "none")
+
+
+#Present as patchwork
+(c1 + c1a)
+(c2 + c2a)
+(c3 + c3a)
+(c4 + c4a)
+(c5 + c5a)
+(c6 + c6a)
+```
+Correlations for estradiol, FSH, and testosterone were Spearman rank. All others were Pearson.
+
+
+### Hormone Correlation by Men
+
+```{r}
+#SHBG
+c1 <- ggscatter(data_men, x = "shbg_nmol_l", y = "avg_ca23",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "SHBG (nmol/L)", ylab = "Averaged CA23 Subfield Volume") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+
+#DHEAS
+c2 <- ggscatter(data_men, x = "dhea_s_ug_d_l", y = "avg_ca23", 
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "DHEAS (ug/dL)", ylab = "Averaged CA23 Subfield Volume") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#Testosterone
+c3 <- ggscatter(data_men, x = "total_testosterone_ng_d_l", y = "avg_ca23",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Testosterone (ng/dL)", ylab = "Averaged CA23 Subfield Volume") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+
+#Present as patchwork
+c1+c2+c3
+```
+Correlations are all Spearman.
+
+## DG
+
+
+### Structural Comparison
+
+```{r}
+#Reproductive status
+p1 <- ggplot(data = data_repo, aes(y = avg_dg,
+                                 x = repo_status,
+                                 fill = repo_status,
+                                 color = repo_status)) + 
+  geom_boxplot(alpha = 0.5,show.legend = FALSE) +
+  geom_jitter(width = 0.1, show.legend = FALSE) +
+  stat_summary(fun.y=mean, geom="point",
+               shape=20, size=3, color="black", fill="black") +
+  labs(x = "Reproductive Status",
+       y = "Averaged DG \nSubfield Volume",
+       title = "Reproductive Status") + 
+  theme(legend.position = "none") 
+
+#Sex
+p2 <- ggplot(data = data, aes(y = avg_dg,
+                                 x = sex,
+                                 fill = sex,
+                                 color = sex)) + 
+  geom_boxplot(alpha = 0.5,show.legend = FALSE) +
+  geom_jitter(width = 0.1, show.legend = FALSE) +
+  stat_summary(fun.y=mean, geom="point",
+               shape=20, size=3, color="black", fill="black") +
+  labs(x = "Sex",
+       y = "Averaged DG \nSubfield Volume",
+       title = "Sex") + 
+  theme(legend.position = "none") 
+
+
+#Total
+p3 <- ggplot(data = data, aes(x = avg_dg)) + 
+  geom_histogram(alpha = 0.5, position = "identity",
+                 show.legend = FALSE) +
+  labs(x = "Average DG Subfield Volume",
+       y = "Count",
+       title = "Total") 
+
+
+#Combine
+(p1+p2)/p3
+```
+
+
+```{r}
+data_repo %>% 
+  group_by(repo_status) %>% 
+  summarize(mean_dg = round(mean(avg_dg), digits = 3),
+            std_dg = round(sd(avg_dg), digits = 3)) %>% kable()
+
+data %>% 
+  group_by(sex) %>% 
+  summarize(mean_dg = round(mean(avg_dg), digits = 3),
+            std_dg = round(sd(avg_dg), digits = 3)) %>% kable()
+```
+
+Means and standard deviations of the subfield are displayed by reproductive status and by sex
+
+```{r}
+#ANOVA of subfield by repo stage
+aov <- aov(avg_dg ~ repo_status, data = data_repo)
+summary_aov <- summary(aov)
+kable(summary_aov[[1]])
+```
+
+ANOVA results comparing DG subfield by reproductive status was not significant.
+
+```{r}
+#T-test of subfield by sex
+ttest <- t.test(avg_dg ~ sex, data = data)
+ttest
+```
+
+T-test results comparing DG subfield by sex was significant.
+
+
+### Hormone Correlation by Reproductive Status
+
+```{r}
+#Estradiol
+c1 <- ggscatter(data_repo, x = "estradiol_pg_m_l", y = "avg_dg", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Estradiol (pg/mL)", ylab = "Averaged DG Subfield Volume") +
+    theme(legend.position = "none")
+
+#Estradiol facet
+c1a <- ggscatter(data_repo, x = "estradiol_pg_m_l", y = "avg_dg", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Estradiol (pg/mL)", ylab = "Averaged DG Subfield Volume") +
+     facet_grid(repo_status ~ ., scale = "free") +theme_bw() +
+    theme(legend.position = "none")
+
+#Progesterone
+c2 <- ggscatter(data_repo, x = "progesterone_ng_m_l", y = "avg_dg", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Progesterone (ng/mL)", ylab = "Averaged DG Subfield Volume") +
+    theme(legend.position = "none")
+
+#Progesterone facet
+c2a <- ggscatter(data_repo, x = "progesterone_ng_m_l", y = "avg_dg", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Progesterone (ng/mL)", ylab = "Averaged DG Subfield Volume") +
+     facet_grid(repo_status ~ ., scale = "free") +
+    theme_bw() +
+    theme(legend.position = "none")
+
+#FSH
+c3 <- ggscatter(data_repo, x = "fsh_m_iu_m_l", y = "avg_dg", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "FSH (mIU/mL)", ylab = "Averaged DG Subfield Volume") +
+    theme(legend.position = "none")
+
+#FSH facet
+c3a <- ggscatter(data_repo, x = "fsh_m_iu_m_l", y = "avg_dg", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "FSH (mIU/mL)", ylab = "Averaged DG Subfield Volume") +
+     facet_grid(repo_status ~ ., scale = "free") +
+    theme_bw() +
+    theme(legend.position = "none")
+
+#SHBG
+c4 <- ggscatter(data_repo, x = "shbg_nmol_l", y = "avg_dg", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "SHBG (nmol/L)", ylab = "Averaged DG Subfield Volume") +
+    theme(legend.position = "none")
+
+#SHBG facet
+c4a <- ggscatter(data_repo, x = "shbg_nmol_l", y = "avg_dg", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "SHBG (nmol/L)", ylab = "Averaged DG Subfield Volume") +
+     facet_grid(repo_status ~ ., scale = "free") +
+   theme_bw() +
+    theme(legend.position = "none")
+
+
+#DHEAS
+c5 <- ggscatter(data_repo, x = "dhea_s_ug_d_l", y = "avg_dg", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "DHEAS (ug/dL)", ylab = "Averaged DG Subfield Volume") +
+    theme(legend.position = "none")
+
+#DHEAS facet
+c5a <- ggscatter(data_repo, x = "dhea_s_ug_d_l", y = "avg_dg", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "DHEAS (ug/dL)", ylab = "Averaged DG Subfield Volume") +
+     facet_grid(repo_status ~ ., scale = "free") +
+   theme_bw() +
+    theme(legend.position = "none")
+
+
+#Testosterone
+c6 <- ggscatter(data_repo, x = "total_testosterone_ng_d_l", y = "avg_dg", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Testosterone (ng/dL)", ylab = "Averaged DG Subfield Volume") +
+    theme(legend.position = "none")
+
+#Testosterone facet
+c6a <- ggscatter(data_repo, x = "total_testosterone_ng_d_l", y = "avg_dg", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Testosterone (ng/dL)", ylab = "Averaged DG Subfield Volume") +
+     facet_grid(repo_status ~ ., scale = "free") +
+   theme_bw() +
+    theme(legend.position = "none")
+
+
+#Present as patchwork
+(c1 + c1a)
+(c2 + c2a)
+(c3 + c3a)
+(c4 + c4a)
+(c5 + c5a)
+(c6 + c6a)
+```
+
+Correlations for estradiol, FSH, and testosterone were Spearman rank. All others were Pearson.
+
+### Hormone Correlation by Men
+
+```{r}
+#SHBG
+c1 <- ggscatter(data_men, x = "shbg_nmol_l", y = "avg_dg",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "SHBG (nmol/L)", ylab = "Averaged DG Subfield Volume") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+
+#DHEAS
+c2 <- ggscatter(data_men, x = "dhea_s_ug_d_l", y = "avg_dg",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "DHEAS (ug/dL)", ylab = "Averaged DG Subfield Volume") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#Testosterone
+c3 <- ggscatter(data_men, x = "total_testosterone_ng_d_l", y = "avg_dg",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Testosterone (ng/dL)", ylab = "Averaged DG Subfield Volume") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#Present as patchwork
+c1+c2+c3
+```
+
+All correlations are Pearson.
+
+## ERC
+
+
+
+### Structural Comparison
+
+```{r}
+#Reproductive status
+p1 <- ggplot(data = data_repo, aes(y = avg_erc,
+                                 x = repo_status,
+                                 fill = repo_status,
+                                 color = repo_status)) + 
+  geom_boxplot(alpha = 0.5,show.legend = FALSE) +
+  geom_jitter(width = 0.1, show.legend = FALSE) +
+  stat_summary(fun.y=mean, geom="point",
+               shape=20, size=3, color="black", fill="black") +
+  labs(x = "Reproductive Status",
+       y = "Averaged ERC \nSubfield Volume",
+       title = "Reproductive Status") + 
+  theme(legend.position = "none") 
+
+#Sex
+p2 <- ggplot(data = data, aes(y = avg_erc,
+                                 x = sex,
+                                 fill = sex,
+                                 color = sex)) + 
+  geom_boxplot(alpha = 0.5,show.legend = FALSE) +
+  geom_jitter(width = 0.1, show.legend = FALSE) +
+  stat_summary(fun.y=mean, geom="point",
+               shape=20, size=3, color="black", fill="black") +
+  labs(x = "Sex",
+       y = "Averaged ERC \nSubfield Volume",
+       title = "Sex") + 
+  theme(legend.position = "none") 
+
+
+#Total
+p3 <- ggplot(data = data, aes(x = avg_erc)) + 
+  geom_histogram(alpha = 0.5, position = "identity",
+                 show.legend = FALSE) +
+  labs(x = "Average ERC Subfield Volume",
+       y = "Count",
+       title = "Total") 
+
+
+#Combine
+(p1+p2)/p3
+```
+
+
+```{r}
+data_repo %>% 
+  group_by(repo_status) %>% 
+  summarize(mean_erc = round(mean(avg_erc), digits = 3),
+            std_erc = round(sd(avg_erc), digits = 3)) %>% kable()
+
+data %>% 
+  group_by(sex) %>% 
+  summarize(mean_erc = round(mean(avg_erc), digits = 3),
+            std_erc = round(sd(avg_erc), digits = 3)) %>% kable()
+```
+
+Means and standard deviations of the subfield are displayed by reproductive status and by sex
+
+```{r}
+#ANOVA of subfield by repo stage
+aov <- aov(avg_erc ~ repo_status, data = data_repo)
+summary_aov <- summary(aov)
+kable(summary_aov[[1]])
+```
+
+ANOVA results comparing ERC subfield by reproductive status was significant.
+
+```{r}
+#T-test of subfield by sex
+ttest <- t.test(avg_erc ~ sex, data = data)
+ttest
+```
+
+T-test results comparing ERC subfield by sex was significant.
+
+
+### Hormone Correlation by Reproductive Status
+
+```{r}
+#Estradiol
+c1 <- ggscatter(data_repo, x = "estradiol_pg_m_l", y = "avg_erc", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Estradiol (pg/mL)", ylab = "Averaged ERC Subfield Volume") +
+    theme(legend.position = "none")
+
+#Estradiol facet
+c1a <- ggscatter(data_repo, x = "estradiol_pg_m_l", y = "avg_erc", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Estradiol (pg/mL)", ylab = "Averaged ERC Subfield Volume") +
+    facet_grid(repo_status ~ ., scale = "free") +
+    theme_bw() +
+    theme(legend.position = "none")
+
+#Progesterone
+c2 <- ggscatter(data_repo, x = "progesterone_ng_m_l", y = "avg_erc", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Progesterone (ng/mL)", ylab = "Averaged ERC Subfield Volume") +
+    theme(legend.position = "none")
+
+#Progesterone facet
+c2a <- ggscatter(data_repo, x = "progesterone_ng_m_l", y = "avg_erc", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Progesterone (ng/mL)", ylab = "Averaged ERC Subfield Volume") +
+    facet_grid(repo_status ~ ., scale = "free") +
+    theme_bw() +
+    theme(legend.position = "none")
+
+#FSH
+c3 <- ggscatter(data_repo, x = "fsh_m_iu_m_l", y = "avg_erc", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "FSH (mIU/mL)", ylab = "Averaged ERC Subfield Volume") +
+    theme(legend.position = "none")
+
+#FSH facet
+c3a <- ggscatter(data_repo, x = "fsh_m_iu_m_l", y = "avg_erc", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "FSH (mIU/mL)", ylab = "Averaged ERC Subfield Volume") +
+    facet_grid(repo_status ~ ., scale = "free") +
+    theme_bw() +
+    theme(legend.position = "none")
+
+#SHBG
+c4 <- ggscatter(data_repo, x = "shbg_nmol_l", y = "avg_erc", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "SHBG (nmol/L)", ylab = "Averaged ERC Subfield Volume") +
+    theme(legend.position = "none")
+
+#SHBG facet
+c4a <- ggscatter(data_repo, x = "shbg_nmol_l", y = "avg_erc", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "SHBG (nmol/L)", ylab = "Averaged ERC Subfield Volume") +
+    facet_grid(repo_status ~ ., scale = "free") +
+    theme_bw() +
+    theme(legend.position = "none")
+
+
+#DHEAS
+c5 <- ggscatter(data_repo, x = "dhea_s_ug_d_l", y = "avg_erc", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "DHEAS (ug/dL)", ylab = "Averaged ERC Subfield Volume") +
+    theme(legend.position = "none")
+
+#DHEAS facet
+c5a <- ggscatter(data_repo, x = "dhea_s_ug_d_l", y = "avg_erc", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "DHEAS (ug/dL)", ylab = "Averaged ERC Subfield Volume") +
+    facet_grid(repo_status ~ ., scale = "free") +
+    theme_bw() +
+    theme(legend.position = "none")
+
+
+#Testosterone
+c6 <- ggscatter(data_repo, x = "total_testosterone_ng_d_l", y = "avg_erc", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Testosterone (ng/dL)", ylab = "Averaged ERC Subfield Volume") +
+    theme(legend.position = "none")
+
+#Testosterone facet
+c6a <- ggscatter(data_repo, x = "total_testosterone_ng_d_l", y = "avg_erc", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Testosterone (ng/dL)", ylab = "Averaged ERC Subfield Volume") +
+    facet_grid(repo_status ~ ., scale = "free") +
+    theme_bw() +
+    theme(legend.position = "none")
+
+
+#Present as patchwork
+(c1 + c1a)
+(c2 + c2a)
+(c3 + c3a)
+(c4 + c4a)
+(c5 + c5a)
+(c6 + c6a)
+```
+
+Correlations for estradiol, FSH, and testosterone were Spearman rank. All others were Pearson.
+
+### Hormone Correlation by Men
+
+```{r}
+#SHBG
+c1 <- ggscatter(data_men, x = "shbg_nmol_l", y = "avg_erc",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "SHBG (nmol/L)", ylab = "Averaged ERC Subfield Volume") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+
+#DHEAS
+c2 <- ggscatter(data_men, x = "dhea_s_ug_d_l", y = "avg_erc", 
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "DHEAS (ug/dL)", ylab = "Averaged ERC Subfield Volume") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#Testosterone
+c3 <- ggscatter(data_men, x = "total_testosterone_ng_d_l", y = "avg_erc",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Testosterone (ng/dL)", ylab = "Averaged ERC Subfield Volume") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+
+#Present as patchwork
+c1+c2+c3
+```
+All correlations are Pearson.
+
+
+## PHC
+
+
+### Structural Comparison
+
+```{r}
+#Reproductive status
+p1 <- ggplot(data = data_repo, aes(y = avg_phc,
+                                 x = repo_status,
+                                 fill = repo_status,
+                                 color = repo_status)) + 
+  geom_boxplot(alpha = 0.5,show.legend = FALSE) +
+  geom_jitter(width = 0.1, show.legend = FALSE) +
+  stat_summary(fun.y=mean, geom="point",
+               shape=20, size=3, color="black", fill="black") +
+  labs(x = "Reproductive Status",
+       y = "Averaged PHC \nSubfield Volume",
+       title = "Reproductive Status") + 
+  theme(legend.position = "none")
+
+#Sex
+p2 <- ggplot(data = data, aes(y = avg_phc,
+                                 x = sex,
+                                 fill = sex,
+                                 color = sex)) + 
+  geom_boxplot(alpha = 0.5,show.legend = FALSE) +
+  geom_jitter(width = 0.1, show.legend = FALSE) +
+  stat_summary(fun.y=mean, geom="point",
+               shape=20, size=3, color="black", fill="black") +
+  labs(x = "Sex",
+       y = "Averaged PHC \nSubfield Volume",
+       title = "Sex") + 
+  theme(legend.position = "none") 
+
+#Total
+p3 <- ggplot(data = data, aes(x = avg_phc)) + 
+  geom_histogram(alpha = 0.5, position = "identity",
+                 show.legend = FALSE) +
+  labs(x = "Average PHC Subfield Volume",
+       y = "Count",
+       title = "Total") 
+
+
+#Combine
+(p1+p2)/p3
+```
+
+
+```{r}
+data_repo %>% 
+  group_by(repo_status) %>% 
+  summarize(mean_phc = round(mean(avg_phc), digits = 3),
+            std_phc = round(sd(avg_phc), digits = 3)) %>% kable()
+
+data %>% 
+  group_by(sex) %>% 
+  summarize(mean_phc = round(mean(avg_phc), digits = 3),
+            std_phc = round(sd(avg_phc), digits = 3)) %>% kable()
+```
+
+Means and standard deviations of the subfield are displayed by reproductive status and by sex
+
+```{r}
+#ANOVA of subfield by repo stage
+aov <- aov(avg_phc ~ repo_status, data = data_repo)
+summary_aov <- summary(aov)
+kable(summary_aov[[1]])
+```
+
+ANOVA results comparing PHC subfield by reproductive status was not significant.
+
+```{r}
+#T-test of subfield by sex
+ttest <- t.test(avg_phc ~ sex, data = data)
+ttest
+```
+
+T-test results comparing PHC subfield by sex was significant.
+
+
+### Hormone Correlation by Reproductive Status
+
+```{r}
+#Estradiol
+c1 <- ggscatter(data_repo, x = "estradiol_pg_m_l", y = "avg_phc", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Estradiol (pg/mL)", ylab = "Averaged PHC Subfield Volume") +
+    theme(legend.position = "none")
+
+#Estradiol facet
+c1a <- ggscatter(data_repo, x = "estradiol_pg_m_l", y = "avg_phc", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Estradiol (pg/mL)", ylab = "Averaged PHC Subfield Volume") +
+    facet_grid(repo_status ~ ., scale = "free") +
+    theme_bw() +
+    theme(legend.position = "none")
+
+#Progesterone
+c2 <- ggscatter(data_repo, x = "progesterone_ng_m_l", y = "avg_phc", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Progesterone (ng/mL)", ylab = "Averaged PHC Subfield Volume") +
+    theme(legend.position = "none")
+
+#Progesterone facet
+c2a <- ggscatter(data_repo, x = "progesterone_ng_m_l", y = "avg_phc", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Progesterone (ng/mL)", ylab = "Averaged PHC Subfield Volume") +
+    facet_grid(repo_status ~ ., scale = "free") +
+    theme_bw() +
+    theme(legend.position = "none")
+
+#FSH
+c3 <- ggscatter(data_repo, x = "fsh_m_iu_m_l", y = "avg_phc", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "FSH (mIU/mL)", ylab = "Averaged PHC Subfield Volume") +
+    theme(legend.position = "none")
+
+#FSH facet
+c3a <- ggscatter(data_repo, x = "fsh_m_iu_m_l", y = "avg_phc", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "FSH (mIU/mL)", ylab = "Averaged PHC Subfield Volume") +
+    facet_grid(repo_status ~ ., scale = "free") +
+    theme_bw() +
+    theme(legend.position = "none")
+
+#SHBG
+c4 <- ggscatter(data_repo, x = "shbg_nmol_l", y = "avg_phc", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "SHBG (nmol/L)", ylab = "Averaged PHC Subfield Volume") +
+    theme(legend.position = "none")
+
+#SHBG facet
+c4a <- ggscatter(data_repo, x = "shbg_nmol_l", y = "avg_phc", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "SHBG (nmol/L)", ylab = "Averaged PHC Subfield Volume") +
+    facet_grid(repo_status ~ ., scale = "free") +
+    theme_bw() +
+    theme(legend.position = "none")
+
+
+#DHEAS
+c5 <- ggscatter(data_repo, x = "dhea_s_ug_d_l", y = "avg_phc", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "DHEAS (ug/dL)", ylab = "Averaged PHC Subfield Volume") +
+    theme(legend.position = "none")
+
+#DHEAS facet
+c5a <- ggscatter(data_repo, x = "dhea_s_ug_d_l", y = "avg_phc", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "DHEAS (ug/dL)", ylab = "Averaged PHC Subfield Volume") +
+    facet_grid(repo_status ~ ., scale = "free") +
+    theme_bw() +
+    theme(legend.position = "none")
+
+
+#Testosterone
+c6 <- ggscatter(data_repo, x = "total_testosterone_ng_d_l", y = "avg_phc", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Testosterone (ng/dL)", ylab = "Averaged PHC Subfield Volume") +
+    theme(legend.position = "none")
+
+#Testosterone facet
+c6a <- ggscatter(data_repo, x = "total_testosterone_ng_d_l", y = "avg_phc", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Testosterone (ng/dL)", ylab = "Averaged PHC Subfield Volume") +
+    facet_grid(repo_status ~ ., scale = "free") +
+    theme_bw() +
+    theme(legend.position = "none")
+
+
+#Present as patchwork
+(c1 + c1a)
+(c2 + c2a)
+(c3 + c3a)
+(c4 + c4a)
+(c5 + c5a)
+(c6 + c6a)
+```
+
+Correlations for estradiol, FSH, and testosterone were Spearman rank. All others were Pearson.
+
+### Hormone Correlation by Men
+
+```{r}
+#SHBG
+c1 <- ggscatter(data_men, x = "shbg_nmol_l", y = "avg_phc", 
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "SHBG (nmol/L)", ylab = "Averaged PHC Subfield Volume") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+
+#DHEAS
+c2 <- ggscatter(data_men, x = "dhea_s_ug_d_l", y = "avg_phc", 
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "DHEAS (ug/dL)", ylab = "Averaged PHC Subfield Volume") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#Testosterone
+c3 <- ggscatter(data_men, x = "total_testosterone_ng_d_l", y = "avg_phc", 
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Testosterone (ng/dL)", ylab = "Averaged PHC Subfield Volume") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#Present as patchwork
+c1+c2+c3
+```
+
+All correlations are Pearson.
+
+## PRC
+
+
+### Structural Comparison
+
+```{r}
+#Reproductive status
+p1 <- ggplot(data = data_repo, aes(y = avg_prc,
+                                 x = repo_status,
+                                 fill = repo_status,
+                                 color = repo_status)) + 
+  geom_boxplot(alpha = 0.5,show.legend = FALSE) +
+  geom_jitter(width = 0.1, show.legend = FALSE) +
+  stat_summary(fun.y=mean, geom="point",
+               shape=20, size=3, color="black", fill="black") +
+  labs(x = "Reproductive Status",
+       y = "Averaged PRC Subfield Volume",
+       title = "Reproductive Status") + 
+  theme(legend.position = "none") 
+
+#Sex
+p2 <- ggplot(data = data, aes(y = avg_prc,
+                                 x = sex,
+                                 fill = sex,
+                                 color = sex)) + 
+  geom_boxplot(alpha = 0.5,show.legend = FALSE) +
+  geom_jitter(width = 0.1, show.legend = FALSE) +
+  stat_summary(fun.y=mean, geom="point",
+               shape=20, size=3, color="black", fill="black") +
+  labs(x = "Sex",
+       y = "Averaged PRC Subfield Volume",
+       title = "Sex") + 
+  theme(legend.position = "none") 
+
+
+#Total
+p3 <- ggplot(data = data, aes(x = avg_prc)) + 
+  geom_histogram(alpha = 0.5, position = "identity",
+                 show.legend = FALSE) +
+  labs(x = "Average PRC Subfield Volume",
+       y = "Count",
+       title = "Total")
+
+
+#Combine
+(p1+p2)/p3
+```
+
+
+```{r}
+data_repo %>% 
+  group_by(repo_status) %>% 
+  summarize(mean_prc = round(mean(avg_prc), digits = 3),
+            std_prc = round(sd(avg_prc), digits = 3)) %>% kable()
+
+data %>% 
+  group_by(sex) %>% 
+  summarize(mean_prc = round(mean(avg_prc), digits = 3),
+            std_prc = round(sd(avg_prc), digits = 3)) %>% kable()
+```
+
+Means and standard deviations of the subfield are displayed by reproductive status and by sex
+
+
+```{r}
+#ANOVA of subfield by repo stage
+aov <- aov(avg_prc ~ repo_status, data = data_repo)
+summary_aov <- summary(aov)
+kable(summary_aov[[1]])
+```
+
+ANOVA results comparing PRC subfield by reproductive status was not significant.
+
+```{r}
+#T-test of subfield by sex
+ttest <- t.test(avg_prc ~ sex, data = data)
+ttest
+```
+
+T-test results comparing PRC subfield by sex was not significant.
+
+
+### Hormone Correlation by Reproductive Status
+
+```{r}
+#Estradiol
+c1 <- ggscatter(data_repo, x = "estradiol_pg_m_l", y = "avg_prc", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Estradiol (pg/mL)", ylab = "Averaged PRC Subfield Volume") +
+    theme(legend.position = "none")
+
+#Estradiol facet
+c1a <- ggscatter(data_repo, x = "estradiol_pg_m_l", y = "avg_prc", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Estradiol (pg/mL)", ylab = "Averaged PRC Subfield Volume") +
+    facet_grid(repo_status ~ ., scale = "free") +
+    theme_bw() +
+    theme(legend.position = "none")
+
+#Progesterone
+c2 <- ggscatter(data_repo, x = "progesterone_ng_m_l", y = "avg_prc", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Progesterone (ng/mL)", ylab = "Averaged PRC Subfield Volume") +
+    theme(legend.position = "none")
+
+#Progesterone facet
+c2a <- ggscatter(data_repo, x = "progesterone_ng_m_l", y = "avg_prc", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Progesterone (ng/mL)", ylab = "Averaged PRC Subfield Volume") +
+    facet_grid(repo_status ~ ., scale = "free") +
+    theme_bw() +
+    theme(legend.position = "none")
+
+#FSH
+c3 <- ggscatter(data_repo, x = "fsh_m_iu_m_l", y = "avg_prc", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "FSH (mIU/mL)", ylab = "Averaged PRC Subfield Volume") +
+    theme(legend.position = "none")
+
+#FSH facet
+c3a <- ggscatter(data_repo, x = "fsh_m_iu_m_l", y = "avg_prc", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "FSH (mIU/mL)", ylab = "Averaged PRC Subfield Volume") +
+    facet_grid(repo_status ~ ., scale = "free") +
+    theme_bw() +
+    theme(legend.position = "none")
+
+#SHBG
+c4 <- ggscatter(data_repo, x = "shbg_nmol_l", y = "avg_prc", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "SHBG (nmol/L)", ylab = "Averaged PRC Subfield Volume") +
+    theme(legend.position = "none")
+
+#SHBG facet
+c4a <- ggscatter(data_repo, x = "shbg_nmol_l", y = "avg_prc", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "SHBG (nmol/L)", ylab = "Averaged PRC Subfield Volume") +
+    facet_grid(repo_status ~ ., scale = "free") +
+    theme_bw() +
+    theme(legend.position = "none")
+
+
+#DHEAS
+c5 <- ggscatter(data_repo, x = "dhea_s_ug_d_l", y = "avg_prc", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "DHEAS (ug/dL)", ylab = "Averaged PRC Subfield Volume") +
+    theme(legend.position = "none")
+
+#DHEAS facet
+c5a <- ggscatter(data_repo, x = "dhea_s_ug_d_l", y = "avg_prc", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "DHEAS (ug/dL)", ylab = "Averaged PRC Subfield Volume") +
+    facet_grid(repo_status ~ ., scale = "free") +
+    theme_bw() +
+    theme(legend.position = "none")
+
+
+#Testosterone
+c6 <- ggscatter(data_repo, x = "total_testosterone_ng_d_l", y = "avg_prc", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Testosterone (ng/dL)", ylab = "Averaged PRC Subfield Volume") +
+    theme(legend.position = "none")
+
+#Testosterone facet
+c6a <- ggscatter(data_repo, x = "total_testosterone_ng_d_l", y = "avg_prc", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Testosterone (ng/dL)", ylab = "Averaged PRC Subfield Volume") +
+    facet_grid(repo_status ~ ., scale = "free") +
+    theme_bw() +
+    theme(legend.position = "none")
+
+
+#Present as patchwork
+(c1 + c1a)
+(c2 + c2a)
+(c3 + c3a)
+(c4 + c4a)
+(c5 + c5a)
+(c6 + c6a)
+```
+
+Correlations for estradiol, FSH, and testosterone were Spearman rank. All others were Pearson.
+
+### Hormone Correlation by Men
+
+```{r}
+#SHBG
+c1 <- ggscatter(data_men, x = "shbg_nmol_l", y = "avg_prc", 
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "SHBG (nmol/L)", ylab = "Averaged PRC Subfield Volume") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+
+#DHEAS
+c2 <- ggscatter(data_men, x = "dhea_s_ug_d_l", y = "avg_prc", 
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "DHEAS (ug/dL)", ylab = "Averaged PRC Subfield Volume") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+
+#Testosterone
+c3 <- ggscatter(data_men, x = "total_testosterone_ng_d_l", y = "avg_prc",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Testosterone (ng/dL)", ylab = "Averaged PRC Subfield Volume") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+
+#Present as patchwork
+c1+c2+c3
+```
+
+All correlations are Pearson.
+
+
+## SUB
+
+### Structural Comparison
+
+```{r}
+#Reproductive status
+p1 <- ggplot(data = data_repo, aes(y = avg_sub,
+                                 x = repo_status,
+                                 fill = repo_status,
+                                 color = repo_status)) + 
+  geom_boxplot(alpha = 0.5,show.legend = FALSE) +
+  geom_jitter(width = 0.1, show.legend = FALSE) +
+  stat_summary(fun.y=mean, geom="point",
+               shape=20, size=3, color="black", fill="black") +
+  labs(x = "Reproductive Status",
+       y = "Averaged SUB \nSubfield Volume",
+       title = "Reproductive Status") + 
+  theme(legend.position = "none")
+
+#Sex
+p2 <- ggplot(data = data, aes(y = avg_sub,
+                                 x = sex,
+                                 fill = sex,
+                                 color = sex)) + 
+  geom_boxplot(alpha = 0.5,show.legend = FALSE) +
+  geom_jitter(width = 0.1, show.legend = FALSE) +
+  stat_summary(fun.y=mean, geom="point",
+               shape=20, size=3, color="black", fill="black") +
+  labs(x = "Sex",
+       y = "Averaged SUB \nSubfield Volume",
+       title = "Sex") + 
+  theme(legend.position = "none") 
+
+
+#Total
+p3 <- ggplot(data = data, aes(x = avg_sub)) + 
+  geom_histogram(alpha = 0.5, position = "identity",
+                 show.legend = FALSE) +
+  labs(x = "Average SUB Subfield Volume",
+       y = "Count",
+       title = "Total") 
+
+
+#Combine
+(p1+p2)/p3
+```
+
+
+```{r}
+data_repo %>% 
+  group_by(repo_status) %>% 
+  summarize(mean_sub = round(mean(avg_sub), digits = 3),
+            std_sub = round(sd(avg_sub), digits = 3)) %>% kable()
+
+data %>% 
+  group_by(sex) %>% 
+  summarize(mean_sub = round(mean(avg_sub), digits = 3),
+            std_sub = round(sd(avg_sub), digits = 3)) %>% kable()
+```
+
+Means and standard deviations of the subfield are displayed by reproductive status and by sex
+
+```{r}
+#ANOVA of subfield by repo stage
+aov <- aov(avg_sub ~ repo_status, data = data_repo)
+summary_aov <- summary(aov)
+kable(summary_aov[[1]])
+```
+
+ANOVA results comparing SUB subfield by reproductive status was not significant.
+
+```{r}
+#T-test of subfield by sex
+ttest <- t.test(avg_sub ~ sex, data = data)
+ttest
+```
+
+T-test results comparing SUB subfield by sex was significant.
+
+
+
+
+### Hormone Correlation by Reproductive Status
+
+```{r}
+#Estradiol
+c1 <- ggscatter(data_repo, x = "estradiol_pg_m_l", y = "avg_sub", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Estradiol (pg/mL)", ylab = "Averaged SUB Subfield Volume") +
+    theme(legend.position = "none")
+
+#Estradiol facet
+c1a <- ggscatter(data_repo, x = "estradiol_pg_m_l", y = "avg_sub", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Estradiol (pg/mL)", ylab = "Averaged SUB Subfield Volume") +
+    facet_grid(repo_status ~ ., scale = "free") +
+    theme_bw() +
+    theme(legend.position = "none")
+
+#Progesterone
+c2 <- ggscatter(data_repo, x = "progesterone_ng_m_l", y = "avg_sub", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Progesterone (ng/mL)", ylab = "Averaged SUB Subfield Volume") +
+    theme(legend.position = "none")
+
+#Progesterone facet
+c2a <- ggscatter(data_repo, x = "progesterone_ng_m_l", y = "avg_sub", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Progesterone (ng/mL)", ylab = "Averaged SUB Subfield Volume") +
+    facet_grid(repo_status ~ ., scale = "free") +
+    theme_bw() +
+    theme(legend.position = "none")
+
+#FSH
+c3 <- ggscatter(data_repo, x = "fsh_m_iu_m_l", y = "avg_sub", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "FSH (mIU/mL)", ylab = "Averaged SUB Subfield Volume") +
+    theme(legend.position = "none")
+
+#FSH facet
+c3a <- ggscatter(data_repo, x = "fsh_m_iu_m_l", y = "avg_sub", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "FSH (mIU/mL)", ylab = "Averaged SUB Subfield Volume") +
+    facet_grid(repo_status ~ ., scale = "free") +
+    theme_bw() +
+    theme(legend.position = "none")
+
+#SHBG
+c4 <- ggscatter(data_repo, x = "shbg_nmol_l", y = "avg_sub", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "SHBG (nmol/L)", ylab = "Averaged SUB Subfield Volume") +
+    theme(legend.position = "none")
+
+#SHBG facet
+c4a <- ggscatter(data_repo, x = "shbg_nmol_l", y = "avg_sub", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "SHBG (nmol/L)", ylab = "Averaged SUB Subfield Volume") +
+    facet_grid(repo_status ~ ., scale = "free") +theme_bw() +
+    theme(legend.position = "none")
+
+
+#DHEAS
+c5 <- ggscatter(data_repo, x = "dhea_s_ug_d_l", y = "avg_sub", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "DHEAS (ug/dL)", ylab = "Averaged SUB Subfield Volume") +
+    theme(legend.position = "none")
+
+#DHEAS facet
+c5a <- ggscatter(data_repo, x = "dhea_s_ug_d_l", y = "avg_sub", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "DHEAS (ug/dL)", ylab = "Averaged SUB Subfield Volume") +
+    facet_grid(repo_status ~ ., scale = "free") +theme_bw() +
+    theme(legend.position = "none")
+
+
+#Testosterone
+c6 <- ggscatter(data_repo, x = "total_testosterone_ng_d_l", y = "avg_sub", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Testosterone (ng/dL)", ylab = "Averaged SUB Subfield Volume") +
+    theme(legend.position = "none")
+
+#Testosterone facet
+c6a <- ggscatter(data_repo, x = "total_testosterone_ng_d_l", y = "avg_sub", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Testosterone (ng/dL)", ylab = "Averaged SUB Subfield Volume") +
+    facet_grid(repo_status ~ ., scale = "free") +
+    theme_bw() +
+    theme(legend.position = "none")
+
+
+#Present as patchwork
+(c1 + c1a)
+(c2 + c2a)
+(c3 + c3a)
+(c4 + c4a)
+(c5 + c5a)
+(c6 + c6a)
+```
+
+All correlations are Spearman.
+
+
+### Hormone Correlation by Men
+
+```{r}
+#SHBG
+c1 <- ggscatter(data_men, x = "shbg_nmol_l", y = "avg_sub",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "SHBG (nmol/L)", ylab = "Averaged SUB Subfield Volume") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+
+#DHEAS
+c2 <- ggscatter(data_men, x = "dhea_s_ug_d_l", y = "avg_sub", 
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "DHEAS (ug/dL)", ylab = "Averaged SUB Subfield Volume") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#Testosterone
+c3 <- ggscatter(data_men, x = "total_testosterone_ng_d_l", y = "avg_sub",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Testosterone (ng/dL)", ylab = "Averaged SUB Subfield Volume") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+
+#Present as patchwork
+c1+c2+c3
+```
+
+All correlations are Pearson
+
+## {-}
+
+
+# Post-Menopausal Women: E, P, FSH for T2 subfields
+
+
+```{r}
+#Subgroup of post women
+data_repo_post <- data_repo %>% 
+  filter(repo_status == "Post")
+
+###CA1
+#Estradiol
+c1a <- ggscatter(data_repo_post, x = "estradiol_pg_m_l", y = "avg_ca1", color = "#00AFBB",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Estradiol (pg/mL)", ylab = "Averaged CA1 \nSubfield Volume") +
+    theme(legend.position = "none")
+#Progesterone
+c1b <- ggscatter(data_repo_post, x = "progesterone_ng_m_l", y = "avg_ca1", color = "#00AFBB",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Progesterone (ng/mL)", ylab = "Averaged CA1 \nSubfield Volume") +
+    theme(legend.position = "none")
+#FSH
+c1c <- ggscatter(data_repo_post, x = "fsh_m_iu_m_l", y = "avg_ca1", color = "#00AFBB",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "FSH (mIU/mL)", ylab = "Averaged CA1 \nSubfield Volume") +
+    theme(legend.position = "none")
+
+
+###CA23
+#Estradiol
+c2a <- ggscatter(data_repo_post, x = "estradiol_pg_m_l", y = "avg_ca23", color = "#00AFBB",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Estradiol (pg/mL)", ylab = "Averaged CA23 \nSubfield Volume") +
+    theme(legend.position = "none")
+#Progesterone
+c2b <- ggscatter(data_repo_post, x = "progesterone_ng_m_l", y = "avg_ca23", color = "#00AFBB",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Progesterone (ng/mL)", ylab = "Averaged CA23 \nSubfield Volume") +
+    theme(legend.position = "none")
+#FSH
+c2c <- ggscatter(data_repo_post, x = "fsh_m_iu_m_l", y = "avg_ca23", color = "#00AFBB",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "FSH (mIU/mL)", ylab = "Averaged CA23 \nSubfield Volume") +
+    theme(legend.position = "none")
+
+
+###DG
+#Estradiol
+c3a <- ggscatter(data_repo_post, x = "estradiol_pg_m_l", y = "avg_dg", color = "#00AFBB",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Estradiol (pg/mL)", ylab = "Averaged DG \nSubfield Volume") +
+    theme(legend.position = "none")
+#Progesterone
+c3b <- ggscatter(data_repo_post, x = "progesterone_ng_m_l", y = "avg_dg", color = "#00AFBB",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Progesterone (ng/mL)", ylab = "Averaged DG \nSubfield Volume") +
+    theme(legend.position = "none")
+#FSH
+c3c <- ggscatter(data_repo_post, x = "fsh_m_iu_m_l", y = "avg_dg", color = "#00AFBB",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "FSH (mIU/mL)", ylab = "Averaged DG \nSubfield Volume") +
+    theme(legend.position = "none")
+
+###ERC
+#Estradiol
+c4a <- ggscatter(data_repo_post, x = "estradiol_pg_m_l", y = "avg_erc", color = "#00AFBB",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Estradiol (pg/mL)", ylab = "Averaged ERC \nSubfield Volume") +
+    theme(legend.position = "none")
+#Progesterone
+c4b <- ggscatter(data_repo_post, x = "progesterone_ng_m_l", y = "avg_erc", color = "#00AFBB",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Progesterone (ng/mL)", ylab = "Averaged ERC \nSubfield Volume") +
+    theme(legend.position = "none")
+#FSH
+c4c <- ggscatter(data_repo_post, x = "fsh_m_iu_m_l", y = "avg_erc", color = "#00AFBB",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "FSH (mIU/mL)", ylab = "Averaged ERC \nSubfield Volume") +
+    theme(legend.position = "none")
+
+
+###PHC
+#Estradiol
+c5a <- ggscatter(data_repo_post, x = "estradiol_pg_m_l", y = "avg_phc", color = "#00AFBB",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Estradiol (pg/mL)", ylab = "Averaged PHC \nSubfield Volume") +
+    theme(legend.position = "none")
+#Progesterone
+c5b <- ggscatter(data_repo_post, x = "progesterone_ng_m_l", y = "avg_phc", color = "#00AFBB",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Progesterone (ng/mL)", ylab = "Averaged PHC \nSubfield Volume") +
+    theme(legend.position = "none")
+#FSH
+c5c <- ggscatter(data_repo_post, x = "fsh_m_iu_m_l", y = "avg_phc", color = "#00AFBB",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "FSH (mIU/mL)", ylab = "Averaged PHC \nSubfield Volume") +
+    theme(legend.position = "none")
+
+###PRC
+#Estradiol
+c6a <- ggscatter(data_repo_post, x = "estradiol_pg_m_l", y = "avg_prc", color = "#00AFBB",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Estradiol (pg/mL)", ylab = "Averaged PRC \nSubfield Volume") +
+    theme(legend.position = "none")
+#Progesterone
+c6b <- ggscatter(data_repo_post, x = "progesterone_ng_m_l", y = "avg_prc", color = "#00AFBB",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Progesterone (ng/mL)", ylab = "Averaged PRC \nSubfield Volume") +
+    theme(legend.position = "none")
+#FSH
+c6c <- ggscatter(data_repo_post, x = "fsh_m_iu_m_l", y = "avg_prc", color = "#00AFBB",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "FSH (mIU/mL)", ylab = "Averaged PRC \nSubfield Volume") +
+    theme(legend.position = "none")
+
+###SUB
+#Estradiol
+c7a <- ggscatter(data_repo_post, x = "estradiol_pg_m_l", y = "avg_sub", color = "#00AFBB",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Estradiol (pg/mL)", ylab = "Averaged SUB \nSubfield Volume") +
+    theme(legend.position = "none")
+#Progesterone
+c7b <- ggscatter(data_repo_post, x = "progesterone_ng_m_l", y = "avg_sub", color = "#00AFBB",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Progesterone (ng/mL)", ylab = "Averaged SUB \nSubfield Volume") +
+    theme(legend.position = "none")
+#FSH
+c7c <- ggscatter(data_repo_post, x = "fsh_m_iu_m_l", y = "avg_sub", color = "#00AFBB",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "FSH (mIU/mL)", ylab = "Averaged SUB \nSubfield Volume") +
+    theme(legend.position = "none")
+
+
+#Patchwork
+c1a+c1b+c1c+plot_layout(ncol=3, nrow=2)
+c2a+c2b+c2c+plot_layout(ncol=3, nrow=2)
+c3a+c3b+c3c+plot_layout(ncol=3, nrow=2)
+c4a+c4b+c4c+plot_layout(ncol=3, nrow=2)
+c5a+c5b+c5c+plot_layout(ncol=3, nrow=2)
+c6a+c6b+c6c+plot_layout(ncol=3, nrow=2)
+c7a+c7b+c7c+plot_layout(ncol=3, nrow=2)
+```
+
+
+Correlations with E, FSH, and testosterone are Spearman rank. Correlations with SUB are all Spearman rank. All others are Pearson correlations.
+
+
+
+
+
+# Summary
+
+
+## T2 Subfields
+
+- All hormones were log transformed first to try to normalize distributions. Next, all correlations with estradiol, FSH, and testosterone for women and by reproductive stage were Spearman rank correlations. Correlations for SUB for women were also all Spearman rank. Correlations for men between hormones and CA23 were also all Spearman rank. All other correlations are Pearson correlations.
+
+- Subregion volumes for women and men were generally normally distributed, except for CA23 in men and SUB in women. Any associations/correlations ran with these groups for these subfields were Spearman rank correlation. There appears to be two women whose SUB volumes appear to be outliers. Hormones were generally right skewed, so log transformations were applied with some still not being corrected fully - so Spearman correlations for certain associations were used.
+
+- No significant trends seen in correlations for DHEAS.
+
+- No significant trends seen in correlations for DG.
+
+- No significant trends seen in correlations for men.
+
+- ANOVA results comparing subfields by reproductive stage were not significant for almost all subfields. ANOVA results for ERC was significant by reproductive stage (*p* < 0.05).
+
+- T-test results comparing subfields by sex were all significant (at least *p* < 0.05) except for PRC. 
+
+- For estradiol, it was significantly negatively correlated with CA1 for peris (*p* = 0.036, Spearman) and with SUB for pres (*p* = 0.04, Spearman), and marginally negatively correlated with CA23 for pres (*p* = 0.054, Spearman) and peris (*p* = 0.068, Spearman). 
+
+- For progesterone, it was significantly positively correlated with CA1 for posts (*p* = 0.033, Pearson) and with ERC for posts (*p* = 0.015, Pearson).
+
+- For FSH, it was significantly negatively correlated with ERC for posts (*p* < 0.01, Spearman) and with SUB for posts (*p* = 0.021, Spearman). PHC volume and FSH were also significantly negatively correlated among women as a group (*p* = 0.041, Spearman). FSH is marginally negatively correlated with CA1 for posts (*p* = 0.086, Spearman). 
+
+- For testosterone, it was marginally negatively correlated with ERC for posts (*p* = 0.083, Spearman) and marginally positively correlated with PHC for pres (*p* = 0.085, Spearman).
+
+- For SHBG, it was significantly negatively correlated with ERC for posts (*p* < 0.01, Pearson). It was also negatively correlated with PRC among women as a group (*p* = 0.028, Pearson) and marginally negatively correlated with PRC for pres (*p* = 0.057). SHBG was also marginally negatively correlated with SUB for posts (*p* = 0.085, Spearman).
+
+
+## Other (Total GMV, TotalHipp, MTL)
+
+- All hormones were log transformed first to try to normalize distributions. Next, all correlations with estradiol, FSH, and testosterone for women and by reproductive stage were Spearman rank correlations. All correlations among women and subgroups for total hipp volume and MTL were spearman. All other correlations were Pearson.
+
+- ANOVA results comparing GMV and total hipp volume by reproductive stage was not significant.
+
+- T-test results comparing GMV (*p* < 0.001), total hipp volume (*p* < 0.01), and MTL (*p* < 0.01) by sex was significant.
+
+- No significant trends seen in correlations for GMV. 
+
+- For total hipp volume, it was negatively correlated with estradiol for pres (*p* = 0.044, Spearman). 
+
+- For MTL, it was marginally negatively correlated with FSH for posts (*p* = 0.071, Spearman)
+
+
