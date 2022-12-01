@@ -2,11 +2,17 @@
 title: 'Study 2: T1 and correlations for hormones and SNAG'
 author: "Shuying Yu"
 date: "11/26/2022"
-output: html_document
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 4
+    theme: flatly
 ---
 
 ```{r setup, include=FALSE, warning = FALSE, message = FALSE}
-knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE, fig.align = "center")
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, 
+                      include = FALSE, fig.align = "center")
 
 #Add libraries
 library(tidyverse)
@@ -14,6 +20,7 @@ library(here)
 library(janitor)
 library(ggpubr)
 library(patchwork)
+library(kableExtra)
 library(readxl)
 library(knitr)
 library(broom)
@@ -21,16 +28,18 @@ library(purrr)
 ```
 
 
+*Modified on:* November 30th, 2022
+
 # Overview
 
 
-This report provides exploratory and preliminary correlation analyses between sex hormones and T1 hippocampal ROI data extracted from AAL for the Healthy Aging Study sample. Mask was selected for left and right hippocampus, using 2D dilation 1 on registered (not smoothed) segmented grey matter.
+This report provides exploratory and preliminary correlation analyses between sex hormones and T1 hippocampal ROI data extracted from AAL for the Healthy Aging Study sample that have completed spatial navigation behavior. Mask was selected for left and right hippocampus, using 2D dilation 1 on registered (not smoothed) segmented grey matter using Wake Forest Univeristy PickAtlas and MarsBaR toolboxes in SPM12.
 
 **Cleaning data steps included (T1 hipp):**
 
-1) Filter participants that have T1 data from scan
+1) Filter participants that have T1 data from scan and have completed spatial
 
-2) Select sex hormone measures from when scan was conducted
+2) Select sex hormone measures from when spatial was conducted
 
 3) Correct left and right volumes with TIV
 
@@ -41,16 +50,16 @@ This report provides exploratory and preliminary correlation analyses between se
 #Read in the data
 data <- read_csv(here("data", "HAS_SNAG_mastersheet_tidy.csv"))
 
-
-
 #Select and filter variables
 data <- data %>%
   filter(age_group == "Midlife",
-         t1_status == "Yes") %>% 
-  select(subject_id, sex, age_scan_years, repo_status_scan,
-         completed_scan, completed_spatial,
+         t1_status == "Yes",
+         completed_spatial == "Yes") %>% 
+  dplyr::select(subject_id, sex, age_spatial_years, repo_status_spatial,
          loop_useable:testosterone_spatial_ng_dl,
          t1_vbm_tiv:t1_vol_right_hipp_aal_3d_d1_s) %>% 
+  mutate(repo_status = fct_relevel(repo_status_spatial, 
+                                    c("Pre", "Peri", "Post", "Men"))) %>% 
 
   #Further exclude this subject:
   filter(!subject_id %in% c(
@@ -85,13 +94,175 @@ data <- data %>%
 #Subset for women by repo status
 data_repo <- data %>% 
   filter(sex == "Female") %>% 
-  mutate(repo_status = fct_relevel(repo_status_scan, 
+  mutate(repo_status = fct_relevel(repo_status_spatial, 
                                     c("Pre", "Peri", "Post")))
-
 #Subset for men
 data_men <- data %>% 
   filter(sex == "Male")
 ```
+
+
+```{r demo-table, include=TRUE, echo=FALSE}
+#Table overall
+tab_overall <- data %>% 
+  group_by(sex) %>% 
+  summarize(n_subject = n(),
+            age_mean = mean(age_spatial_years),
+            age_Sd = sd(age_spatial_years))
+
+#Table LOOP
+tab_loop <- data %>% 
+  filter(loop_useable == "Yes") %>% 
+  group_by(sex) %>% 
+  summarize(n_subject = n(),
+            age_mean = mean(age_spatial_years),
+            age_Sd = sd(age_spatial_years))
+
+#Table MAZE
+tab_maze <- data %>% 
+  filter(maze_useable == "Yes") %>% 
+  group_by(sex) %>% 
+  summarize(n_subject = n(),
+            age_mean = mean(age_spatial_years),
+            age_Sd = sd(age_spatial_years))
+
+
+#Table DSP
+tab_dsp <- data %>% 
+  filter(dsp_useable == "Yes") %>% 
+  group_by(sex) %>% 
+  summarize(n_subject = n(),
+            age_mean = mean(age_spatial_years),
+            age_Sd = sd(age_spatial_years))
+
+
+#Join df based on sex
+tab1 <- merge(tab_overall, tab_loop, by = "sex")
+
+#Rename columns
+tab1 <- tab1 %>% 
+  rename(n_subject_overall = n_subject.x,
+         age_mean_overall = age_mean.x,
+         age_sd_overall = age_Sd.x,
+         n_subject_loop = n_subject.y,
+         age_mean_loop = age_mean.y,
+         age_sd_loop = age_Sd.y)
+
+#Rest of the merge
+tab2 <- merge(tab1, tab_maze, by = "sex")
+tab_final <- merge(tab2, tab_dsp, by = "sex")
+
+
+#Rename columns
+tab_final <- tab_final %>% 
+  rename(n_subject_maze = n_subject.x,
+         age_mean_maze = age_mean.x,
+         age_sd_maze = age_Sd.x,
+         n_subject_dsp = n_subject.y,
+         age_mean_dsp = age_mean.y,
+         age_sd_dsp = age_Sd.y)
+
+#Kable presentation (ideal if we had all hormones)
+tab_final %>% 
+  kable(col.names = c("Sex", "n","Mean Age","SD Age",
+                      "n","Mean Age","SD Age",
+                      "n","Mean Age","SD Age",
+                      "n","Mean Age","SD Age"),
+        caption = "Sample size and age for women and men grouped by overall completion of spatial navigation behavior with T1 scan.",
+        digits = 2,
+        align = c("l", rep("c", times = 11))) %>% 
+  kable_styling("striped", full_width = FALSE,
+                position = "center", 
+                font_size = 12) %>%
+  add_header_above(c(" " = 1, "Overall" = 3, 
+                     "LOOP" = 3, "MAZE" = 3, "DSP" = 3))
+```
+Above table shows the table of sample size and mean and standard deviation of age by sex for overall group who have completed spatial behavior and have a T1 scan.
+
+All sample size for T1 x hormone correlations for women are listed in the table above. For men, because some participants did not have all hormones evaluated (e.g, only testosterone available), the sample size for the correlations for that hormone and with T1 hipp volume will be different.
+
+For men, the accurate sample sizes would be:
+
+- LOOP: *n* = 16 DHEAS, *n* = 18 for SHBG and T
+
+- MAZE: *n* = 21 DHEAS, *n* = 22 for SHBG and T
+
+- DSP: *n* = 25 DHEAS, *n* = 26 for SHBG and T
+
+```{r}
+##### WOMEN
+#LOOP
+test <- data_repo %>% 
+  filter(loop_useable == "Yes") %>% 
+  select(subject_id,
+         estradiol_spatial_pg_ml,
+         progesterone_spatial_ng_ml,
+         fsh_spatial_miu_ml,
+         shbg_spatial_nmol_l,
+         dheas_spatial_ug_dl,
+         testosterone_spatial_ng_dl)
+#Sum of rows = sample size for each hormone x T1 correlation
+colSums(!is.na(test)) #all n=26
+
+#MAZE
+test <- data_repo %>% 
+  filter(maze_useable == "Yes") %>% 
+  select(subject_id,
+         estradiol_spatial_pg_ml,
+         progesterone_spatial_ng_ml,
+         fsh_spatial_miu_ml,
+         shbg_spatial_nmol_l,
+         dheas_spatial_ug_dl,
+         testosterone_spatial_ng_dl)
+#Sum of rows = sample size for each hormone x T1 correlation
+colSums(!is.na(test)) #all n=61
+
+#DSP
+test <- data_repo %>% 
+  filter(dsp_useable == "Yes") %>% 
+  select(subject_id,
+         estradiol_spatial_pg_ml,
+         progesterone_spatial_ng_ml,
+         fsh_spatial_miu_ml,
+         shbg_spatial_nmol_l,
+         dheas_spatial_ug_dl,
+         testosterone_spatial_ng_dl)
+#Sum of rows = sample size for each hormone x T1 correlation
+colSums(!is.na(test)) #all n=46
+
+
+#####MEN
+#LOOP
+test <- data_men %>% 
+  filter(loop_useable == "Yes") %>% 
+  select(fsh_spatial_miu_ml,
+         shbg_spatial_nmol_l,
+         dheas_spatial_ug_dl,
+         testosterone_spatial_ng_dl)
+#Sum of rows = sample size for each hormone x T1 correlation
+colSums(!is.na(test)) #DHEAS n = 16, SHBG & T n = 18
+
+#MAZE
+test <- data_men %>% 
+  filter(maze_useable == "Yes") %>% 
+  select(subject_id,
+         shbg_spatial_nmol_l,
+         dheas_spatial_ug_dl,
+         testosterone_spatial_ng_dl)
+#Sum of rows = sample size for each hormone x T1 correlation
+colSums(!is.na(test)) #DHEAS n = 21, SHBG & T n = 22
+
+#DSP
+test <- data_men %>% 
+  filter(dsp_useable == "Yes") %>% 
+  select(subject_id,
+         shbg_spatial_nmol_l,
+         dheas_spatial_ug_dl,
+         testosterone_spatial_ng_dl)
+#Sum of rows = sample size for each hormone x T1 correlation
+colSums(!is.na(test)) #DHEAS n = 25, SHBG & T n = 26
+```
+
 
 
 # Structural Distributions
@@ -105,11 +276,9 @@ shapiro.test(data_repo$avg_t1_hipp) #no
 shapiro.test(data_men$avg_t1_hipp) #no
 ```
 
-Shapiro-Wilks test reveals that the average T1 hipp volume for all groups were normally distributed.
+Shapiro-Wilks test reveals that the average T1 hipp volume for all groups (overall, women, men) were normally distributed.
 
-## Structural Comparison: all with T1
-
-```{r}
+```{r include=TRUE, echo=FALSE}
 #Reproductive status
 p1 <- ggplot(data = data_repo, aes(y = avg_t1_hipp,
                                  x = repo_status,
@@ -151,7 +320,7 @@ p3 <- ggplot(data = data, aes(x = avg_t1_hipp)) +
 #Combine
 (p1+p2)/p3
 ```
- Interestingly, women show greater T1 hippocampal GMV than men.
+ Box plot shows the women appear to have greater T1 hippocampal GMV than men.
 
 
 ```{r}
@@ -174,7 +343,7 @@ summary_aov <- summary(aov)
 kable(summary_aov[[1]])
 ```
 
-ANOVA results comparing GMV by reproductive status was not significant.
+ANOVA results comparing T1 hipp GMV by reproductive status was not significant.
 
 ```{r}
 #T-test of GMV by sex
@@ -183,48 +352,48 @@ ttest
 ```
 
 
-T-test results comparing GMV by sex was significant. Women have larger T1 hippocampal volume than men (*p* < 0.001)
+T-test results comparing GMV by sex was significant. Women (*M* = 0.556) have larger T1 hippocampal volume than men (*M* = 0.484) (*t* = 10.07, *df* = 63.50, *p* < 0.001).
 
 
-
-# Hormone 
+# T1 and Hormone 
 
 
 ```{r echo=FALSE, results = 'hide'}
 #Estradiol
-shapiro.test(data$estradiol_scan_pg_ml) #yes
-shapiro.test(log(data$estradiol_scan_pg_ml)) #yes
-
-
+shapiro.test(data_repo$estradiol_spatial_pg_ml) #yes
 #Progesterone
-shapiro.test(data$progesterone_scan_ng_ml) #yes
-shapiro.test(log(data$progesterone_scan_ng_ml)) #yes
-
+shapiro.test(data_repo$progesterone_spatial_ng_ml) #yes
 #FSH
-shapiro.test(data$fsh_scan_miu_ml) #yes
-shapiro.test(log(data$fsh_scan_miu_ml)) #yes
+shapiro.test(data_repo$fsh_spatial_miu_ml) #yes
+#DHEAS
+shapiro.test(data_repo$dheas_spatial_ug_dl) #yes
+#SHBG
+shapiro.test(data_repo$shbg_spatial_nmol_l) #yes
+#Testosterone
+shapiro.test(data_repo$testosterone_spatial_ng_dl) #yes
 
 #Testosterone
-shapiro.test(data_men$testosterone_scan_ng_dl) #no
+shapiro.test(data_men$dheas_spatial_ug_dl) #no
+shapiro.test(data_men$shbg_spatial_nmol_l) #yes
+shapiro.test(data_men$testosterone_spatial_ng_dl) #no
 ```
 
-We know that estradiol, progesterone, and FSH distributions are skewed, so we can either apply log transformations or move forward with Spearman rank correlations.
+We know that estradiol, progesterone, and FSH distributions are skewed, so we can either apply log transformations or move forward with Spearman rank correlations. Despite log transformations, hormones were still significant (different than normal), so correlations will be Spearman rank correlations with raw hormone values for women.
 
-To be consistent, for women, all hormones will first be log transformed. Despite log transformations, hormones were still significant (different than normal), so correlations will be Spearman rank correlations with log-transformed hormones for women.
+For men, DHEAS was not normal so Spearman rank correlation will be applied for these associations with T1 hipp GMV.
 
 ```{r}
 #Convert to log for data_repo
-data_repo <- data_repo %>% 
-  mutate_at(vars(estradiol_scan_pg_ml:testosterone_spatial_ng_dl), log)
+# data_repo <- data_repo %>% 
+#   mutate_at(vars(estradiol_spatial_pg_ml:testosterone_spatial_ng_dl), log)
 ```
-
 
 
 ## Hormone Correlation by Reproductive Status
 
-```{r}
+```{r include=TRUE, echo=FALSE}
 #Estradiol
-c1 <- ggscatter(data_repo, x = "estradiol_scan_pg_ml", y = "avg_t1_hipp", color = "repo_status",
+c1 <- ggscatter(data_repo, x = "estradiol_spatial_pg_ml", y = "avg_t1_hipp", color = "repo_status",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -236,7 +405,7 @@ c1 <- ggscatter(data_repo, x = "estradiol_scan_pg_ml", y = "avg_t1_hipp", color 
 
 
 #Estradiol facet
-c1a <- ggscatter(data_repo, x = "estradiol_scan_pg_ml", y = "avg_t1_hipp", color = "repo_status",
+c1a <- ggscatter(data_repo, x = "estradiol_spatial_pg_ml", y = "avg_t1_hipp", color = "repo_status",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -250,7 +419,7 @@ c1a <- ggscatter(data_repo, x = "estradiol_scan_pg_ml", y = "avg_t1_hipp", color
 
 
 #Progesterone
-c2 <- ggscatter(data_repo, x = "progesterone_scan_ng_ml", y = "avg_t1_hipp", color = "repo_status",
+c2 <- ggscatter(data_repo, x = "progesterone_spatial_ng_ml", y = "avg_t1_hipp", color = "repo_status",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -261,7 +430,7 @@ c2 <- ggscatter(data_repo, x = "progesterone_scan_ng_ml", y = "avg_t1_hipp", col
     theme(legend.position = "none") 
 
 #Progesterone facet
-c2a <- ggscatter(data_repo, x = "progesterone_scan_ng_ml", y = "avg_t1_hipp", color = "repo_status",
+c2a <- ggscatter(data_repo, x = "progesterone_spatial_ng_ml", y = "avg_t1_hipp", color = "repo_status",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -274,7 +443,7 @@ c2a <- ggscatter(data_repo, x = "progesterone_scan_ng_ml", y = "avg_t1_hipp", co
      theme(legend.position = "none")
 
 #FSH
-c3 <- ggscatter(data_repo, x = "fsh_scan_miu_ml", y = "avg_t1_hipp", color = "repo_status",
+c3 <- ggscatter(data_repo, x = "fsh_spatial_miu_ml", y = "avg_t1_hipp", color = "repo_status",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -285,7 +454,7 @@ c3 <- ggscatter(data_repo, x = "fsh_scan_miu_ml", y = "avg_t1_hipp", color = "re
     theme(legend.position = "none") 
 
 #FSH facet
-c3a <- ggscatter(data_repo, x = "fsh_scan_miu_ml", y = "avg_t1_hipp", color = "repo_status",
+c3a <- ggscatter(data_repo, x = "fsh_spatial_miu_ml", y = "avg_t1_hipp", color = "repo_status",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -298,7 +467,7 @@ c3a <- ggscatter(data_repo, x = "fsh_scan_miu_ml", y = "avg_t1_hipp", color = "r
      theme(legend.position = "none")
 
 #SHBG
-c4 <- ggscatter(data_repo, x = "shbg_scan_nmol_l", y = "avg_t1_hipp", color = "repo_status",
+c4 <- ggscatter(data_repo, x = "shbg_spatial_nmol_l", y = "avg_t1_hipp", color = "repo_status",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -309,7 +478,7 @@ c4 <- ggscatter(data_repo, x = "shbg_scan_nmol_l", y = "avg_t1_hipp", color = "r
     theme(legend.position = "none")
 
 #SHBG facet
-c4a <- ggscatter(data_repo, x = "shbg_scan_nmol_l", y = "avg_t1_hipp", color = "repo_status",
+c4a <- ggscatter(data_repo, x = "shbg_spatial_nmol_l", y = "avg_t1_hipp", color = "repo_status",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -323,7 +492,7 @@ c4a <- ggscatter(data_repo, x = "shbg_scan_nmol_l", y = "avg_t1_hipp", color = "
 
 
 #DHEAS
-c5 <- ggscatter(data_repo, x = "dheas_scan_ug_dl", y = "avg_t1_hipp", color = "repo_status",
+c5 <- ggscatter(data_repo, x = "dheas_spatial_ug_dl", y = "avg_t1_hipp", color = "repo_status",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -335,7 +504,7 @@ c5 <- ggscatter(data_repo, x = "dheas_scan_ug_dl", y = "avg_t1_hipp", color = "r
 
 
 #DHEAS facet
-c5a <- ggscatter(data_repo, x = "dheas_scan_ug_dl", y = "avg_t1_hipp", color = "repo_status",
+c5a <- ggscatter(data_repo, x = "dheas_spatial_ug_dl", y = "avg_t1_hipp", color = "repo_status",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -349,7 +518,7 @@ c5a <- ggscatter(data_repo, x = "dheas_scan_ug_dl", y = "avg_t1_hipp", color = "
 
 
 #Testosterone
-c6 <- ggscatter(data_repo, x = "testosterone_scan_ng_dl", y = "avg_t1_hipp", color = "repo_status",
+c6 <- ggscatter(data_repo, x = "testosterone_spatial_ng_dl", y = "avg_t1_hipp", color = "repo_status",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -361,7 +530,7 @@ c6 <- ggscatter(data_repo, x = "testosterone_scan_ng_dl", y = "avg_t1_hipp", col
 
 
 #Testosterone facet
-c6a <- ggscatter(data_repo, x = "testosterone_scan_ng_dl", y = "avg_t1_hipp", color = "repo_status",
+c6a <- ggscatter(data_repo, x = "testosterone_spatial_ng_dl", y = "avg_t1_hipp", color = "repo_status",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -384,13 +553,13 @@ c6a <- ggscatter(data_repo, x = "testosterone_scan_ng_dl", y = "avg_t1_hipp", co
 ```
 
 
-All correlations are Spearman rank.
+All correlations are Spearman rank. DHEAS was negatively correlated with T1 hippocampal GMV for posts (*p* < 0.01).
 
 ## Hormone Correlation by Men
 
-```{r}
+```{r include=TRUE, echo=FALSE}
 #SHBG
-c1 <- ggscatter(data_men, x = "shbg_scan_nmol_l", y = "avg_t1_hipp",
+c1 <- ggscatter(data_men, x = "shbg_spatial_nmol_l", y = "avg_t1_hipp",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -402,19 +571,19 @@ c1 <- ggscatter(data_men, x = "shbg_scan_nmol_l", y = "avg_t1_hipp",
      theme(legend.position = "none")
 
 #DHEAS
-c2 <- ggscatter(data_men, x = "dheas_scan_ug_dl", y = "avg_t1_hipp",
+c2 <- ggscatter(data_men, x = "dheas_spatial_ug_dl", y = "avg_t1_hipp",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
           conf.int = TRUE, 
-          cor.method = "pearson",
+          cor.method = "spearman",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "DHEAS (ug/dL)", ylab = "Grey Matter Volume") +
      theme_bw() +
      theme(legend.position = "none")
 
 #Testosterone
-c3 <- ggscatter(data_men, x = "testosterone_scan_ng_dl", y = "avg_t1_hipp", 
+c3 <- ggscatter(data_men, x = "testosterone_spatial_ng_dl", y = "avg_t1_hipp", 
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -430,43 +599,43 @@ c3 <- ggscatter(data_men, x = "testosterone_scan_ng_dl", y = "avg_t1_hipp",
 c1+c2+c3
 ```
 
-All correlations are Pearson
+All correlations are Pearson except for DHEAS (Spearman).
 
-# Behavior
+# T1 and Behavior
 
-## Overall
+```{r generate-subsets}
+#Check to see if T1 GMV has any relationship with SNAG data
 
-Check to see if T1 GMV has any relationship with SNAG data
-
-```{r}
 #Further filter for SNAG
 #Separate for SNAG
-data_loop <- data %>% 
+data_loop <- data %>%
   filter(loop_useable == "Yes")
-data_maze <- data %>% 
+data_maze <- data %>%
   filter(maze_useable == "Yes")
-data_dsp <- data %>% 
+data_dsp <- data %>%
   filter(dsp_useable == "Yes")
 
 
 #Separate for women and men
-data_loop_women <- data %>% 
-  filter(sex == "Female", loop_useable == "Yes") 
-data_maze_women <- data %>% 
-  filter(sex == "Female", maze_useable == "Yes") 
-data_dsp_women <- data %>% 
-  filter(sex == "Female", dsp_useable == "Yes") 
+data_loop_women <- data_repo %>% 
+  filter(loop_useable == "Yes") 
+data_maze_women <- data_repo %>% 
+  filter(maze_useable == "Yes") 
+data_dsp_women <- data_repo %>% 
+  filter(dsp_useable == "Yes") 
 
-data_loop_men <- data %>% 
-  filter(sex == "Male", loop_useable == "Yes")
-data_maze_men <- data %>% 
-  filter(sex == "Male", maze_useable == "Yes")
-data_dsp_men <- data %>% 
-  filter(sex == "Male", dsp_useable == "Yes")
+data_loop_men <- data_men %>% 
+  filter(loop_useable == "Yes")
+data_maze_men <- data_men %>% 
+  filter(maze_useable == "Yes")
+data_dsp_men <- data_men %>% 
+  filter(dsp_useable == "Yes")
 ```
 
 
-```{r distributions-qqplots}
+```{r overall-distributions-qqplots}
+## Overall
+
 #LOOP: normally distributed, no need to transform
 h1 <- ggplot(data = data_loop, aes(x = loop_pe_avg_m)) +
   geom_histogram(alpha = 0.5, color = "black", position = "identity") +
@@ -587,11 +756,11 @@ h6bq <- ggqqplot(data = sqrt(data_dsp$dsp_si_true_pct)) +
 #DSP
 (h5+h5a+h5b)/(h5q+h5aq+h5bq)
 (h6+h6a+h6b)/(h6q+h6aq+h6bq)
+
+# LOOP dependent variables appear normally distributed, but MAZE and DSP variables have slight skews. I applied log and square root transformations to these variables in MAZE and DSP to see whether the observed distribution looks normal.
+# 
+# We can check Shapiro-Wilk's to see if normality is violated for raw values and after transformation using log and square root.
 ```
-
-LOOP dependent variables appear normally distributed, but MAZE and DSP variables have slight skews. I applied log and square root transformations to these variables in MAZE and DSP to see whether the observed distribution looks normal.
-
-We can check Shapiro-Wilk's to see if normality is violated for raw values and after transformation using log and square root.
 
 
 ```{r shapiro-check, results='hide'}
@@ -620,21 +789,22 @@ shapiro.test(log(data_dsp$dsp_si_true_pct)) #yes
 
 shapiro.test(sqrt(data_dsp$dsp_success_pct)) #yes
 shapiro.test(sqrt(data_dsp$dsp_si_true_pct)) #yes
-```
 
-Shapiro-Wilk's test reveal that LOOP dependent variables are normally distributed, but MAZE dependent variables and DSP solution index are not even after log and square root transformations. Thus, all correlations with GMV for these DV will be spearman rank correlations.
+
+# Shapiro-Wilk's test reveal that LOOP dependent variables are normally distributed, but MAZE dependent variables and DSP solution index are not even after log and square root transformations. Thus, all correlations with GMV for these DV will be spearman rank correlations.
+```
 
 
 ```{r log-transformation}
-data_maze_log <- data_maze %>% 
-  mutate_at(vars(maze_accuracy_pct,maze_moves), log)
-
-data_dsp_log <- data_dsp %>% 
-  mutate_at(vars(dsp_si_true_pct), log)
+# data_maze_log <- data_maze %>% 
+#   mutate_at(vars(maze_accuracy_pct,maze_moves), log)
+# 
+# data_dsp_log <- data_dsp %>% 
+#   mutate_at(vars(dsp_si_true_pct), log)
 ```
 
 
-## By Women
+
 
 ```{r women-distributions-qqplots}
 #LOOP: normally distributed, no need to transform
@@ -757,11 +927,14 @@ h6bq <- ggqqplot(data = sqrt(data_dsp_women$dsp_si_true_pct)) +
 #DSP
 (h5+h5a+h5b)/(h5q+h5aq+h5bq)
 (h6+h6a+h6b)/(h6q+h6aq+h6bq)
+
+
+# Like the overall distributions, LOOP DVs look normal but MAZE and DSP variables appear skewed.
+# 
+# We can check Shapiro-Wilk's to see if normality is violated for raw values and after transformation using log and square root.
 ```
 
-Like the overall distributions, LOOP DVs look normal but MAZE and DSP variables appear skewed.
 
-We can check Shapiro-Wilk's to see if normality is violated for raw values and after transformation using log and square root.
 
 
 ```{r women-shapiro-check, results='hide'}
@@ -785,17 +958,15 @@ shapiro.test(sqrt(data_maze_women$maze_moves)) #yes
 shapiro.test(data_dsp_women$dsp_success_pct) #no
 shapiro.test(data_dsp_women$dsp_si_true_pct) #yes
 
-shapiro.test(log(data_dsp_women$dsp_success_pct)) #yes
 shapiro.test(log(data_dsp_women$dsp_si_true_pct)) #yes
 
-shapiro.test(sqrt(data_dsp_women$dsp_success_pct)) #yes
 shapiro.test(sqrt(data_dsp_women$dsp_si_true_pct)) #yes
+
+# DSP wayfinding success was not significantly different than normal. MAZ and DSP solution index was still skewed after transformations, so correlations with DSP solution index for women will be using Spearman rank correlation.
 ```
 
-DSP wayfinding success was not significantly different than normal. MAZ and DSP solution index was still skewed after transformations, so correlations with DSP solution index for women will be using Spearman rank correlation.
 
 
-## By Men
 
 ```{r men-distributions-qqplots}
 #LOOP: normally distributed, no need to transform
@@ -935,28 +1106,26 @@ shapiro.test(data_maze_men$maze_accuracy_pct) #yes
 shapiro.test(data_maze_men$maze_moves) #no
 
 shapiro.test(log(data_maze_men$maze_accuracy_pct)) #yes
-shapiro.test(log(data_maze_men$maze_moves)) #yes
 
 shapiro.test(sqrt(data_maze_men$maze_accuracy_pct)) #yes
-shapiro.test(sqrt(data_maze_men$maze_moves)) #yes
 
 #DSP
 shapiro.test(data_dsp_men$dsp_success_pct) #no
 shapiro.test(data_dsp_men$dsp_si_true_pct) #yes
 
-shapiro.test(log(data_dsp_men$dsp_success_pct)) #no
 shapiro.test(log(data_dsp_men$dsp_si_true_pct)) #yes
-```
 
-LOOP and DSP success and MAZE moves variables were not significantly different than normal, but MAZE accuracy and DSP soluion index was. Despite transformations, MAZE moves and DSP solution index accuracy was still pretty skewed so Spearman rank correlations will be applied for associations with GMV for men here.
+
+# LOOP and DSP success and MAZE moves variables were not significantly different than normal, but MAZE accuracy and DSP soluion index was. Despite transformations, MAZE moves and DSP solution index accuracy was still pretty skewed so Spearman rank correlations will be applied for associations with GMV for men here.
+```
 
 ## LOOP
 
 ### Position Error
 
-```{r}
+```{r include=TRUE, echo=FALSE}
 #All
-c1 <- ggscatter(data_loop, x = "avg_t1_hipp", y = "loop_pe_avg_m", color = "repo_status_scan",
+c1 <- ggscatter(data_loop, x = "avg_t1_hipp", y = "loop_pe_avg_m", color = "repo_status",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -980,17 +1149,33 @@ c1a <- ggscatter(data_loop, x = "avg_t1_hipp", y = "loop_pe_avg_m", color = "sex
      theme_bw() +
      theme(legend.position = "none")
 
+#By repo
+c1b <- ggscatter(data_loop_women, x = "avg_t1_hipp", y = "loop_pe_avg_m", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged GMV Volume", ylab = "Averaged \nPosition Error (m)") +
+    facet_wrap(. ~ repo_status, scale = "free", ncol = 1) +
+     theme_bw() +
+     theme(legend.position = "none")
+
 
 #Present
-c1+c1a
+c1
+c1a+c1b
 ```
-All others are Pearson correlations.
+
+
+All are Pearson correlations. T1 hipp GMV is postively correlated with position error for pres (*p* < 0.05).
 
 ### Degrees Traveled
 
-```{r}
+```{r include=TRUE, echo=FALSE}
 #all
-c1 <- ggscatter(data_loop, x = "avg_t1_hipp", y = "loop_de_avg_degree", color = "repo_status_scan",
+c1 <- ggscatter(data_loop, x = "avg_t1_hipp", y = "loop_de_avg_degree", color = "repo_status",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -1013,7 +1198,22 @@ c1a <- ggscatter(data_loop, x = "avg_t1_hipp", y = "loop_de_avg_degree", color =
      theme_bw() +
      theme(legend.position = "none")
 
-c1+c1a
+#By repo
+c1b <- ggscatter(data_loop_women, x = "avg_t1_hipp", y = "loop_de_avg_degree", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged GMV Volume", ylab = "Averaged \nDegrees Traveled") +
+    facet_wrap(. ~ repo_status, scale = "free", ncol = 1) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#Present
+c1
+c1a+c1b
 ```
 
 All correlations are pearson
@@ -1022,9 +1222,9 @@ All correlations are pearson
 
 ### Accuracy
 
-```{r}
-#CA1
-c1 <- ggscatter(data_maze, x = "avg_t1_hipp", y = "maze_accuracy_pct", color = "repo_status_scan",
+```{r include=TRUE, echo=FALSE}
+#All
+c1 <- ggscatter(data_maze, x = "avg_t1_hipp", y = "maze_accuracy_pct", color = "repo_status",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -1034,6 +1234,7 @@ c1 <- ggscatter(data_maze, x = "avg_t1_hipp", y = "maze_accuracy_pct", color = "
           xlab = "Averaged GMV Volume", ylab = "Averaged \nWayfinding Success (%)") +
     theme(legend.position = "top", legend.title=element_blank()) 
 
+#By sex
 c1a <- ggscatter(data_maze, x = "avg_t1_hipp", y = "maze_accuracy_pct", color = "sex",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
@@ -1046,16 +1247,31 @@ c1a <- ggscatter(data_maze, x = "avg_t1_hipp", y = "maze_accuracy_pct", color = 
      theme_bw() +
      theme(legend.position = "none")
 
-c1+c1a
+#By repo
+c1b <- ggscatter(data_maze_women, x = "avg_t1_hipp", y = "maze_accuracy_pct", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged GMV Volume", ylab = "Averaged \nWayfinding Success (%)") +
+    facet_wrap(. ~ repo_status, scale = "free", ncol = 1) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#Present
+c1
+c1a+c1b
 ```
 
-All correlations are Spearman
+All correlations are Spearman.
 
 ### Moves
 
-```{r}
+```{r include=TRUE, echo=FALSE}
 #overall
-c1 <- ggscatter(data_maze, x = "avg_t1_hipp", y = "maze_moves", color = "repo_status_scan",
+c1 <- ggscatter(data_maze, x = "avg_t1_hipp", y = "maze_moves", color = "repo_status",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -1071,26 +1287,40 @@ c1a <- ggscatter(data_maze, x = "avg_t1_hipp", y = "maze_moves", color = "sex",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
           conf.int = TRUE, 
-          cor.method = "pearson",
+          cor.method = "spearman",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged GMV Subfield Volume", ylab = "Averaged \nNumber of Moves") +
     facet_wrap(. ~ sex, scale = "free", ncol = 1) +
      theme_bw() +
      theme(legend.position = "none")
 
-c1+c1a
+#by repo
+c1b <- ggscatter(data_maze_women, x = "avg_t1_hipp", y = "maze_moves", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged GMV Subfield Volume", ylab = "Averaged \nNumber of Moves") +
+    facet_wrap(. ~ repo_status, scale = "free", ncol = 1) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#Present
+c1
+c1a+c1b
 ```
 
-
-Women and men correlations are pearson. 
+All Spearman correlations.
 
 ## DSP
 
 ### Wayfinding Success
 
-```{r}
+```{r include=TRUE, echo=FALSE}
 #all
-c1 <- ggscatter(data_dsp, x = "avg_t1_hipp", y = "dsp_success_pct", color = "repo_status_scan",
+c1 <- ggscatter(data_dsp, x = "avg_t1_hipp", y = "dsp_success_pct", color = "repo_status",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -1113,16 +1343,31 @@ c1a <- ggscatter(data_dsp, x = "avg_t1_hipp", y = "dsp_success_pct", color = "se
      theme_bw() +
      theme(legend.position = "none")
 
-c1+c1a
+#repo
+c1b <- ggscatter(data_dsp_women, x = "avg_t1_hipp", y = "dsp_success_pct", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged GMV Volume", ylab = "Averaged \nWayfinding Success (%)") +
+    facet_wrap(. ~ repo_status, scale = "free", ncol = 1) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#Present
+c1
+c1a+c1b
 ```
 
 All correlations were pearson. Overall, lower T1 hipp GMV was associated with lower wayfinding success in DSP (*p* < 0.05). This pattern was also observed marginally in men (*p* = 0.055), but not in women (*p* = 0.89).
 
 ### Solution Index
 
-```{r}
+```{r include=TRUE, echo=FALSE}
 #all
-c1 <- ggscatter(data_dsp, x = "avg_t1_hipp", y = "dsp_si_true_pct", color = "repo_status_scan",
+c1 <- ggscatter(data_dsp, x = "avg_t1_hipp", y = "dsp_si_true_pct", color = "repo_status",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -1145,22 +1390,39 @@ c1a <- ggscatter(data_dsp, x = "avg_t1_hipp", y = "dsp_si_true_pct", color = "se
      theme_bw() +
      theme(legend.position = "none")
 
-c1+c1a
+#repo
+c1b <- ggscatter(data_dsp_women, x = "avg_t1_hipp", y = "dsp_si_true_pct", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged GMV Volume", ylab = "Averaged \nSolution Index (%)") +
+    facet_wrap(. ~ repo_status, scale = "free", ncol = 1) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#Present
+c1
+c1a+c1b
 ```
 
-All correlations are spearman. For women, T1 volume was also marginally associated with DSP solution index (Spearman, *p* = 0.079).
+All correlations are spearman. For women, T1 volume is positively marginally associated with DSP solution index (*p* = 0.079). This pattern was also observed in pres (*p* = 0.068)
 
 
 # Summary
 
 Results reveal that:
 
-- For all HAS participants who had a T1 scan, Based on structural comparisons and after correcting for TIV, women have larger T1 hippocampal volume than men (*p* < 0.001). Sex hormones for women were log-transformed and correlations among women were carried out using Spearman rank. All correlations with men were Pearson. No significant correlations between hormone concentrations and T1 hippocampal volume were observed for any groups.
+- Sample included HAS participants who had a T1 scan and completed spatial navigation behavior
 
-- For LOOP, women with lower GMV correlated with lower degrees traveled (Pearson, *p* < 0.05).  Overall, lower T1 hipp GMV was associated with lower wayfinding success in DSP (Pearson, *p* < 0.05). This pattern was also observed marginally in men (Pearson, *p* = 0.055), but not in women (Pearson, *p* = 0.89). DSP solution index was marginally positively associated with women with higher GMV (Spearman, *p* = 0.079).
+- Based on structural comparisons and after correcting for TIV, women have larger T1 hippocampal volume than men (*p* < 0.001). Correlations between brains structure and hormones among women were carried out using Spearman rank. All correlations with men were Pearson except for DHEAS. No significant correlations between hormone concentrations and T1 hippocampal volume were observed for men. DHEAS was negatively correlated with T1 hippocampal GMV for posts (*p* < 0.01, Spearman).
 
-Future:
+- For LOOP, T1 hipp GMV is positively correlated with position error for pres (*p* < 0.05, Pearson). Women with higher GMV correlated with lower degrees traveled (*p* < 0.05, Pearson). Pres who had higher GMV correlated with lower degrees traveled (*p* < 0.01, Pearson). 
 
-- Will need to assess hormone-brain relationships among those with specific behavioral data
+- For MAZE, there were no significant correlations observed for men or women.
+
+- For DSP, overall (women and men) higher T1 hipp GMV was associated with lower wayfinding success in DSP (*p* < 0.05, Pearson). This pattern was also observed marginally in men (*p* = 0.055, Pearson), but not in women (*p* = 0.89, Pearson). DSP solution index was marginally positively associated with women with higher GMV (*p* = 0.079, Spearman). This pattern was also observed among pres (*p* = 0.068, Spearman)
 
 
