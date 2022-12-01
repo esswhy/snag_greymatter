@@ -369,7 +369,9 @@ shapiro.test(data_repo$avg_sub) #yes
 shapiro.test(data_men$avg_sub) #no
 ```
 
-Shapiro-Wilk's test reveal that CA23 for men, and SUB overall and SUB for women were not normally distributed. Also, total hipp and MTL for overall and for women were not normally distributed. Hormone and subfield/volume associations for these subfields will be using Spearman rank correlation.
+**Subfields:** Shapiro-Wilk's test reveal that CA23 for men, and SUB overall and SUB for women were not normally distributed. Hormone and subfield/volume associations for these subfields will be using Spearman rank correlations.
+
+**Structure:** Shapiro-Wilk's test reveal that total hipp and MTL for overall and for women were not normally distributed. Hormone and subfield/volume associations for these subfields will be using Spearman rank correlations.
 
 
 # Hormone Distributions {.tabset}
@@ -438,9 +440,7 @@ shapiro.test(log(data_repo$testosterone_spatial_ng_dl)) #yes
 shapiro.test(log(data_men$testosterone_spatial_ng_dl)) #no
 ```
 
-Shapiro-Wilk tests reveal that all hormones violated normality in the overall and women group. Most hormones for women subgroup distributions were still significantly different from normal after log transformation, so Spearman rank correlations will be applied to these hormone and subfield associations.
-
-For men, only SHBG violated normality correlation with this hormone in men will be spearman rank.
+Shapiro-Wilk tests reveal that all six hormones violated normality in the overall and women group. Most hormones for women subgroup distributions were still significantly different from normal after log transformation, so Spearman rank correlations will be applied to these hormone and subfield and structure associations. For men, only SHBG violated normality so all subfield and structure correlations with this hormone in men will be spearman rank.
 
 
 ```{r}
@@ -1815,8 +1815,9 @@ c6a <- ggscatter(data_repo, x = "testosterone_spatial_ng_dl", y = "avg_ca23", co
 (c5 + c5a)
 (c6 + c6a)
 ```
-Correlations for estradiol, FSH, and testosterone were Spearman rank. All others were Pearson.
 
+
+All correlations were Spearman
 
 ### Hormone Correlation by Men
 
@@ -2258,7 +2259,7 @@ summary_aov <- summary(aov)
 kable(summary_aov[[1]])
 ```
 
-ANOVA results comparing ERC subfield by reproductive status was significant.
+ANOVA results comparing ERC subfield by reproductive status was not significant.
 
 ```{r}
 #T-test of subfield by sex
@@ -3407,46 +3408,42 @@ All correlations are Pearson except SHBG (Spearman)
 
 # Summary
 
+## Hormones
 
-## T2 Subfields
+**Total hipp Volume and MTL**
 
-- All hormones were log transformed first to try to normalize distributions. Next, all correlations with estradiol, FSH, and testosterone for women and by reproductive stage were Spearman rank correlations. Correlations for SUB for women were also all Spearman rank. Correlations for men between hormones and CA23 were also all Spearman rank. All other correlations are Pearson correlations.
+- Sample included HAS participants who had a T2 hipp scan and completed spatial navigation behavior.
 
-- Subregion volumes for women and men were generally normally distributed, except for CA23 in men and SUB in women. Any associations/correlations ran with these groups for these subfields were Spearman rank correlation. There appears to be two women whose SUB volumes appear to be outliers. Hormones were generally right skewed, so log transformations were applied with some still not being corrected fully - so Spearman correlations for certain associations were used.
+- ANOVA results comparing total hipp volume and MTL by reproductive stage were not significant. T-test results comparing total hipp volume (*p* < 0.01) and MTL (*p* < 0.05) by sex were significant, with results showing women have larger volumes than men.
 
-- No significant trends seen in correlations for DHEAS.
+- For total hipp volume, it was negatively correlated with estradiol for pres (*p* = 0.033, Spearman) and marginally positively correlated with FSH for peris (*p* = 0.07, Spearman).
 
-- No significant trends seen in correlations for DG.
+- There were no significant correlations between MTL and hormones observed.
 
-- No significant trends seen in correlations for men.
+**Subfields**
 
-- ANOVA results comparing subfields by reproductive stage were not significant for almost all subfields. ANOVA results for ERC was significant by reproductive stage (*p* < 0.05).
+- Sample included HAS participants who had a T2 hipp scan and completed spatial navigation behavior.
 
-- T-test results comparing subfields by sex were all significant (at least *p* < 0.05) except for PRC. 
+- Subregion volumes for women and men were generally normally distributed, except for CA23 in men and SUB in women. ANOVA results comparing subfields by reproductive stage were all not significant. ANOVA results for ERC was marginally significant by reproductive stage (*p* = 0.087). T-test results comparing subfields by sex were all significant (at least *p* < 0.05) except for DG, PHC, and PRC, with results revealing that women larger volumes than men.
 
-- For estradiol, it was significantly negatively correlated with CA1 for peris (*p* = 0.036, Spearman) and with SUB for pres (*p* = 0.04, Spearman), and marginally negatively correlated with CA23 for pres (*p* = 0.054, Spearman) and peris (*p* = 0.068, Spearman). 
+- All hormones were skewed for overall and women groups, so hormone and volume correlations were Spearman rank correlations. All correlations for men were pearson except for those involving SHBG. CA23 correlations with hormones for men were all Spearman rank.
 
-- For progesterone, it was significantly positively correlated with CA1 for posts (*p* = 0.033, Pearson) and with ERC for posts (*p* = 0.015, Pearson).
+- For estradiol, it was significantly negatively correlated with with DG for peris (*p* < 0.01, Spearman) and with SUB for pres (*p* = 0.044, Spearman). It was also marginally negatively associated with CA23 for pres (*p* = 0.07, Spearman).
 
-- For FSH, it was significantly negatively correlated with ERC for posts (*p* < 0.01, Spearman) and with SUB for posts (*p* = 0.021, Spearman). PHC volume and FSH were also significantly negatively correlated among women as a group (*p* = 0.041, Spearman). FSH is marginally negatively correlated with CA1 for posts (*p* = 0.086, Spearman). 
+- For progesterone, it was marginally positively associated with ERC for posts (*p* = 0.053, Spearman).
 
-- For testosterone, it was marginally negatively correlated with ERC for posts (*p* = 0.083, Spearman) and marginally positively correlated with PHC for pres (*p* = 0.085, Spearman).
+- For FSH, it was significantly negatively correlated with ERC for posts (*p* < 0.01, Spearman) and with SUB for posts (*p* = 0.031, Spearman). FSH is marginally negatively correlated with CA1 for pres (*p* = 0.07, Spearman) and posts (*p* = 0.07, Spearman) and with PHC for women as a group (*p* = 0.08, Spearman). FSH was also marginally positively correlated with CA23 for peris (*p* = 0.08, Spearman) and with ERC for pres (*p* = 0.07, Spearman). 
 
-- For SHBG, it was significantly negatively correlated with ERC for posts (*p* < 0.01, Pearson). It was also negatively correlated with PRC among women as a group (*p* = 0.028, Pearson) and marginally negatively correlated with PRC for pres (*p* = 0.057). SHBG was also marginally negatively correlated with SUB for posts (*p* = 0.085, Spearman).
+- For SHBG, it was significantly negatively correlated with ERC for posts (*p* < 0.01, Spearman). It was also significantly negatively correlated with PRC among women as a group (*p* = 0.038, Spearman) and for pres (*p* = 0.04, Spearman). SHBG was also marginally negatively correlated with SUB for women as a group (*p* = 0.07, Spearman).
+
+- For DHEAS, it was significantly negatively correlated with CA23 in women as a group (*p* = 0.01, Spearman).
+
+- For testosterone, it was marginally negatively correlated with CA1 for men (*p* = 0.065, Pearson).
 
 
-## Other (Total Hipp, MTL)
+## Behavior
 
-- All hormones were log transformed first to try to normalize distributions. Next, all correlations with estradiol, FSH, and testosterone for women and by reproductive stage were Spearman rank correlations. All correlations among women and subgroups for total hipp volume and MTL were spearman. All other correlations were Pearson.
 
-- ANOVA results comparing GMV and total hipp volume by reproductive stage was not significant.
 
-- T-test results comparing GMV (*p* < 0.001), total hipp volume (*p* < 0.01), and MTL (*p* < 0.01) by sex was significant.
-
-- No significant trends seen in correlations for GMV. 
-
-- For total hipp volume, it was negatively correlated with estradiol for pres (*p* = 0.044, Spearman). 
-
-- For MTL, it was marginally negatively correlated with FSH for posts (*p* = 0.071, Spearman)
 
 
