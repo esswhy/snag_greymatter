@@ -711,8 +711,10 @@ ANOVA results comparing T2 hipp GMV by reproductive status was not significant.
 #T-test of total hipp by sex
 ttest <- t.test(avg_total_hipp ~ sex, data = data)
 ttest
+tidy_ttest <- tidy(ttest)
 ```
-T-test results comparing GMV by sex was significant. Women (*M* = 1.82) have larger T2 hippocampal volume than men (*M* = 1.71) (*t* = 2.81, *df* = 48.55, *p* < 0.01).
+
+T-test results comparing GMV by sex was significant. Women (*M* = `r round(tidy_ttest$estimate1, digits = 3)`) have larger T2 hippocampal volume than men (*M* = `r round(tidy_ttest$estimate2, digits = 3)`) (*t* = `r round(tidy_ttest$statistic, digits = 3)`, *df* = `r round(tidy_ttest$parameter, digits = 3)`, *p* = `r round(tidy_ttest$p.value, digits = 3)`).
 
 
 ## Hormone Correlation by Reproductive Status
@@ -1022,10 +1024,12 @@ ANOVA results comparing MTL by reproductive status was not significant.
 #T-test of MTL by sex
 ttest <- t.test(avg_mtl ~ sex, data = data)
 ttest
+tidy_ttest <- tidy(ttest)
 ```
 
 
-T-test results comparing MTL by sex was significant. Women (*M* = 5.64) have larger MTL volume than men (*M* = 5.32) (*t* = 2.39, *df* = 43.17, *p* < 0.05).
+T-test results comparing MTL by sex was significant. Women (*M* = `r round(tidy_ttest$estimate1, digits = 3)`) have larger MTL volume than men (*M* = `r round(tidy_ttest$estimate2, digits = 3)`) (*t* = `r round(tidy_ttest$statistic, digits = 3)`, *df* = `r round(tidy_ttest$parameter, digits = 3)`, *p* = `r round(tidy_ttest$p.value, digits = 3)`).
+
 
 
 ## Hormone Correlation by Reproductive Status
@@ -1338,10 +1342,11 @@ ANOVA results comparing CA1 subfield by reproductive status was not significant.
 #T-test of subfield by sex
 ttest <- t.test(avg_ca1 ~ sex, data = data)
 ttest
+tidy_ttest <- tidy(ttest)
 ```
 
 
-T-test results comparing CA1 by sex was significant. Women (*M* = 0.588) have larger CA1 volume than men (*M* = 0.543) (*t* = 2.95, *df* = 46.67, *p* < 0.01).
+T-test results comparing CA1 subfield by sex was significant. Women (*M* = `r round(tidy_ttest$estimate1, digits = 3)`) have larger CA1 volume than men (*M* = `r round(tidy_ttest$estimate2, digits = 3)`) (*t* = `r round(tidy_ttest$statistic, digits = 3)`, *df* = `r round(tidy_ttest$parameter, digits = 3)`, *p* = `r round(tidy_ttest$p.value, digits = 3)`).
 
 ### Hormone Correlation by Reproductive Status
 
@@ -1650,9 +1655,10 @@ ANOVA results comparing CA23 subfield by reproductive status was not significant
 #T-test of subfield by sex
 ttest <- t.test(avg_ca23 ~ sex, data = data)
 ttest
+tidy_ttest <- tidy(ttest)
 ```
 
-T-test results comparing CA23 subfield by sex was significant.
+T-test results comparing CA23 subfield by sex was significant. Women (*M* = `r round(tidy_ttest$estimate1, digits = 3)`) have larger CA23 volume than men (*M* = `r round(tidy_ttest$estimate2, digits = 3)`) (*t* = `r round(tidy_ttest$statistic, digits = 3)`, *df* = `r round(tidy_ttest$parameter, digits = 3)`, *p* = `r round(tidy_ttest$p.value, digits = 3)`).
 
 
 ### Hormone Correlation by Reproductive Status
@@ -1953,9 +1959,10 @@ ANOVA results comparing DG subfield by reproductive status was not significant.
 #T-test of subfield by sex
 ttest <- t.test(avg_dg ~ sex, data = data)
 ttest
+tidy_ttest <- tidy(ttest)
 ```
 
-T-test results comparing DG subfield by sex was significant.
+T-test results comparing DG subfield by sex was not significant. Women (*M* = `r round(tidy_ttest$estimate1, digits = 3)`) do not have larger DG volume than men (*M* = `r round(tidy_ttest$estimate2, digits = 3)`) (*t* = `r round(tidy_ttest$statistic, digits = 3)`, *df* = `r round(tidy_ttest$parameter, digits = 3)`, *p* = `r round(tidy_ttest$p.value, digits = 3)`).
 
 
 ### Hormone Correlation by Reproductive Status
@@ -2257,9 +2264,10 @@ ANOVA results comparing ERC subfield by reproductive status was significant.
 #T-test of subfield by sex
 ttest <- t.test(avg_erc ~ sex, data = data)
 ttest
+tidy_ttest <- tidy(ttest)
 ```
 
-T-test results comparing ERC subfield by sex was significant.
+T-test results comparing ERC subfield by sex was significant. Women (*M* = `r round(tidy_ttest$estimate1, digits = 3)`) have larger ERC volume than men (*M* = `r round(tidy_ttest$estimate2, digits = 3)`) (*t* = `r round(tidy_ttest$statistic, digits = 3)`, *df* = `r round(tidy_ttest$parameter, digits = 3)`, *p* = `r round(tidy_ttest$p.value, digits = 3)`).
 
 
 ### Hormone Correlation by Reproductive Status
@@ -2563,9 +2571,10 @@ ANOVA results comparing PHC subfield by reproductive status was not significant.
 #T-test of subfield by sex
 ttest <- t.test(avg_phc ~ sex, data = data)
 ttest
+tidy_ttest <- tidy(ttest)
 ```
 
-T-test results comparing PHC subfield by sex was significant.
+T-test results comparing PHC subfield by sex was not significant. Women (*M* = `r round(tidy_ttest$estimate1, digits = 3)`) do not have larger PHC volume than men (*M* = `r round(tidy_ttest$estimate2, digits = 3)`) (*t* = `r round(tidy_ttest$statistic, digits = 3)`, *df* = `r round(tidy_ttest$parameter, digits = 3)`, *p* = `r round(tidy_ttest$p.value, digits = 3)`).
 
 
 ### Hormone Correlation by Reproductive Status
@@ -2870,9 +2879,10 @@ ANOVA results comparing PRC subfield by reproductive status was not significant.
 #T-test of subfield by sex
 ttest <- t.test(avg_prc ~ sex, data = data)
 ttest
+tidy_ttest <- tidy(ttest)
 ```
 
-T-test results comparing PRC subfield by sex was not significant.
+T-test results comparing PRC subfield by sex was not significant. Women (*M* = `r round(tidy_ttest$estimate1, digits = 3)`) do not have larger PRC volume than men (*M* = `r round(tidy_ttest$estimate2, digits = 3)`) (*t* = `r round(tidy_ttest$statistic, digits = 3)`, *df* = `r round(tidy_ttest$parameter, digits = 3)`, *p* = `r round(tidy_ttest$p.value, digits = 3)`).
 
 
 ### Hormone Correlation by Reproductive Status
@@ -3178,11 +3188,10 @@ ANOVA results comparing SUB subfield by reproductive status was not significant.
 #T-test of subfield by sex
 ttest <- t.test(avg_sub ~ sex, data = data)
 ttest
+tidy_ttest <- tidy(ttest)
 ```
 
-T-test results comparing SUB subfield by sex was significant.
-
-
+T-test results comparing SUB subfield by sex was significant. Women (*M* = `r round(tidy_ttest$estimate1, digits = 3)`) have larger SUB volume than men (*M* = `r round(tidy_ttest$estimate2, digits = 3)`) (*t* = `r round(tidy_ttest$statistic, digits = 3)`, *df* = `r round(tidy_ttest$parameter, digits = 3)`, *p* = `r round(tidy_ttest$p.value, digits = 3)`).
 
 
 ### Hormone Correlation by Reproductive Status
