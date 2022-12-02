@@ -41,9 +41,9 @@ This report provides exploratory and preliminary correlation analyses between se
 
 2) Select sex hormone measures from when spatial was conducted
 
-3) Correct left and right volumes with TIV
+3) Average left and right volumes to get a single measure
 
-4) Average left and right volumes to get an average measure
+4) Correct averaged volume with TIV
 
 
 ```{r data_wrangling}
@@ -71,7 +71,6 @@ data <- data %>%
   ))
 
 
-
 #Correct with TIV and average
 #Create function for apply to variables
 dividebyTIV <- function(x, na.rm = FALSE) (x/data$t1_vbm_tiv)
@@ -79,15 +78,16 @@ dividebyTIV <- function(x, na.rm = FALSE) (x/data$t1_vbm_tiv)
 #Apply function to variables
 data <- data %>% 
   
-  #Correct using TIV from SPM VBM
-  mutate_at(vars(t1_vol_left_hipp_aal_2d_d1_r, 
-                 t1_vol_right_hipp_aal_2d_d1_r),
-            dividebyTIV) %>%
-  
   #Average left and right regions
   #No need to multiply since values are the same proportion
-  mutate(avg_t1_hipp = ((t1_vol_left_hipp_aal_2d_d1_r + 
-                        t1_vol_right_hipp_aal_2d_d1_r)/2)*1000)
+  mutate(avg_t1_hipp = (t1_vol_left_hipp_aal_2d_d1_r + 
+                        t1_vol_right_hipp_aal_2d_d1_r)/2) %>% 
+  
+  #Correct using TIV from SPM VBM
+  mutate_at(vars(avg_t1_hipp),dividebyTIV) %>% 
+
+  #Multiply to get proportions
+  mutate(avg_t1_hipp = avg_t1_hipp*1000)
 
 
 #Create subsets
