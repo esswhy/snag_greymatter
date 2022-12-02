@@ -323,16 +323,36 @@ p3 <- ggplot(data = data, aes(x = avg_t1_hipp)) +
  Box plot shows the women appear to have greater T1 hippocampal GMV than men.
 
 
-```{r}
+```{r include=TRUE, echo=FALSE}
 data_repo %>% 
   group_by(repo_status) %>% 
-  summarize(mean_gmv = round(mean(avg_t1_hipp), digits = 3),
-            std_gmv = round(sd(avg_t1_hipp), digits = 3)) %>% kable()
+  dplyr::summarize(count = n(),
+            mean_total_hipp = mean(avg_t1_hipp, na.rm=TRUE),
+            std_total_hipp = sd(avg_t1_hipp, na.rm=TRUE)) %>% 
+  kable(col.names = c("Sex", "n", "Mean Total Hipp Volume",
+                      "SD Total Hipp Volume"),
+        caption = "Sample size and means for subjects by sex with T1 hipp volume and completed spatial navigation behavior",
+        digits = 2,
+        align = c("l", rep("c", times = 3)),
+        table.attr = "style='width:70%;'") %>% 
+  kable_styling("striped", full_width = FALSE,
+                position = "center", 
+                font_size = 12)
 
 data %>% 
   group_by(sex) %>% 
-  summarize(mean_gmv = round(mean(avg_t1_hipp), digits = 3),
-            std_gmv = round(sd(avg_t1_hipp), digits = 3)) %>% kable()
+  dplyr::summarize(count = n(),
+            mean_total_hipp = mean(avg_t1_hipp, na.rm=TRUE),
+            std_total_hipp = sd(avg_t1_hipp, na.rm=TRUE)) %>% 
+  kable(col.names = c("Sex", "n", "Mean Total Hipp Volume",
+                      "SD Total Hipp Volume"),
+        caption = "Sample size and means for subjects by sex with T1 hipp volume and completed spatial navigation behavior",
+        digits = 2,
+        align = c("l", rep("c", times = 3)),
+        table.attr = "style='width:70%;'") %>% 
+  kable_styling("striped", full_width = FALSE,
+                position = "center", 
+                font_size = 12)
 ```
 
 
@@ -349,13 +369,14 @@ ANOVA results comparing T1 hipp GMV by reproductive status was not significant.
 #T-test of GMV by sex
 ttest <- t.test(avg_t1_hipp ~ sex, data = data)
 ttest
+tidy_ttest <- tidy(ttest)
 ```
 
 
-T-test results comparing GMV by sex was significant. Women (*M* = 0.556) have larger T1 hippocampal volume than men (*M* = 0.484) (*t* = 10.07, *df* = 63.50, *p* < 0.001).
+T-test results comparing GMV by sex was significant. Women (*M* = `r round(tidy_ttest$estimate1, digits = 3)`) have larger T1 hippocampal volume than men (*M* = `r round(tidy_ttest$estimate2, digits = 3)`) (*t* = `r round(tidy_ttest$statistic, digits = 3)`, *df* = `r round(tidy_ttest$parameter, digits = 3)`, *p* = `r round(tidy_ttest$p.value, digits = 3)`).
 
 
-# T1 and Hormone 
+# T1 and Hormone {.tabset}
 
 
 ```{r echo=FALSE, results = 'hide'}
@@ -552,7 +573,6 @@ c6a <- ggscatter(data_repo, x = "testosterone_spatial_ng_dl", y = "avg_t1_hipp",
 (c6 + c6a)
 ```
 
-
 All correlations are Spearman rank. DHEAS was negatively correlated with T1 hippocampal GMV for posts (*p* < 0.01).
 
 ## Hormone Correlation by Men
@@ -564,7 +584,7 @@ c1 <- ggscatter(data_men, x = "shbg_spatial_nmol_l", y = "avg_t1_hipp",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
           conf.int = TRUE, 
-          cor.method = "pearson",
+          cor.method = "spearman",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "SHBG (nmol/L)", ylab = "Grey Matter Volume") +
      theme_bw() +
@@ -576,7 +596,7 @@ c2 <- ggscatter(data_men, x = "dheas_spatial_ug_dl", y = "avg_t1_hipp",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
           conf.int = TRUE, 
-          cor.method = "spearman",
+          cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "DHEAS (ug/dL)", ylab = "Grey Matter Volume") +
      theme_bw() +
@@ -599,9 +619,11 @@ c3 <- ggscatter(data_men, x = "testosterone_spatial_ng_dl", y = "avg_t1_hipp",
 c1+c2+c3
 ```
 
-All correlations are Pearson except for DHEAS (Spearman).
+All correlations are Pearson except for SHBG (Spearman).
 
-# T1 and Behavior
+# {-}
+
+# T1 and Behavior {.tabset}
 
 ```{r generate-subsets}
 #Check to see if T1 GMV has any relationship with SNAG data
@@ -790,9 +812,11 @@ shapiro.test(log(data_dsp$dsp_si_true_pct)) #yes
 shapiro.test(sqrt(data_dsp$dsp_success_pct)) #yes
 shapiro.test(sqrt(data_dsp$dsp_si_true_pct)) #yes
 
-
-# Shapiro-Wilk's test reveal that LOOP dependent variables are normally distributed, but MAZE dependent variables and DSP solution index are not even after log and square root transformations. Thus, all correlations with GMV for these DV will be spearman rank correlations.
 ```
+
+**Overall:**
+
+Shapiro-Wilk's test reveal that LOOP dependent variables and DSP wayfinding success are normally distributed, but MAZE dependent variables and DSP solution index are not even after log and square root transformations. Thus, all correlations with GMV for these DV will be spearman rank correlations.
 
 
 ```{r log-transformation}
@@ -962,9 +986,10 @@ shapiro.test(log(data_dsp_women$dsp_si_true_pct)) #yes
 
 shapiro.test(sqrt(data_dsp_women$dsp_si_true_pct)) #yes
 
-# DSP wayfinding success was not significantly different than normal. MAZ and DSP solution index was still skewed after transformations, so correlations with DSP solution index for women will be using Spearman rank correlation.
 ```
+**Women:**
 
+MAZE dependent variables and DSP solution index success were significantly different than normal. MAZE and DSP solution index was still skewed after transformations, so correlations with MAZE variables and DSP solution index for women will be using Spearman rank correlation.
 
 
 
@@ -1114,12 +1139,14 @@ shapiro.test(data_dsp_men$dsp_success_pct) #no
 shapiro.test(data_dsp_men$dsp_si_true_pct) #yes
 
 shapiro.test(log(data_dsp_men$dsp_si_true_pct)) #yes
-
-
-# LOOP and DSP success and MAZE moves variables were not significantly different than normal, but MAZE accuracy and DSP soluion index was. Despite transformations, MAZE moves and DSP solution index accuracy was still pretty skewed so Spearman rank correlations will be applied for associations with GMV for men here.
 ```
 
-## LOOP
+
+**Men:**
+
+LOOP variables, DSP wayfinding success, and MAZE moves variables were not significantly different than normal, but MAZE accuracy and DSP solution index were. Despite transformations, MAZE moves and DSP solution index accuracy was still pretty skewed so Spearman rank correlations will be applied for associations with GMV for men here.
+
+## LOOP {.tabset}
 
 ### Position Error
 
@@ -1137,7 +1164,7 @@ c1 <- ggscatter(data_loop, x = "avg_t1_hipp", y = "loop_pe_avg_m", color = "repo
 
 
 #By sex
-c1a <- ggscatter(data_loop, x = "avg_t1_hipp", y = "loop_pe_avg_m", color = "sex",
+c1a <- ggscatter(data_loop_women, x = "avg_t1_hipp", y = "loop_pe_avg_m", color = "red", alpha = 0.6, title = "Women",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -1145,12 +1172,21 @@ c1a <- ggscatter(data_loop, x = "avg_t1_hipp", y = "loop_pe_avg_m", color = "sex
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged GMV Volume", ylab = "Averaged \nPosition Error (m)") +
-    facet_wrap(. ~ sex, scale = "free", ncol = 1) +
+     theme_bw() +
+     theme(legend.position = "none")
+c1b <- ggscatter(data_loop_men, x = "avg_t1_hipp", y = "loop_pe_avg_m", color = "#00AFBB", alpha = 0.6, title = "Men",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged GMV Volume", ylab = "Averaged \nPosition Error (m)") +
      theme_bw() +
      theme(legend.position = "none")
 
 #By repo
-c1b <- ggscatter(data_loop_women, x = "avg_t1_hipp", y = "loop_pe_avg_m", color = "repo_status",
+c1c <- ggscatter(data_loop_women, x = "avg_t1_hipp", y = "loop_pe_avg_m", color = "repo_status",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -1158,18 +1194,17 @@ c1b <- ggscatter(data_loop_women, x = "avg_t1_hipp", y = "loop_pe_avg_m", color 
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged GMV Volume", ylab = "Averaged \nPosition Error (m)") +
-    facet_wrap(. ~ repo_status, scale = "free", ncol = 1) +
+    facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
      theme(legend.position = "none")
 
 
 #Present
 c1
-c1a+c1b
+(c1a+c1b)/c1c
 ```
 
-
-All are Pearson correlations. T1 hipp GMV is postively correlated with position error for pres (*p* < 0.05).
+All are Pearson correlations. Larger T1 hipp volumes is positively associated with position error in pres (*p* < 0.05, Pearson).
 
 ### Degrees Traveled
 
@@ -1186,7 +1221,7 @@ c1 <- ggscatter(data_loop, x = "avg_t1_hipp", y = "loop_de_avg_degree", color = 
     theme(legend.position = "top", legend.title=element_blank()) 
 
 #sex
-c1a <- ggscatter(data_loop, x = "avg_t1_hipp", y = "loop_de_avg_degree", color = "sex",
+c1a <- ggscatter(data_loop_women, x = "avg_t1_hipp", y = "loop_de_avg_degree", color = "red", alpha = 0.6, title = "Women",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -1194,12 +1229,21 @@ c1a <- ggscatter(data_loop, x = "avg_t1_hipp", y = "loop_de_avg_degree", color =
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged GMV Volume", ylab = "Averaged \nDegrees Traveled") +
-    facet_wrap(. ~ sex, scale = "free", ncol = 1) +
+     theme_bw() +
+     theme(legend.position = "none")
+c1b <- ggscatter(data_loop_men, x = "avg_t1_hipp", y = "loop_de_avg_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged GMV Volume", ylab = "Averaged \nDegrees Traveled") +
      theme_bw() +
      theme(legend.position = "none")
 
 #By repo
-c1b <- ggscatter(data_loop_women, x = "avg_t1_hipp", y = "loop_de_avg_degree", color = "repo_status",
+c1c <- ggscatter(data_loop_women, x = "avg_t1_hipp", y = "loop_de_avg_degree", color = "repo_status",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -1207,18 +1251,20 @@ c1b <- ggscatter(data_loop_women, x = "avg_t1_hipp", y = "loop_de_avg_degree", c
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged GMV Volume", ylab = "Averaged \nDegrees Traveled") +
-    facet_wrap(. ~ repo_status, scale = "free", ncol = 1) +
+    facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
      theme(legend.position = "none")
 
 #Present
 c1
-c1a+c1b
+(c1a+c1b)/c1c
 ```
 
-All correlations are pearson
+All correlations are Pearson. Women with higher GMV correlated with fewer degrees traveled (*p* < 0.05, Pearson). Pres who had higher GMV correlated with lower degrees traveled (*p* < 0.01, Pearson). 
 
-## MAZE
+## {-}
+
+## MAZE {.tabset}
 
 ### Accuracy
 
@@ -1235,7 +1281,7 @@ c1 <- ggscatter(data_maze, x = "avg_t1_hipp", y = "maze_accuracy_pct", color = "
     theme(legend.position = "top", legend.title=element_blank()) 
 
 #By sex
-c1a <- ggscatter(data_maze, x = "avg_t1_hipp", y = "maze_accuracy_pct", color = "sex",
+c1a <- ggscatter(data_maze_women, x = "avg_t1_hipp", y = "maze_accuracy_pct", color = "red", alpha = 0.6, title = "Women",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -1243,12 +1289,21 @@ c1a <- ggscatter(data_maze, x = "avg_t1_hipp", y = "maze_accuracy_pct", color = 
           cor.method = "spearman",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged GMV Volume", ylab = "Averaged \nWayfinding Success (%)") +
-    facet_wrap(. ~ sex, scale = "free", ncol = 1) +
+     theme_bw() +
+     theme(legend.position = "none")
+c1b <- ggscatter(data_maze_men, x = "avg_t1_hipp", y = "maze_accuracy_pct", color = "#00AFBB", alpha = 0.6, title = "Men",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged GMV Volume", ylab = "Averaged \nWayfinding Success (%)") +
      theme_bw() +
      theme(legend.position = "none")
 
 #By repo
-c1b <- ggscatter(data_maze_women, x = "avg_t1_hipp", y = "maze_accuracy_pct", color = "repo_status",
+c1c <- ggscatter(data_maze_women, x = "avg_t1_hipp", y = "maze_accuracy_pct", color = "repo_status",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -1256,13 +1311,13 @@ c1b <- ggscatter(data_maze_women, x = "avg_t1_hipp", y = "maze_accuracy_pct", co
           cor.method = "spearman",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged GMV Volume", ylab = "Averaged \nWayfinding Success (%)") +
-    facet_wrap(. ~ repo_status, scale = "free", ncol = 1) +
+    facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
      theme(legend.position = "none")
 
 #Present
 c1
-c1a+c1b
+(c1a+c1b)/c1c
 ```
 
 All correlations are Spearman.
@@ -1282,39 +1337,50 @@ c1 <- ggscatter(data_maze, x = "avg_t1_hipp", y = "maze_moves", color = "repo_st
     theme(legend.position = "top", legend.title=element_blank()) 
 
 #sex
-c1a <- ggscatter(data_maze, x = "avg_t1_hipp", y = "maze_moves", color = "sex",
+c1a <- ggscatter(data_maze_women, x = "avg_t1_hipp", y = "maze_moves", color = "red", alpha = 0.6, title = "Women",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
           conf.int = TRUE, 
           cor.method = "spearman",
           cor.coeff.args = list(label.sep = "\n"),
-          xlab = "Averaged GMV Subfield Volume", ylab = "Averaged \nNumber of Moves") +
-    facet_wrap(. ~ sex, scale = "free", ncol = 1) +
+          xlab = "Averaged GMV Volume", ylab = "Averaged \nNumber of Moves") +
+     theme_bw() +
+     theme(legend.position = "none")
+c1b <- ggscatter(data_maze_men, x = "avg_t1_hipp", y = "maze_moves", color = "#00AFBB", alpha = 0.6, title = "Men",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged GMV Volume", ylab = "Averaged \nNumber of Moves") +
      theme_bw() +
      theme(legend.position = "none")
 
 #by repo
-c1b <- ggscatter(data_maze_women, x = "avg_t1_hipp", y = "maze_moves", color = "repo_status",
+c1c <- ggscatter(data_maze_women, x = "avg_t1_hipp", y = "maze_moves", color = "repo_status",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
           conf.int = TRUE, 
           cor.method = "spearman",
           cor.coeff.args = list(label.sep = "\n"),
-          xlab = "Averaged GMV Subfield Volume", ylab = "Averaged \nNumber of Moves") +
-    facet_wrap(. ~ repo_status, scale = "free", ncol = 1) +
+          xlab = "Averaged GMV Volume", ylab = "Averaged \nNumber of Moves") +
+    facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
      theme(legend.position = "none")
 
 #Present
 c1
-c1a+c1b
+(c1a+c1b)/c1c
 ```
 
-All Spearman correlations.
+All Spearman correlations except for men (Pearson)
 
-## DSP
+## {-}
+
+## DSP {.tabset}
 
 ### Wayfinding Success
 
@@ -1331,7 +1397,17 @@ c1 <- ggscatter(data_dsp, x = "avg_t1_hipp", y = "dsp_success_pct", color = "rep
     theme(legend.position = "top", legend.title=element_blank()) 
 
 #sex
-c1a <- ggscatter(data_dsp, x = "avg_t1_hipp", y = "dsp_success_pct", color = "sex",
+c1a <- ggscatter(data_dsp_women, x = "avg_t1_hipp", y = "dsp_success_pct", color = "red", alpha = 0.6, title = "Women",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged GMV Volume", ylab = "Averaged \nWayfinding Success (%)") +
+     theme_bw() +
+     theme(legend.position = "none")
+c1b <- ggscatter(data_dsp_men, x = "avg_t1_hipp", y = "dsp_success_pct", color = "#00AFBB", alpha = 0.6, title = "Men",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -1339,29 +1415,28 @@ c1a <- ggscatter(data_dsp, x = "avg_t1_hipp", y = "dsp_success_pct", color = "se
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged GMV Volume", ylab = "Averaged \nWayfinding Success (%)") +
-    facet_wrap(. ~ sex, scale = "free", ncol = 1) +
      theme_bw() +
      theme(legend.position = "none")
 
 #repo
-c1b <- ggscatter(data_dsp_women, x = "avg_t1_hipp", y = "dsp_success_pct", color = "sex",
+c1c <- ggscatter(data_dsp_women, x = "avg_t1_hipp", y = "dsp_success_pct", color = "repo_status",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
           conf.int = TRUE, 
-          cor.method = "pearson",
+          cor.method = "spearman",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged GMV Volume", ylab = "Averaged \nWayfinding Success (%)") +
-    facet_wrap(. ~ repo_status, scale = "free", ncol = 1) +
+    facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
      theme(legend.position = "none")
 
 #Present
 c1
-c1a+c1b
+(c1a+c1b)/c1c
 ```
 
-All correlations were pearson. Overall, lower T1 hipp GMV was associated with lower wayfinding success in DSP (*p* < 0.05). This pattern was also observed marginally in men (*p* = 0.055), but not in women (*p* = 0.89).
+All correlations were Pearson except for women groups (Spearman). Overall, larger T1 hipp GMV was associated with lower wayfinding success in DSP (*p* < 0.05, Pearson). This pattern was also observed marginally in men (*p* = 0.055, Pearson), but not in women (*p* = 0.84, Spearman).
 
 ### Solution Index
 
@@ -1378,7 +1453,17 @@ c1 <- ggscatter(data_dsp, x = "avg_t1_hipp", y = "dsp_si_true_pct", color = "rep
     theme(legend.position = "top", legend.title=element_blank()) 
 
 #sex
-c1a <- ggscatter(data_dsp, x = "avg_t1_hipp", y = "dsp_si_true_pct", color = "sex",
+c1a <- ggscatter(data_dsp_women, x = "avg_t1_hipp", y = "dsp_si_true_pct", color = "red", alpha = 0.6, title = "Women",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged GMV Volume", ylab = "Averaged \nSolution Index (%)") +
+     theme_bw() +
+     theme(legend.position = "none")
+c1b <- ggscatter(data_dsp_men, x = "avg_t1_hipp", y = "dsp_si_true_pct", color = "#00AFBB", alpha = 0.6, title = "Men",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -1386,43 +1471,49 @@ c1a <- ggscatter(data_dsp, x = "avg_t1_hipp", y = "dsp_si_true_pct", color = "se
           cor.method = "spearman",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged GMV Volume", ylab = "Averaged \nSolution Index (%)") +
-    facet_wrap(. ~ sex, scale = "free", ncol = 1) +
      theme_bw() +
      theme(legend.position = "none")
 
 #repo
-c1b <- ggscatter(data_dsp_women, x = "avg_t1_hipp", y = "dsp_si_true_pct", color = "sex",
+c1c <- ggscatter(data_dsp_women, x = "avg_t1_hipp", y = "dsp_si_true_pct", color = "repo_status",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
           conf.int = TRUE, 
-          cor.method = "spearman",
+          cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged GMV Volume", ylab = "Averaged \nSolution Index (%)") +
-    facet_wrap(. ~ repo_status, scale = "free", ncol = 1) +
+    facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
      theme(legend.position = "none")
 
 #Present
 c1
-c1a+c1b
+(c1a+c1b)/c1c
 ```
 
-All correlations are spearman. For women, T1 volume is positively marginally associated with DSP solution index (*p* = 0.079). This pattern was also observed in pres (*p* = 0.068)
+All correlations are Spearman except for women groups (Spearman). T1 volume is positively marginally associated with DSP solution index in pres (*p* = 0.051, Pearson).
 
+## {-}
+
+# {-}
 
 # Summary
 
-Results reveal that:
+Sample included HAS participants who had a T1 scan and completed spatial navigation behavior
 
-- Sample included HAS participants who had a T1 scan and completed spatial navigation behavior
+## Hormones
 
-- Based on structural comparisons and after correcting for TIV, women have larger T1 hippocampal volume than men (*p* < 0.001). Correlations between brains structure and hormones among women were carried out using Spearman rank. All correlations with men were Pearson except for DHEAS. No significant correlations between hormone concentrations and T1 hippocampal volume were observed for men. DHEAS was negatively correlated with T1 hippocampal GMV for posts (*p* < 0.01, Spearman).
+- Based on structural comparisons and after correcting for TIV, women have larger T1 hippocampal volume than men (*p* < 0.001). Correlations between brain structure and hormones among women were carried out using Spearman rank. All correlations with men were Pearson except for SHBG. 
 
-- For LOOP, T1 hipp GMV is positively correlated with position error for pres (*p* < 0.05, Pearson). Women with higher GMV correlated with lower degrees traveled (*p* < 0.05, Pearson). Pres who had higher GMV correlated with lower degrees traveled (*p* < 0.01, Pearson). 
+- No significant correlations between hormone concentrations and T1 hippocampal volume were observed for men. DHEAS was negatively correlated with T1 hippocampal GMV for posts (*p* < 0.01, Spearman).
+
+## Behavior
+
+- For LOOP, larger T1 hipp GMV is positively correlated with position error for pres (*p* < 0.05, Pearson). Women with higher GMV correlated with fewer degrees traveled (*p* < 0.05, Pearson). Pres who had higher GMV also correlated with fewer degrees traveled (*p* < 0.01, Pearson). 
 
 - For MAZE, there were no significant correlations observed for men or women.
 
-- For DSP, overall (women and men) higher T1 hipp GMV was associated with lower wayfinding success in DSP (*p* < 0.05, Pearson). This pattern was also observed marginally in men (*p* = 0.055, Pearson), but not in women (*p* = 0.89, Pearson). DSP solution index was marginally positively associated with women with higher GMV (*p* = 0.079, Spearman). This pattern was also observed among pres (*p* = 0.068, Spearman)
+- For DSP, overall (women and men) higher T1 hipp GMV was associated with lower wayfinding success in DSP (*p* < 0.05, Pearson). This pattern was also observed marginally in men (*p* = 0.055, Pearson), but not in women (*p* = 0.84, Spearman). Higher DSP solution index was marginally positively associated with pres who had higher GMV (*p* = 0.051, Pearson). 
 
 
