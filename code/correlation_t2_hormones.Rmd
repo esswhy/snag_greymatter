@@ -619,51 +619,66 @@ h6+h6a
 
 ```{r}
 #Navigation behavior subsets
-data_loop <- data %>% filter(loop_useable == "Yes")
-data_repo_loop <- data_repo %>% filter(loop_useable == "Yes")
-data_men_loop <- data_men %>% filter(loop_useable == "Yes")
-data_maze <- data %>% filter(maze_useable == "Yes")
-data_repo_maze <- data_repo %>% filter(maze_useable == "Yes")
-data_men_maze <- data_men %>% filter(maze_useable == "Yes")
-data_dsp <- data %>% filter(dsp_useable == "Yes")
-data_repo_dsp <- data_repo %>% filter(dsp_useable == "Yes")
-data_men_dsp <- data_men %>% filter(dsp_useable == "Yes")
+#Further filter for SNAG
+#Separate for SNAG
+data_loop <- data %>%
+  filter(loop_useable == "Yes")
+data_maze <- data %>%
+  filter(maze_useable == "Yes")
+data_dsp <- data %>%
+  filter(dsp_useable == "Yes")
+
+
+#Separate for women and men
+data_loop_women <- data_repo %>% 
+  filter(loop_useable == "Yes") 
+data_maze_women <- data_repo %>% 
+  filter(maze_useable == "Yes") 
+data_dsp_women <- data_repo %>% 
+  filter(dsp_useable == "Yes") 
+
+data_loop_men <- data_men %>% 
+  filter(loop_useable == "Yes")
+data_maze_men <- data_men %>% 
+  filter(maze_useable == "Yes")
+data_dsp_men <- data_men %>% 
+  filter(dsp_useable == "Yes")
 
 #LOOP: position error
 shapiro.test(data_loop$loop_pe_avg_m) #no
-shapiro.test(data_repo_loop$loop_pe_avg_m) #no
-shapiro.test(data_men_loop$loop_pe_avg_m) #no
+shapiro.test(data_loop_women$loop_pe_avg_m) #no
+shapiro.test(data_loop_men$loop_pe_avg_m) #no
 
 #LOOP: degrees traveled
 shapiro.test(data_loop$loop_de_avg_degree) #no
-shapiro.test(data_repo_loop$loop_de_avg_degree) #no
-shapiro.test(data_men_loop$loop_de_avg_degree) #no
+shapiro.test(data_loop_women$loop_de_avg_degree) #no
+shapiro.test(data_loop_men$loop_de_avg_degree) #no
 
 #MAZE: accuracy
 shapiro.test(data_maze$maze_accuracy_pct) #yes
-shapiro.test(data_repo_maze$maze_accuracy_pct) #yes
-shapiro.test(data_men_maze$maze_accuracy_pct) #yes
+shapiro.test(data_maze_women$maze_accuracy_pct) #yes
+shapiro.test(data_maze_men$maze_accuracy_pct) #yes
 
 #MAZE: moves
 shapiro.test(data_maze$maze_moves) #yes
-shapiro.test(data_repo_maze$maze_moves) #yes
-shapiro.test(data_men_maze$maze_moves) #no
+shapiro.test(data_maze_women$maze_moves) #yes
+shapiro.test(data_maze_men$maze_moves) #no
 
 #DSP: wayfinding success
 shapiro.test(data_dsp$dsp_success_pct) #no
-shapiro.test(data_repo_dsp$dsp_success_pct) #no
-shapiro.test(data_men_dsp$dsp_success_pct) #no
+shapiro.test(data_dsp_women$dsp_success_pct) #no
+shapiro.test(data_dsp_men$dsp_success_pct) #no
 
 #DSP: solution index
 shapiro.test(data_dsp$dsp_si_true_pct) #yes
-shapiro.test(data_repo_dsp$dsp_si_true_pct) #yes
-shapiro.test(data_men_dsp$dsp_si_true_pct) #no
+shapiro.test(data_dsp_women$dsp_si_true_pct) #yes
+shapiro.test(data_dsp_men$dsp_si_true_pct) #no
 ```
 
 Shapiro-Wilk's test reveal that MAZE accuracy for all and MAZE moves for overall, women groups were not normally distributed. DSP solution index for overall and women were also not normally distributed. Behavior and volume correlations will be Spearman rank
 
 
-# Total Hippocampal Volume
+# Total Hippocampal Volume {.tabset}
 
 ## Structural Comparison
 
@@ -767,7 +782,7 @@ T-test results comparing GMV by sex was significant. Women (*M* = `r round(tidy_
 
 ## Hormone Correlation by Reproductive Status
 
-```{r}
+```{r include=TRUE, echo=FALSE}
 #Estradiol
 c1 <- ggscatter(data_repo, x = "estradiol_spatial_pg_ml", y = "avg_total_hipp", color = "repo_status",
           add = "reg.line",
@@ -932,7 +947,7 @@ All correlations are Spearman.
 
 ## Hormone Correlation by Men
 
-```{r}
+```{r include=TRUE, echo=FALSE}
 #SHBG
 c1 <- ggscatter(data_men, x = "shbg_spatial_nmol_l", y = "avg_total_hipp",
           add = "reg.line",
@@ -980,18 +995,76 @@ All correlations are Pearson except for SHBG (Spearman)
 
 ### LOOP
 
+**Position Error**
+
+```{r include=TRUE, echo=FALSE}
+#All
+c1 <- ggscatter(data_loop, x = "avg_total_hipp", y = "loop_pe_avg_m", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged GMV Volume", ylab = "Averaged \nPosition Error (m)", ) +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+
+#By sex
+c1a <- ggscatter(data_loop, x = "avg_total_hipp", y = "loop_pe_avg_m", color = "sex",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged GMV Volume", ylab = "Averaged \nPosition Error (m)") +
+    facet_wrap(. ~ sex, scale = "free", ncol = 1) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#By repo
+c1b <- ggscatter(data_loop_women, x = "avg_total_hipp", y = "loop_pe_avg_m", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged GMV Volume", ylab = "Averaged \nPosition Error (m)") +
+    facet_wrap(. ~ repo_status, scale = "free", ncol = 1) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+
+#Present
+c1
+c1a+c1b
+```
+
+**Position Error**
+**Degrees Traveled**
+
+
 ### MAZE
+
+**Accuracy**
+**Number of Moves**
 
 ### DSP
 
+**Wayfinding Success**
+**Solution Index**
+
 ## {-}
 
+# {-}
 
-# MTL
+# MTL {.tabset}
 
 ## Structural Comparison
 
-```{r}
+```{r include=TRUE, echo=FALSE}
 #Reproductive status
 p1 <- ggplot(data = data_repo, aes(y = avg_mtl,
                                  x = repo_status,
@@ -1092,7 +1165,7 @@ T-test results comparing MTL by sex was significant. Women (*M* = `r round(tidy_
 
 ## Hormone Correlation by Reproductive Status
 
-```{r}
+```{r include=TRUE, echo=FALSE}
 #Estradiol
 c1 <- ggscatter(data_repo, x = "estradiol_spatial_pg_ml", y = "avg_mtl", color = "repo_status",
           add = "reg.line",
@@ -1259,7 +1332,7 @@ All correlations are Spearman.
 
 ## Hormone Correlation by Men
 
-```{r}
+```{r include=TRUE, echo=FALSE}
 #SHBG
 c1 <- ggscatter(data_men, x = "shbg_spatial_nmol_l", y = "avg_mtl",
           add = "reg.line",
@@ -1304,13 +1377,36 @@ c1+c2+c3
 
 All correlations are Pearson except SHBG (Spearman)
 
+## Behavioral Correlations {.tabset}
+
+### LOOP
+
+**Position Error**
+**Degrees Traveled**
+
+
+### MAZE
+
+**Accuracy**
+**Number of Moves**
+
+### DSP
+
+**Wayfinding Success**
+**Solution Index**
+
+## {-}
+
+# {-}
+
+
 # T2 Subfield Volume {.tabset}
 
-## CA1 
+## CA1 {.tabset}
 
 ### Structural Comparison
 
-```{r}
+```{r include=TRUE, echo=FALSE}
 #Reproductive status
 p1 <- ggplot(data = data_repo, aes(y = avg_ca1,
                                  x = repo_status,
@@ -1408,7 +1504,7 @@ T-test results comparing CA1 subfield by sex was significant. Women (*M* = `r ro
 
 ### Hormone Correlation by Reproductive Status
 
-```{r}
+```{r include=TRUE, echo=FALSE}
 #Estradiol
 c1 <- ggscatter(data_repo, x = "estradiol_spatial_pg_ml", y = "avg_ca1", color = "repo_status",
           add = "reg.line",
@@ -1574,7 +1670,7 @@ All correlations are Spearman.
 
 ### Hormone Correlation by Men
 
-```{r}
+```{r include=TRUE, echo=FALSE}
 #SHBG
 c1 <- ggscatter(data_men, x = "shbg_spatial_nmol_l", y = "avg_ca1",
           add = "reg.line",
@@ -1618,14 +1714,35 @@ c1+c2+c3
 
 Correlations are all Pearson except SHBG (Spearman)
 
+### Behavioral Correlations {.tabset}
+
+#### LOOP
+
+**Position Error**
+**Degrees Traveled**
 
 
-## CA2/3
+#### MAZE
+
+**Accuracy**
+**Number of Moves**
+
+#### DSP
+
+**Wayfinding Success**
+**Solution Index**
+
+### {-}
+
+## {-}
+
+
+## CA2/3 {.tabset}
 
 
 ### Structural Comparison
 
-```{r}
+```{r include=TRUE, echo=FALSE}
 #Reproductive status
 p1 <- ggplot(data = data_repo, aes(y = avg_ca23,
                                  x = repo_status,
@@ -1721,7 +1838,7 @@ T-test results comparing CA23 subfield by sex was significant. Women (*M* = `r r
 
 ### Hormone Correlation by Reproductive Status
 
-```{r}
+```{r include=TRUE, echo=FALSE}
 #Estradiol
 c1 <- ggscatter(data_repo, x = "estradiol_spatial_pg_ml", y = "avg_ca23", color = "repo_status",
           add = "reg.line",
@@ -1879,7 +1996,7 @@ All correlations were Spearman
 
 ### Hormone Correlation by Men
 
-```{r}
+```{r include=TRUE, echo=FALSE}
 #SHBG
 c1 <- ggscatter(data_men, x = "shbg_spatial_nmol_l", y = "avg_ca23",
           add = "reg.line",
@@ -1924,12 +2041,34 @@ c1+c2+c3
 
 Correlations are all Spearman.
 
-## DG
+### Behavioral Correlations {.tabset}
+
+#### LOOP
+**Position Error**
+**Degrees Traveled**
+
+
+#### MAZE
+
+**Accuracy**
+**Number of Moves**
+
+#### DSP
+
+**Wayfinding Success**
+**Solution Index**
+
+### {-}
+
+## {-}
+
+
+## DG {.tabset}
 
 
 ### Structural Comparison
 
-```{r}
+```{r include=TRUE, echo=FALSE}
 #Reproductive status
 p1 <- ggplot(data = data_repo, aes(y = avg_dg,
                                  x = repo_status,
@@ -2026,7 +2165,7 @@ T-test results comparing DG subfield by sex was not significant. Women (*M* = `r
 
 ### Hormone Correlation by Reproductive Status
 
-```{r}
+```{r include=TRUE, echo=FALSE}
 #Estradiol
 c1 <- ggscatter(data_repo, x = "estradiol_spatial_pg_ml", y = "avg_dg", color = "repo_status",
           add = "reg.line",
@@ -2186,7 +2325,7 @@ All correlations are Spearman
 
 ### Hormone Correlation by Men
 
-```{r}
+```{r include=TRUE, echo=FALSE}
 #SHBG
 c1 <- ggscatter(data_men, x = "shbg_spatial_nmol_l", y = "avg_dg",
           add = "reg.line",
@@ -2230,11 +2369,34 @@ c1+c2+c3
 
 All correlations are Pearson except SHBG (Spearman)
 
-## ERC
+### Behavioral Correlations {.tabset}
+
+#### LOOP
+
+**Position Error**
+**Degrees Traveled**
+
+
+#### MAZE
+
+**Accuracy**
+**Number of Moves**
+
+#### DSP
+
+**Wayfinding Success**
+**Solution Index**
+
+### {-}
+
+## {-}
+
+
+## ERC {.tabset}
 
 ### Structural Comparison
 
-```{r}
+```{r include=TRUE, echo=FALSE}
 #Reproductive status
 p1 <- ggplot(data = data_repo, aes(y = avg_erc,
                                  x = repo_status,
@@ -2331,7 +2493,7 @@ T-test results comparing ERC subfield by sex was significant. Women (*M* = `r ro
 
 ### Hormone Correlation by Reproductive Status
 
-```{r}
+```{r include=TRUE, echo=FALSE}
 #Estradiol
 c1 <- ggscatter(data_repo, x = "estradiol_spatial_pg_ml", y = "avg_erc", color = "repo_status",
           add = "reg.line",
@@ -2492,7 +2654,7 @@ All correlations are Spearman.
 
 ### Hormone Correlation by Men
 
-```{r}
+```{r include=TRUE, echo=FALSE}
 #SHBG
 c1 <- ggscatter(data_men, x = "shbg_spatial_nmol_l", y = "avg_erc",
           add = "reg.line",
@@ -2536,13 +2698,35 @@ c1+c2+c3
 ```
 All correlations are Pearson except SHBG (Spearman)
 
+### Behavioral Correlations {.tabset}
 
-## PHC
+#### LOOP
+
+**Position Error**
+**Degrees Traveled**
+
+
+#### MAZE
+
+**Accuracy**
+**Number of Moves**
+
+#### DSP
+
+**Wayfinding Success**
+**Solution Index**
+
+### {-}
+
+## {-}
+
+
+## PHC {.tabset}
 
 
 ### Structural Comparison
 
-```{r}
+```{r include=TRUE, echo=FALSE}
 #Reproductive status
 p1 <- ggplot(data = data_repo, aes(y = avg_phc,
                                  x = repo_status,
@@ -2638,7 +2822,7 @@ T-test results comparing PHC subfield by sex was not significant. Women (*M* = `
 
 ### Hormone Correlation by Reproductive Status
 
-```{r}
+```{r include=TRUE, echo=FALSE}
 #Estradiol
 c1 <- ggscatter(data_repo, x = "estradiol_spatial_pg_ml", y = "avg_phc", color = "repo_status",
           add = "reg.line",
@@ -2799,7 +2983,7 @@ All correlations are Spearman
 
 ### Hormone Correlation by Men
 
-```{r}
+```{r include=TRUE, echo=FALSE}
 #SHBG
 c1 <- ggscatter(data_men, x = "shbg_spatial_nmol_l", y = "avg_phc", 
           add = "reg.line",
@@ -2843,12 +3027,35 @@ c1+c2+c3
 
 All correlations are Pearson except SHBG (Spearman)
 
-## PRC
+
+### Behavioral Correlations {.tabset}
+
+#### LOOP
+
+**Position Error**
+**Degrees Traveled**
+
+
+#### MAZE
+
+**Accuracy**
+**Number of Moves**
+
+#### DSP
+
+**Wayfinding Success**
+**Solution Index**
+
+### {-}
+
+## {-}
+
+## PRC {.tabset}
 
 
 ### Structural Comparison
 
-```{r}
+```{r include=TRUE, echo=FALSE}
 #Reproductive status
 p1 <- ggplot(data = data_repo, aes(y = avg_prc,
                                  x = repo_status,
@@ -2946,7 +3153,7 @@ T-test results comparing PRC subfield by sex was not significant. Women (*M* = `
 
 ### Hormone Correlation by Reproductive Status
 
-```{r}
+```{r include=TRUE, echo=FALSE}
 #Estradiol
 c1 <- ggscatter(data_repo, x = "estradiol_spatial_pg_ml", y = "avg_prc", color = "repo_status",
           add = "reg.line",
@@ -3107,7 +3314,7 @@ All correlations are Spearman
 
 ### Hormone Correlation by Men
 
-```{r}
+```{r include=TRUE, echo=FALSE}
 #SHBG
 c1 <- ggscatter(data_men, x = "shbg_spatial_nmol_l", y = "avg_prc", 
           add = "reg.line",
@@ -3153,12 +3360,33 @@ c1+c2+c3
 
 All correlations are Pearson except SHBG (Spearman)
 
+### Behavioral Correlations {.tabset}
 
-## SUB
+#### LOOP
+
+**Position Error**
+**Degrees Traveled**
+
+
+#### MAZE
+
+**Accuracy**
+**Number of Moves**
+
+#### DSP
+
+**Wayfinding Success**
+**Solution Index**
+
+### {-}
+
+## {-}
+
+## SUB {.tabset}
 
 ### Structural Comparison
 
-```{r}
+```{r include=TRUE, echo=FALSE}
 #Reproductive status
 p1 <- ggplot(data = data_repo, aes(y = avg_sub,
                                  x = repo_status,
@@ -3255,7 +3483,7 @@ T-test results comparing SUB subfield by sex was significant. Women (*M* = `r ro
 
 ### Hormone Correlation by Reproductive Status
 
-```{r}
+```{r include=TRUE, echo=FALSE}
 #Estradiol
 c1 <- ggscatter(data_repo, x = "estradiol_spatial_pg_ml", y = "avg_sub", color = "repo_status",
           add = "reg.line",
@@ -3415,7 +3643,7 @@ All correlations are Spearman.
 
 ### Hormone Correlation by Men
 
-```{r}
+```{r include=TRUE, echo=FALSE}
 #SHBG
 c1 <- ggscatter(data_men, x = "shbg_spatial_nmol_l", y = "avg_sub",
           add = "reg.line",
@@ -3460,7 +3688,29 @@ c1+c2+c3
 
 All correlations are Pearson except SHBG (Spearman)
 
+### Behavioral Correlations {.tabset}
+
+#### LOOP
+
+**Position Error**
+**Degrees Traveled**
+
+
+#### MAZE
+
+**Accuracy**
+**Number of Moves**
+
+#### DSP
+
+**Wayfinding Success**
+**Solution Index**
+
+### {-}
+
 ## {-}
+
+# {-}
 
 
 
