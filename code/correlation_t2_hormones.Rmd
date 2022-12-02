@@ -369,12 +369,14 @@ shapiro.test(data_repo$avg_sub) #yes
 shapiro.test(data_men$avg_sub) #no
 ```
 
-**Subfields:** Shapiro-Wilk's test reveal that CA23 for men, and SUB overall and SUB for women were not normally distributed. Hormone and subfield/volume associations for these subfields will be using Spearman rank correlations.
-
 **Structure:** Shapiro-Wilk's test reveal that total hipp and MTL for overall and for women were not normally distributed. Hormone and subfield/volume associations for these subfields will be using Spearman rank correlations.
 
+**Subfields:** Shapiro-Wilk's test reveal that CA23 for men, and SUB overall and SUB for women were not normally distributed. Hormone and subfield/volume associations for these subfields will be using Spearman rank correlations.
 
-# Hormone Distributions {.tabset}
+
+
+
+# Hormone Distributions 
 
 ```{r echo=FALSE, results='hide'}
 #RAW
@@ -613,6 +615,52 @@ h6+h6a
 #   mutate_at(vars(estradiol_spatial_pg_ml:testosterone_spatial_ng_dl), log)
 ```
 
+# Behavioral Distributions
+
+```{r}
+#Navigation behavior subsets
+data_loop <- data %>% filter(loop_useable == "Yes")
+data_repo_loop <- data_repo %>% filter(loop_useable == "Yes")
+data_men_loop <- data_men %>% filter(loop_useable == "Yes")
+data_maze <- data %>% filter(maze_useable == "Yes")
+data_repo_maze <- data_repo %>% filter(maze_useable == "Yes")
+data_men_maze <- data_men %>% filter(maze_useable == "Yes")
+data_dsp <- data %>% filter(dsp_useable == "Yes")
+data_repo_dsp <- data_repo %>% filter(dsp_useable == "Yes")
+data_men_dsp <- data_men %>% filter(dsp_useable == "Yes")
+
+#LOOP: position error
+shapiro.test(data_loop$loop_pe_avg_m) #no
+shapiro.test(data_repo_loop$loop_pe_avg_m) #no
+shapiro.test(data_men_loop$loop_pe_avg_m) #no
+
+#LOOP: degrees traveled
+shapiro.test(data_loop$loop_de_avg_degree) #no
+shapiro.test(data_repo_loop$loop_de_avg_degree) #no
+shapiro.test(data_men_loop$loop_de_avg_degree) #no
+
+#MAZE: accuracy
+shapiro.test(data_maze$maze_accuracy_pct) #yes
+shapiro.test(data_repo_maze$maze_accuracy_pct) #yes
+shapiro.test(data_men_maze$maze_accuracy_pct) #yes
+
+#MAZE: moves
+shapiro.test(data_maze$maze_moves) #yes
+shapiro.test(data_repo_maze$maze_moves) #yes
+shapiro.test(data_men_maze$maze_moves) #no
+
+#DSP: wayfinding success
+shapiro.test(data_dsp$dsp_success_pct) #no
+shapiro.test(data_repo_dsp$dsp_success_pct) #no
+shapiro.test(data_men_dsp$dsp_success_pct) #no
+
+#DSP: solution index
+shapiro.test(data_dsp$dsp_si_true_pct) #yes
+shapiro.test(data_repo_dsp$dsp_si_true_pct) #yes
+shapiro.test(data_men_dsp$dsp_si_true_pct) #no
+```
+
+Shapiro-Wilk's test reveal that MAZE accuracy for all and MAZE moves for overall, women groups were not normally distributed. DSP solution index for overall and women were also not normally distributed. Behavior and volume correlations will be Spearman rank
 
 
 # Total Hippocampal Volume
@@ -927,6 +975,16 @@ c1+c2+c3
 ```
 
 All correlations are Pearson except for SHBG (Spearman)
+
+## Behavioral Correlations {.tabset}
+
+### LOOP
+
+### MAZE
+
+### DSP
+
+## {-}
 
 
 # MTL
