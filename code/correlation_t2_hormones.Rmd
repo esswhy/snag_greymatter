@@ -6128,7 +6128,7 @@ ttest
 tidy_ttest <- tidy(ttest)
 ```
 
-T-test results comparing SUB subfield by sex was significant. Women (*M* = `r round(tidy_ttest$estimate1, digits = 3)`) have larger SUB volume than men (*M* = `r round(tidy_ttest$estimate2, digits = 3)`) (*t* = `r round(tidy_ttest$statistic, digits = 3)`, *df* = `r round(tidy_ttest$parameter, digits = 3)`, *p* = `r round(tidy_ttest$p.value, digits = 3)`).
+T-test results comparing SUB subfield by sex was not significant. 
 
 
 ### Hormone Correlation by Reproductive Status
@@ -6344,7 +6344,115 @@ All correlations are Pearson except SHBG (Spearman)
 
 ##### Position Error
 
+```{r include=TRUE, echo=FALSE}
+#All
+c1 <- ggscatter(data_loop, x = "avg_sub", y = "loop_pe_avg_m", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged SUB Volume", ylab = "Averaged \nPosition Error (m)", ) +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+
+#By sex
+c1a <- ggscatter(data_loop_women, x = "avg_sub", y = "loop_pe_avg_m", color = "red", alpha = 0.6, title = "Women",
+          add = "reg.line", 
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged SUB Volume", ylab = "Averaged \nPosition Error (m)") +
+     theme_bw() +
+     theme(legend.position = "none")
+c1b <- ggscatter(data_loop_men, x = "avg_sub", y = "loop_pe_avg_m", color = "#00AFBB", alpha = 0.6, title = "Men",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged SUB Volume", ylab = "Averaged \nPosition Error (m)") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#By repo
+c1c <- ggscatter(data_loop_women, x = "avg_sub", y = "loop_pe_avg_m", color = "repo_status", 
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged SUB Volume", ylab = "Averaged \nPosition Error (m)") +
+    facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+
+#Present
+c1
+(c1a+c1b)/c1c
+```
+All correlations were Pearson
+
 ##### Degrees Traveled
+
+```{r include=TRUE, echo=FALSE}
+#all
+c1 <- ggscatter(data_loop, x = "avg_sub", y = "loop_de_avg_degree", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged SUB Volume", ylab = "Averaged \nDegrees Traveled", ) +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+#sex
+c1a <- ggscatter(data_loop_women, x = "avg_sub", y = "loop_de_avg_degree", color = "red", alpha = 0.6, title = "Women",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged SUB Volume", ylab = "Averaged \nDegrees Traveled") +
+     theme_bw() +
+     theme(legend.position = "none")
+c1b <- ggscatter(data_loop_men, x = "avg_sub", y = "loop_de_avg_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged SUB Volume", ylab = "Averaged \nDegrees Traveled") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#By repo
+c1c <- ggscatter(data_loop_women, x = "avg_sub", y = "loop_de_avg_degree", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged SUB Volume", ylab = "Averaged \nDegrees Traveled") +
+    facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#Present
+c1
+(c1a+c1b)/c1c
+```
+All correlations were Pearson
 
 #### {-}
 
@@ -6352,7 +6460,115 @@ All correlations are Pearson except SHBG (Spearman)
 
 ##### Accuracy
 
-##### Moves
+```{r include=TRUE, echo=FALSE}
+#All
+c1 <- ggscatter(data_maze, x = "avg_sub", y = "maze_accuracy_pct", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged SUB Volume", ylab = "Averaged \nWayfinding Success (%)") +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+#By sex
+c1a <- ggscatter(data_maze_women, x = "avg_sub", y = "maze_accuracy_pct", color = "red", alpha = 0.6, title = "Women",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged SUB Volume", ylab = "Averaged \nWayfinding Success (%)") +
+     theme_bw() +
+     theme(legend.position = "none")
+c1b <- ggscatter(data_maze_men, x = "avg_sub", y = "maze_accuracy_pct", color = "#00AFBB", alpha = 0.6, title = "Men",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged SUB Volume", ylab = "Averaged \nWayfinding Success (%)") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#By repo
+c1c <- ggscatter(data_maze_women, x = "avg_sub", y = "maze_accuracy_pct", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged SUB Volume", ylab = "Averaged \nWayfinding Success (%)") +
+    facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#Present
+c1
+(c1a+c1b)/c1c
+```
+
+All correlations were Spearman
+
+##### 
+
+```{r include=TRUE, echo=FALSE}
+#overall
+c1 <- ggscatter(data_maze, x = "avg_sub", y = "maze_moves", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged SUB Volume", ylab = "Averaged \nNumber of Moves") +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+#sex
+c1a <- ggscatter(data_maze_women, x = "avg_sub", y = "maze_moves", color = "red", alpha = 0.6, title = "Women",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged SUB Subfield Volume", ylab = "Averaged \nNumber of Moves") +
+     theme_bw() +
+     theme(legend.position = "none")
+c1b <- ggscatter(data_maze_men, x = "avg_sub", y = "maze_moves", color = "#00AFBB", alpha = 0.6, title = "Men",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged SUB Subfield Volume", ylab = "Averaged \nNumber of Moves") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#by repo
+c1c <- ggscatter(data_maze_women, x = "avg_sub", y = "maze_moves", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged SUB Subfield Volume", ylab = "Averaged \nNumber of Moves") +
+    facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#Present
+c1
+(c1a+c1b)/c1c
+```
+
+All correlations were Spearman except for men (Pearson)
 
 #### {-}
 
@@ -6360,7 +6576,115 @@ All correlations are Pearson except SHBG (Spearman)
 
 ##### Wayfinding Success
 
+```{r include=TRUE, echo=FALSE}
+#all
+c1 <- ggscatter(data_dsp, x = "avg_sub", y = "dsp_success_pct", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged SUB Volume", ylab = "Averaged \nWayfinding Success (%)") +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+#sex
+c1a <- ggscatter(data_dsp_women, x = "avg_sub", y = "dsp_success_pct", color = "red", alpha = 0.6, title = "Women",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged SUB Volume", ylab = "Averaged \nWayfinding Success (%)") +
+     theme_bw() +
+     theme(legend.position = "none")
+c1b <- ggscatter(data_dsp_men, x = "avg_sub", y = "dsp_success_pct", color = "#00AFBB", alpha = 0.6, title = "Men",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged SUB Volume", ylab = "Averaged \nWayfinding Success (%)") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#repo
+c1c <- ggscatter(data_dsp_women, x = "avg_sub", y = "dsp_success_pct", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged SUB Volume", ylab = "Averaged \nWayfinding Success (%)") +
+    facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#Present
+c1
+(c1a+c1b)/c1c
+```
+
+All correlations were Pearson
+
 ##### Solution Index
+
+```{r include=TRUE, echo=FALSE}
+#all
+c1 <- ggscatter(data_dsp, x = "avg_sub", y = "dsp_si_true_pct", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged SUB Volume", ylab = "Averaged \nSolution Index (%)") +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+#sex
+c1a <- ggscatter(data_dsp_women, x = "avg_sub", y = "dsp_si_true_pct", color = "red", alpha = 0.6, title = "Women",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged SUB Volume", ylab = "Averaged \nSolution Index (%)") +
+     theme_bw() +
+     theme(legend.position = "none")
+c1b <- ggscatter(data_dsp_men, x = "avg_sub", y = "dsp_si_true_pct", color = "#00AFBB", alpha = 0.6, title = "Men",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged SUB Volume", ylab = "Averaged \nSolution Index (%)") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#repo
+c1c <- ggscatter(data_dsp_women, x = "avg_sub", y = "dsp_si_true_pct", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged SUB Volume", ylab = "Averaged \nSolution Index (%)") +
+    facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#Present
+c1
+(c1a+c1b)/c1c
+```
+
+All correlations were Spearman except for men (Pearson)
 
 #### {-}
 
@@ -6370,46 +6694,63 @@ All correlations are Pearson except SHBG (Spearman)
 
 # {-}
 
-
-
 # Summary
+
+Sample included HAS participants who had a T2 hipp scan and completed spatial navigation behavior. 
+
+There are 4 subjects (2 female, 2 male) still waiting to be segmented, and they will be included in the next iteration of this analysis.
 
 ## Hormones
 
+All hormones were skewed for overall and women groups, so hormone and volume correlations were Spearman rank correlations. All correlations for men were Pearson except for those involving SHBG.
+
 **Total hipp Volume and MTL**
 
-- Sample included HAS participants who had a T2 hipp scan and completed spatial navigation behavior.
+- Total hipp volume and MTL volumes were normally distributed. ANOVA results comparing total hipp volume and MTL by reproductive stage were not significant. T-test results comparing total hipp volume and MTL by sex were also not significant.
 
-- ANOVA results comparing total hipp volume and MTL by reproductive stage were not significant. T-test results comparing total hipp volume (*p* < 0.01) and MTL (*p* < 0.05) by sex were significant, with results showing women have larger volumes than men.
+- For progesterone, higher concentration was negatively associated with lower total hipp volumes in women (*p* = 0.04, Spearman) and in pres (*p* < 0.001, Spearman). Progesterone was marginally negatively associated with lower MTL volumes in women (*p* = 0.05, Spearman) and in pres (*p* = 0.08, Spearman)
 
-- For total hipp volume, it was negatively correlated with estradiol for pres (*p* = 0.033, Spearman) and marginally positively correlated with FSH for peris (*p* = 0.07, Spearman).
-
-- There were no significant correlations between MTL and hormones observed.
 
 **Subfields**
 
-- Sample included HAS participants who had a T2 hipp scan and completed spatial navigation behavior.
+- Subregion volumes for women and men were generally normally distributed, except for CA1 overall and in women, ERC overall, and PHC in women. ANOVA results comparing subfields by reproductive stage were all not significant. T-test results comparing subfields by sex were all not significant except for ERC (*p* < 0.05), with women showing greater ERC subfield volume than men.
 
-- Subregion volumes for women and men were generally normally distributed, except for CA23 in men and SUB in women. ANOVA results comparing subfields by reproductive stage were all not significant. ANOVA results for ERC was marginally significant by reproductive stage (*p* = 0.087). T-test results comparing subfields by sex were all significant (at least *p* < 0.05) except for DG, PHC, and PRC, with results revealing that women larger volumes than men.
+- For estradiol, it was significantly negatively correlated with PRC for posts (*p* < 0.05, Spearman). It was also marginally negatively associated with PHC for pres (*p* = 0.062, Spearman).
 
-- All hormones were skewed for overall and women groups, so hormone and volume correlations were Spearman rank correlations. All correlations for men were pearson except for those involving SHBG. CA23 correlations with hormones for men were all Spearman rank.
+- For progesterone, it was significantly negatively associated with SUB for pres (*p* < 0.05, Spearman), with PRC for posts (*p* < 0.05, Spearman), DG for women (*p* < 0.01, Spearman) and DG for pres (*p* < 0.01, Spearman), as well as with CA1 for pres (*p* = 0.15, Spearman). It was marginally negatively associated with PRC for women (*p* = 0.086, Spearman). Progesterone was only marginally positively associated with CA1 for posts (*p* = 0.052, Spearman). 
 
-- For estradiol, it was significantly negatively correlated with with DG for peris (*p* < 0.01, Spearman) and with SUB for pres (*p* = 0.044, Spearman). It was also marginally negatively associated with CA23 for pres (*p* = 0.07, Spearman).
+- For FSH, it was significantly negatively correlated with CA1 for posts (*p* < 0.05, Spearman). It was significantly positively correlated with ERC for peris (*p* < 0.05, Spearman) and SUB for pres (*p* < 0.05, Spearman). FSH was marginally positively correlated with CA23 for peris (*p* = 0.07, Spearman) and with DG for peris (*p* = 0.054, Spearman).
 
-- For progesterone, it was marginally positively associated with ERC for posts (*p* = 0.053, Spearman).
+- For SHBG, it was significantly negatively correlated with PHC for posts (*p* < 0.05, Spearman), and marginally negatively correlated with SUB for pres (*p* = 0.068, Spearman).
 
-- For FSH, it was significantly negatively correlated with ERC for posts (*p* < 0.01, Spearman) and with SUB for posts (*p* = 0.031, Spearman). FSH is marginally negatively correlated with CA1 for pres (*p* = 0.07, Spearman) and posts (*p* = 0.07, Spearman) and with PHC for women as a group (*p* = 0.08, Spearman). FSH was also marginally positively correlated with CA23 for peris (*p* = 0.08, Spearman) and with ERC for pres (*p* = 0.07, Spearman). 
+- For DHEAS, it was significantly negatively correlated with CA23 for posts (*p* < 0.01, Spearman) and with DG for posts (*p* < 0.05, Spearman). It was marginally negatively correlated with SUB for posts (*p* = 0.081, Spearman).
 
-- For SHBG, it was significantly negatively correlated with ERC for posts (*p* < 0.01, Spearman). It was also significantly negatively correlated with PRC among women as a group (*p* = 0.038, Spearman) and for pres (*p* = 0.04, Spearman). SHBG was also marginally negatively correlated with SUB for women as a group (*p* = 0.07, Spearman).
-
-- For DHEAS, it was significantly negatively correlated with CA23 in women as a group (*p* = 0.01, Spearman).
-
-- For testosterone, it was marginally negatively correlated with CA1 for men (*p* = 0.065, Pearson).
+- For testosterone, it was marginally negatively correlated with CA1 for men (*p* = 0.075, Pearson) and with SUB for pres (*p* = 0.078, Spearman). Testosterone was also marginally positively associated with PHC for peris (*p* = 0.068, Spearman).
 
 
 ## Behavior
 
+**Total hipp Volume and MTL**
+
+- LOOP greater degrees traveled was significantly negatively correlated with lower total hipp volume within overall (women and men together) (*p* < 0.01, Pearson) and within men (*p* < 0.05, Pearson).
+
+- DSP higher solution index was significantly negatively correlated with lower total hipp volume in men (*p* < 0.05, Pearson) and marginally negatively correlated with lower total hipp volume in posts (*p* = 0.08, Spearman). DSP higher solution index was significantly positively correlated with total hipp volume in peris (*p* < 0.05, Spearman).
+
+- There were no significant or marginal correlations observed for MTL and navigation behaviors.
 
 
+**Subfields**
+
+- LOOP larger position error was significantly negatively correlated with lower PHC volume within overall (women and men) (*p* = 0.049, Pearson).
+
+- LOOP greater degrees traveled was significantly negatively correlated with lower volumes in CA1 for overall (*p* < 0.05, Spearman) and for men (*p* = 0.05, Pearson), in CA23 for overall (*p* < 0.01, Pearson) and for men (*p* < 0.05, Pearson), in DG for overall (*p* < 0.05, Pearson) and for men (*p* < 0.05, Pearson), in ERC for peris (*p* = 0.046, Pearson), in PRC for peris (*p* = 0.46, Pearson), and in SUB for overall (*p* < 0.05, Pearson). Basically pattern can be seen in all subfields except for PHC.
+
+- There were no significant or marginal correlations observed for MAZE accuracy.
+
+- MAZE higher moves made was significantly positively associated with higher PHC volume in pres (*p* < 0.05, Spearman) but only marginally positively associated with higher CA1 volume in women (*p* = 0.088, Spearman).
+
+- DSP higher wayfinding success was significantly negatively correlated lower ERC volumes in pres (*p* < 0.05, Pearson), but marginally with overall (*p* = 0.057, Spearman). It was marginally positively associated with PHC volumes in women (*p* = 0.09, Spearman) and in peris (*p* = 0.08, Spearman).
+
+- DSP higher solution index was significantly positively correlated with higher volume in CA23 in peris (*p* < 0.05, Spearman). It was significantly negatively correlated with lower volume in DG for men (*p* < 0.05, Pearson) but marginally for posts (*p* = 0.074, Spearman).
 
 
