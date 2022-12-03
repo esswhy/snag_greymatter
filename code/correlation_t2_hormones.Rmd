@@ -37,25 +37,26 @@ This report provides exploratory and preliminary correlation analyses between se
 
 1) Filter participants that have T2 subfield data from scan and completed spatial navigation behavior
 
-2) Select sex hormone measures from when scan was conducted
+2) Select sex hormone measures from when spatial study was conducted
 
-3) Correct left and right volumes with TIV from T1 data
-
-4) Average left and right volumes to get an average measure for each subfield region
+3) Values were already averaged together (left and right) and already corrected with TIV
 
 
 **Calculating Total Hippocampal Volume:**
 
-1) After left and right T2 subfields were corrected for TIV, sum up left and right total hipp (CA1, CA23, DG, SUB)
-
-2) Average left and right volumes to get an average measure 
+- Sum up the averaged CA1, CA23, DG, SUB to get T2 total hippocampal volume
 
 
 **Calculating Total MTL:**
 
-1) After left and right T2 subfields were corrected for TIV, sum up left and right MTL (CA1, CA23, DG, SUB, ERC, PHC, PRC)
+- Sum up the averaged CA1, CA23, DG, SUB, ERC, PHC, PRC to get MTL volume
 
 2) Average left and right volumes to get an average measure 
+
+
+**Notes**
+
+Still waiting on 4 subjects to process
 
 
 ```{r data_wrangling}
@@ -64,13 +65,14 @@ This report provides exploratory and preliminary correlation analyses between se
 #Read in the data
 data <- read_csv(here("data", "HAS_SNAG_mastersheet_tidy.csv"))
 
-#Filter for midlife, has spatial, has t2hipp data
+#Filter for midlife, has spatial, has t2hipp data that is useable
 data <- data %>% 
   filter(age_group == "Midlife", 
-         t2hipp_status == "Yes",
+         t2hipp_useable == "Yes",
          completed_spatial == "Yes") %>% 
   dplyr::select(subject_id, sex, 
          age_scan_years:testosterone_spatial_ng_dl,
+         t2hipp_vol_avg_ca1:t2hipp_vol_avg_sub,
          t2hipp_vol_left_ca1:t2hipp_vol_right_sub,
          t1_vbm_tiv) %>% 
   mutate(repo_status = fct_relevel(repo_status_spatial, 
@@ -86,58 +88,76 @@ data <- data %>%
   ))
 
 
+########## Create T2 total hipp and MTL volumes
+data <- data %>% 
+  
+  #Rename columns
+  rename(avg_ca1 = t2hipp_vol_avg_ca1,
+         avg_ca23 = t2hipp_vol_avg_ca23,
+         avg_dg = t2hipp_vol_avg_dg,
+         avg_erc = t2hipp_vol_avg_erc,
+         avg_phc = t2hipp_vol_avg_phc,
+         avg_prc = t2hipp_vol_avg_prc,
+         avg_sub = t2hipp_vol_avg_sub) %>% 
+  
+  #Create T2 total hipp and MTL
+  mutate(avg_total_hipp = avg_ca1 + avg_ca23 + avg_dg + avg_sub,
+         avg_mtl = avg_ca1 + avg_ca23 + avg_dg + avg_sub +
+           avg_erc + avg_phc + avg_prc)
+
+
 ########## Correct using TIV, then average left and right
 
 ##### T2hipp
 
-#Create function for apply to variables
-#t2hipp_vol_tiv
-dividebyTIV <- function(x, na.rm = FALSE) (x/data$t1_vbm_tiv)
-
-#Correct left and right volumes with TIV
-data <- data %>% 
-  
-  #Correct using TIV from SPM
-  #CA1, CA23, DG, ERC,PHC, PRC, SUB, GMV
-  mutate_at(vars(t2hipp_vol_left_ca1:t2hipp_vol_right_sub),
-            dividebyTIV) %>% 
-  
-  #Average left and right subfields
-  mutate(avg_ca1 = (t2hipp_vol_left_ca1+t2hipp_vol_right_ca1) / 2,
-         avg_ca23 = (t2hipp_vol_left_ca23+t2hipp_vol_right_ca23) / 2,
-         avg_dg = (t2hipp_vol_left_dg+t2hipp_vol_right_dg) / 2,
-         avg_erc = (t2hipp_vol_left_erc+t2hipp_vol_right_erc) / 2,
-         avg_phc = (t2hipp_vol_left_phc+t2hipp_vol_right_phc) / 2,
-         avg_prc = (t2hipp_vol_left_prc+t2hipp_vol_right_prc) / 2,
-         avg_sub = (t2hipp_vol_left_sub+t2hipp_vol_right_sub) / 2) %>% 
-  
-  #Calculate total left and right hipp
-  mutate(total_l_hipp = (t2hipp_vol_left_ca1 + 
-                         t2hipp_vol_left_ca23 +
-                         t2hipp_vol_left_dg + 
-                         t2hipp_vol_left_sub),
-         total_r_hipp = (t2hipp_vol_right_ca1 + 
-                         t2hipp_vol_right_ca23 + 
-                         t2hipp_vol_right_dg + 
-                         t2hipp_vol_right_sub),
-         avg_total_hipp = (total_l_hipp + total_r_hipp)/2) %>% 
-  
-  #Calculate left and right MTL
-  mutate(lmtl = (t2hipp_vol_left_ca1 + 
-                 t2hipp_vol_left_ca23 +
-                 t2hipp_vol_left_dg + 
-                 t2hipp_vol_left_sub + 
-                 t2hipp_vol_left_erc + 
-                 t2hipp_vol_left_phc + 
-                 t2hipp_vol_left_prc),
-         rmtl = (t2hipp_vol_right_ca1 + 
-                 t2hipp_vol_right_ca23 +
-                 t2hipp_vol_right_dg + 
-                 t2hipp_vol_right_sub + 
-                 t2hipp_vol_right_erc + 
-                 t2hipp_vol_right_phc + 
-                 t2hipp_vol_right_prc),
-         avg_mtl = (lmtl + rmtl)/2)
+# #Create function for apply to variables
+# #t2hipp_vol_tiv
+# dividebyTIV <- function(x, na.rm = FALSE) (x/data$t1_vbm_tiv)
+# 
+# #Correct left and right volumes with TIV
+# data <- data %>% 
+#   
+#   #Correct using TIV from SPM
+#   #CA1, CA23, DG, ERC,PHC, PRC, SUB, GMV
+#   mutate_at(vars(t2hipp_vol_left_ca1:t2hipp_vol_right_sub),
+#             dividebyTIV) %>% 
+#   
+#   #Average left and right subfields
+#   mutate(avg_ca1 = (t2hipp_vol_left_ca1+t2hipp_vol_right_ca1) / 2,
+#          avg_ca23 = (t2hipp_vol_left_ca23+t2hipp_vol_right_ca23) / 2,
+#          avg_dg = (t2hipp_vol_left_dg+t2hipp_vol_right_dg) / 2,
+#          avg_erc = (t2hipp_vol_left_erc+t2hipp_vol_right_erc) / 2,
+#          avg_phc = (t2hipp_vol_left_phc+t2hipp_vol_right_phc) / 2,
+#          avg_prc = (t2hipp_vol_left_prc+t2hipp_vol_right_prc) / 2,
+#          avg_sub = (t2hipp_vol_left_sub+t2hipp_vol_right_sub) / 2) %>% 
+#   
+#   #Calculate total left and right hipp
+#   mutate(total_l_hipp = (t2hipp_vol_left_ca1 + 
+#                          t2hipp_vol_left_ca23 +
+#                          t2hipp_vol_left_dg + 
+#                          t2hipp_vol_left_sub),
+#          total_r_hipp = (t2hipp_vol_right_ca1 + 
+#                          t2hipp_vol_right_ca23 + 
+#                          t2hipp_vol_right_dg + 
+#                          t2hipp_vol_right_sub),
+#          avg_total_hipp = (total_l_hipp + total_r_hipp)/2) %>% 
+#   
+#   #Calculate left and right MTL
+#   mutate(lmtl = (t2hipp_vol_left_ca1 + 
+#                  t2hipp_vol_left_ca23 +
+#                  t2hipp_vol_left_dg + 
+#                  t2hipp_vol_left_sub + 
+#                  t2hipp_vol_left_erc + 
+#                  t2hipp_vol_left_phc + 
+#                  t2hipp_vol_left_prc),
+#          rmtl = (t2hipp_vol_right_ca1 + 
+#                  t2hipp_vol_right_ca23 +
+#                  t2hipp_vol_right_dg + 
+#                  t2hipp_vol_right_sub + 
+#                  t2hipp_vol_right_erc + 
+#                  t2hipp_vol_right_phc + 
+#                  t2hipp_vol_right_prc),
+#          avg_mtl = (lmtl + rmtl)/2)
 
 
 #Subset for women by repo status
@@ -228,7 +248,7 @@ tab_final %>%
                      "LOOP" = 3, "MAZE" = 3, "DSP" = 3))
 ```
 
-Above table shows the table of sample size and mean and standard deviation of age by sex for overall group who have completed spatial behavior and have a T2hipp scan.
+Above table shows the table of sample size and mean and standard deviation of age by sex for overall group who have completed spatial behavior and have a useable T2hipp scan.
 
 All sample size for T2hipp x hormone correlations for women are listed in the table above. For men, because some participants did not have all hormones evaluated (e.g, only testosterone available), the sample size for the correlations for that hormone and with T1 hipp volume will be different.
 
@@ -236,9 +256,13 @@ For men, the accurate sample sizes would be:
 
 - LOOP: *n* = 10 DHEAS, *n* = 11 for SHBG and T
 
-- MAZE: *n* = 16 DHEAS, *n* = 17 for SHBG and T
+- MAZE: *n* = 14 DHEAS, *n* = 15 for SHBG and T
 
-- DSP: *n* = 21 DHEAS, *n* = 22 for SHBG and T
+- DSP: *n* = 19 DHEAS, *n* = 20 for SHBG and T
+
+
+We are still waiting for 4 more subject's (2 female, 2 male) segmentation to be compelted.
+
 
 ```{r}
 ##### WOMEN
@@ -323,25 +347,25 @@ colSums(!is.na(test)) #DHEAS n = 21, SHBG & T n = 22
 
 
 #TotalHipp
-shapiro.test(data$avg_total_hipp) #yes
-shapiro.test(data_repo$avg_total_hipp) #yes
+shapiro.test(data$avg_total_hipp) #no
+shapiro.test(data_repo$avg_total_hipp) #no
 shapiro.test(data_men$avg_total_hipp) #no
 
 #MTL
-shapiro.test(data$avg_mtl) #yes
-shapiro.test(data_repo$avg_mtl) #yes
+shapiro.test(data$avg_mtl) #no
+shapiro.test(data_repo$avg_mtl) #no
 shapiro.test(data_men$avg_mtl) #no
 
 
 #CA1
-shapiro.test(data$avg_ca1) #no
-shapiro.test(data_repo$avg_ca1) #no
+shapiro.test(data$avg_ca1) #yes
+shapiro.test(data_repo$avg_ca1) #yes
 shapiro.test(data_men$avg_ca1) #no
 
 #CA23
 shapiro.test(data$avg_ca23) #no
 shapiro.test(data_repo$avg_ca23) #no
-shapiro.test(data_men$avg_ca23) #yes
+shapiro.test(data_men$avg_ca23) #no
 
 #DG
 shapiro.test(data$avg_dg) #no
@@ -349,13 +373,13 @@ shapiro.test(data_repo$avg_dg) #no
 shapiro.test(data_men$avg_dg) #no
 
 #ERC
-shapiro.test(data$avg_erc) #no
+shapiro.test(data$avg_erc) #yes
 shapiro.test(data_repo$avg_erc) #no
 shapiro.test(data_men$avg_erc) #no
 
 #PHC
 shapiro.test(data$avg_phc) #no
-shapiro.test(data_repo$avg_phc) #no
+shapiro.test(data_repo$avg_phc) #yes
 shapiro.test(data_men$avg_phc) #no
 
 #PRC
@@ -364,14 +388,14 @@ shapiro.test(data_repo$avg_prc) #no
 shapiro.test(data_men$avg_prc) #no
 
 #SUB
-shapiro.test(data$avg_sub) #yes
-shapiro.test(data_repo$avg_sub) #yes
+shapiro.test(data$avg_sub) #no
+shapiro.test(data_repo$avg_sub) #no
 shapiro.test(data_men$avg_sub) #no
 ```
 
-**Structure:** Shapiro-Wilk's test reveal that total hipp and MTL for overall and for women were not normally distributed. Hormone and subfield/volume associations for these subfields will be using Spearman rank correlations.
+**Structure:** Shapiro-Wilk's test reveal that total hipp and MTL volumes were normally distributed.
 
-**Subfields:** Shapiro-Wilk's test reveal that CA23 for men, and SUB overall and SUB for women were not normally distributed. Hormone and subfield/volume associations for these subfields will be using Spearman rank correlations.
+**Subfields:** Shapiro-Wilk's test reveal that CA1 for overall and women, ERC for overall, and PHC for women volumes were not normally distributed. Hormone and subfield/volume associations for these subfields will be using Spearman rank correlations.
 
 
 
@@ -777,7 +801,7 @@ ttest
 tidy_ttest <- tidy(ttest)
 ```
 
-T-test results comparing GMV by sex was significant. Women (*M* = `r round(tidy_ttest$estimate1, digits = 3)`) have larger T2 hippocampal volume than men (*M* = `r round(tidy_ttest$estimate2, digits = 3)`) (*t* = `r round(tidy_ttest$statistic, digits = 3)`, *df* = `r round(tidy_ttest$parameter, digits = 3)`, *p* = `r round(tidy_ttest$p.value, digits = 3)`).
+T-test results comparing GMV by sex was not significant. 
 
 
 ## Hormone Correlation by Reproductive Status
@@ -1004,7 +1028,7 @@ c1 <- ggscatter(data_loop, x = "avg_total_hipp", y = "loop_pe_avg_m", color = "r
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
           conf.int = TRUE, 
-          cor.method = "spearman",
+          cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged GMV Volume", ylab = "Averaged \nPosition Error (m)", ) +
     theme(legend.position = "top", legend.title=element_blank()) 
@@ -1016,7 +1040,7 @@ c1a <- ggscatter(data_loop_women, x = "avg_total_hipp", y = "loop_pe_avg_m", col
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
           conf.int = TRUE, 
-          cor.method = "spearman",
+          cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged GMV Volume", ylab = "Averaged \nPosition Error (m)") +
      theme_bw() +
@@ -1038,7 +1062,7 @@ c1c <- ggscatter(data_loop_women, x = "avg_total_hipp", y = "loop_pe_avg_m", col
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
           conf.int = TRUE, 
-          cor.method = "spearman",
+          cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged GMV Volume", ylab = "Averaged \nPosition Error (m)") +
     facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
@@ -1050,7 +1074,7 @@ c1c <- ggscatter(data_loop_women, x = "avg_total_hipp", y = "loop_pe_avg_m", col
 c1
 (c1a+c1b)/c1c
 ```
-All correlations are Spearman except for men (Pearson)
+All correlations are Pearson
 
 #### Degrees Traveled
 
@@ -1061,7 +1085,7 @@ c1 <- ggscatter(data_loop, x = "avg_total_hipp", y = "loop_de_avg_degree", color
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
           conf.int = TRUE, 
-          cor.method = "spearman",
+          cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged GMV Volume", ylab = "Averaged \nDegrees Traveled", ) +
     theme(legend.position = "top", legend.title=element_blank()) 
@@ -1072,7 +1096,7 @@ c1a <- ggscatter(data_loop_women, x = "avg_total_hipp", y = "loop_de_avg_degree"
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
           conf.int = TRUE, 
-          cor.method = "spearman",
+          cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged GMV Volume", ylab = "Averaged \nDegrees Traveled") +
      theme_bw() +
@@ -1084,7 +1108,7 @@ c1b <- ggscatter(data_loop_men, x = "avg_total_hipp", y = "loop_de_avg_degree", 
           conf.int = TRUE, 
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
-          xlab = "Averaged GMV Volume", ylab = "Averaged \nPosition Error (m)") +
+          xlab = "Averaged GMV Volume", ylab = "Averaged \nDegrees Traveled") +
      theme_bw() +
      theme(legend.position = "none")
 
@@ -1094,7 +1118,7 @@ c1c <- ggscatter(data_loop_women, x = "avg_total_hipp", y = "loop_de_avg_degree"
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
           conf.int = TRUE, 
-          cor.method = "spearman",
+          cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged GMV Volume", ylab = "Averaged \nDegrees Traveled") +
     facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
@@ -1106,7 +1130,7 @@ c1
 (c1a+c1b)/c1c
 ```
 
-All correlations are Spearman except for men (Pearson)
+All correlations are Pearson
 
 ### {-}
 
@@ -1169,7 +1193,7 @@ c1
 All correlations are Spearman.
 
 
-#### Number of Moves
+#### Moves
 
 ```{r include=TRUE, echo=FALSE}
 #overall
@@ -1223,7 +1247,7 @@ c1
 (c1a+c1b)/c1c
 ```
 
-All Spearman correlations except for men (Pearson). Higher total hipp GMV was marginally associated with higher number of moves made for pres (*p* = 0.07, Spearman).
+All Spearman correlations except for men (Pearson). 
 
 
 ### {-}
@@ -1239,7 +1263,7 @@ c1 <- ggscatter(data_dsp, x = "avg_total_hipp", y = "dsp_success_pct", color = "
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
           conf.int = TRUE, 
-          cor.method = "spearman",
+          cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged GMV Volume", ylab = "Averaged \nWayfinding Success (%)") +
     theme(legend.position = "top", legend.title=element_blank()) 
@@ -1250,7 +1274,7 @@ c1a <- ggscatter(data_dsp_women, x = "avg_total_hipp", y = "dsp_success_pct", co
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
           conf.int = TRUE, 
-          cor.method = "spearman",
+          cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged GMV Volume", ylab = "Averaged \nWayfinding Success (%)") +
      theme_bw() +
@@ -1272,7 +1296,7 @@ c1c <- ggscatter(data_dsp_women, x = "avg_total_hipp", y = "dsp_success_pct", co
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
           conf.int = TRUE, 
-          cor.method = "spearman",
+          cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged GMV Volume", ylab = "Averaged \nWayfinding Success (%)") +
     facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
@@ -1284,7 +1308,7 @@ c1
 (c1a+c1b)/c1c
 ```
 
-All correlations were Spearman except for men (Pearson). Larger T2 hipp GMV was marginally positively associated with wayfidning success for peris (*p* = 0.052, Spearman).
+All correlations were Pearson
 
 #### Solution Index
 
@@ -1339,7 +1363,7 @@ c1c <- ggscatter(data_dsp_women, x = "avg_total_hipp", y = "dsp_si_true_pct", co
 c1
 (c1a+c1b)/c1c
 ```
-All correlations were Spearman except for men (Pearson). Larger T2 hipp GMV was marginally positively associated with solution index for posts (*p* = 0.08, Spearman).
+All correlations were Spearman except for men (Pearson). 
 
 ### {-}
 
@@ -1666,21 +1690,141 @@ All correlations are Pearson except SHBG (Spearman)
 
 ## Behavioral Correlations {.tabset}
 
-### LOOP
+### LOOP {.tabset}
 
-**Position Error**
-**Degrees Traveled**
+#### Position Error
+
+```{r include=TRUE, echo=FALSE}
+#All
+c1 <- ggscatter(data_loop, x = "avg_mtl", y = "loop_pe_avg_m", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged GMV Volume", ylab = "Averaged \nPosition Error (m)", ) +
+    theme(legend.position = "top", legend.title=element_blank()) 
 
 
-### MAZE
+#By sex
+c1a <- ggscatter(data_loop_women, x = "avg_mtl", y = "loop_pe_avg_m", color = "red", alpha = 0.6, title = "Women",
+          add = "reg.line", 
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged GMV Volume", ylab = "Averaged \nPosition Error (m)") +
+     theme_bw() +
+     theme(legend.position = "none")
+c1b <- ggscatter(data_loop_men, x = "avg_mtl", y = "loop_pe_avg_m", color = "#00AFBB", alpha = 0.6, title = "Men",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged GMV Volume", ylab = "Averaged \nPosition Error (m)") +
+     theme_bw() +
+     theme(legend.position = "none")
 
-**Accuracy**
-**Number of Moves**
+#By repo
+c1c <- ggscatter(data_loop_women, x = "avg_mtl", y = "loop_pe_avg_m", color = "repo_status", 
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged GMV Volume", ylab = "Averaged \nPosition Error (m)") +
+    facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
+     theme_bw() +
+     theme(legend.position = "none")
 
-### DSP
 
-**Wayfinding Success**
-**Solution Index**
+#Present
+c1
+(c1a+c1b)/c1c
+```
+
+
+
+All correlations are Spearman except for men (Pearson)
+
+#### Degrees Traveled
+
+```{r include=TRUE, echo=FALSE}
+#all
+c1 <- ggscatter(data_loop, x = "avg_mtl", y = "loop_de_avg_degree", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged GMV Volume", ylab = "Averaged \nDegrees Traveled", ) +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+#sex
+c1a <- ggscatter(data_loop_women, x = "avg_mtl", y = "loop_de_avg_degree", color = "red", alpha = 0.6, title = "Women",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged GMV Volume", ylab = "Averaged \nDegrees Traveled") +
+     theme_bw() +
+     theme(legend.position = "none")
+c1b <- ggscatter(data_loop_men, x = "avg_mtl", y = "loop_de_avg_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged GMV Volume", ylab = "Averaged \nPosition Error (m)") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#By repo
+c1c <- ggscatter(data_loop_women, x = "avg_mtl", y = "loop_de_avg_degree", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged GMV Volume", ylab = "Averaged \nDegrees Traveled") +
+    facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#Present
+c1
+(c1a+c1b)/c1c
+```
+
+All correlations are Spearman except for men (Pearson)
+
+### {-}
+
+### MAZE {.tabset}
+
+#### Accuracy
+
+#### Moves
+
+### {-}
+
+### DSP {.tabset}
+
+#### Wayfinding Success
+
+#### Solution Index
+
+### {-}
 
 ## {-}
 
