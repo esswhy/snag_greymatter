@@ -31,11 +31,11 @@ library(purrr)
 
 # Overview
 
-This report provides exploratory and preliminary correlation analyses between sex hormones and T2 *unretouched*, raw hippocampal subfield data from the Healthy Aging Study sample that have completed some portion of the spatial navigation study. 
+This report provides exploratory and preliminary correlation analyses between sex hormones and T2 *final* hippocampal subfield volume data from the Healthy Aging Study sample that have completed the spatial navigation study. 
 
 **Cleaning data steps included (T2 subfields):**
 
-1) Filter participants that have T2 subfield data from scan and completed spatial navigation behavior
+1) Filter participants that have useable T2 subfield data from scan and completed spatial navigation behavior
 
 2) Select sex hormone measures from when spatial study was conducted
 
@@ -44,19 +44,12 @@ This report provides exploratory and preliminary correlation analyses between se
 
 **Calculating Total Hippocampal Volume:**
 
-- Sum up the averaged CA1, CA23, DG, SUB to get T2 total hippocampal volume
+- Sum up the averaged CA1, CA23, DG, SUB to get T2 total hippocampal volumes
 
 
 **Calculating Total MTL:**
 
 - Sum up the averaged CA1, CA23, DG, SUB, ERC, PHC, PRC to get MTL volume
-
-2) Average left and right volumes to get an average measure 
-
-
-**Notes**
-
-Still waiting on 4 subjects to process
 
 
 ```{r data_wrangling}
@@ -248,7 +241,7 @@ tab_final %>%
                      "LOOP" = 3, "MAZE" = 3, "DSP" = 3))
 ```
 
-Above table shows the table of sample size and mean and standard deviation of age by sex for overall group who have completed spatial behavior and have a useable T2hipp scan.
+Above table shows the table of sample size and mean and standard deviation of age by sex for overall group who have completed spatial behavior and have a useable T2hipp scan (overall, XX women removed and XX men removed).
 
 All sample size for T2hipp x hormone correlations for women are listed in the table above. For men, because some participants did not have all hormones evaluated (e.g, only testosterone available), the sample size for the correlations for that hormone and with T1 hipp volume will be different.
 
@@ -256,12 +249,9 @@ For men, the accurate sample sizes would be:
 
 - LOOP: *n* = 10 DHEAS, *n* = 11 for SHBG and T
 
-- MAZE: *n* = 14 DHEAS, *n* = 15 for SHBG and T
+- MAZE: *n* = 13 DHEAS, *n* = 14 for SHBG and T
 
-- DSP: *n* = 19 DHEAS, *n* = 20 for SHBG and T
-
-
-We are still waiting for 4 more subject's (2 female, 2 male) segmentation to be compelted.
+- DSP: *n* = 18 DHEAS, *n* = 19 for SHBG and T
 
 
 ```{r}
@@ -277,7 +267,7 @@ test <- data_repo %>%
          dheas_spatial_ug_dl,
          testosterone_spatial_ng_dl)
 #Sum of rows = sample size for each hormone x T1 correlation
-colSums(!is.na(test)) #all n=16
+colSums(!is.na(test)) #all n=15
 
 #MAZE
 test <- data_repo %>% 
@@ -290,7 +280,7 @@ test <- data_repo %>%
          dheas_spatial_ug_dl,
          testosterone_spatial_ng_dl)
 #Sum of rows = sample size for each hormone x T1 correlation
-colSums(!is.na(test)) #all n=50
+colSums(!is.na(test)) #all n=45
 
 #DSP
 test <- data_repo %>% 
@@ -303,14 +293,14 @@ test <- data_repo %>%
          dheas_spatial_ug_dl,
          testosterone_spatial_ng_dl)
 #Sum of rows = sample size for each hormone x T1 correlation
-colSums(!is.na(test)) #all n=35
+colSums(!is.na(test)) #all n=32
 
 
 #####MEN
 #LOOP
 test <- data_men %>% 
   filter(loop_useable == "Yes") %>% 
-  select(fsh_spatial_miu_ml,
+  select(subject_id,
          shbg_spatial_nmol_l,
          dheas_spatial_ug_dl,
          testosterone_spatial_ng_dl)
@@ -325,7 +315,7 @@ test <- data_men %>%
          dheas_spatial_ug_dl,
          testosterone_spatial_ng_dl)
 #Sum of rows = sample size for each hormone x T1 correlation
-colSums(!is.na(test)) #DHEAS n = 16, SHBG & T n = 17
+colSums(!is.na(test)) #DHEAS n = 13, SHBG & T n = 14
 
 #DSP
 test <- data_men %>% 
@@ -335,7 +325,7 @@ test <- data_men %>%
          dheas_spatial_ug_dl,
          testosterone_spatial_ng_dl)
 #Sum of rows = sample size for each hormone x T1 correlation
-colSums(!is.na(test)) #DHEAS n = 21, SHBG & T n = 22
+colSums(!is.na(test)) #DHEAS n = 18, SHBG & T n = 19
 ```
 
 
@@ -373,7 +363,7 @@ shapiro.test(data_repo$avg_dg) #no
 shapiro.test(data_men$avg_dg) #no
 
 #ERC
-shapiro.test(data$avg_erc) #yes
+shapiro.test(data$avg_erc) #no
 shapiro.test(data_repo$avg_erc) #no
 shapiro.test(data_men$avg_erc) #no
 
@@ -395,7 +385,7 @@ shapiro.test(data_men$avg_sub) #no
 
 **Structure:** Shapiro-Wilk's test reveal that total hipp and MTL volumes were normally distributed.
 
-**Subfields:** Shapiro-Wilk's test reveal that CA1 for overall and women, ERC for overall, and PHC for women volumes were not normally distributed. Hormone and subfield/volume associations for these subfields will be using Spearman rank correlations.
+**Subfields:** Shapiro-Wilk's test reveal that CA1 for overall and women, and PHC for women volumes were not normally distributed. Hormone and subfield/volume associations for these subfields will be using Spearman rank correlations.
 
 
 
@@ -4360,7 +4350,7 @@ c1 <- ggscatter(data_loop, x = "avg_erc", y = "loop_pe_avg_m", color = "repo_sta
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
           conf.int = TRUE, 
-          cor.method = "spearman",
+          cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged ERC Volume", ylab = "Averaged \nPosition Error (m)", ) +
     theme(legend.position = "top", legend.title=element_blank()) 
@@ -4407,7 +4397,7 @@ c1
 (c1a+c1b)/c1c
 ```
 
-All correlations were Pearson except for overall (Spearman)
+All correlations were Pearson 
 
 ##### Degrees Traveled
 
@@ -4418,7 +4408,7 @@ c1 <- ggscatter(data_loop, x = "avg_erc", y = "loop_de_avg_degree", color = "rep
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
           conf.int = TRUE, 
-          cor.method = "spearman",
+          cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged ERC Volume", ylab = "Averaged \nDegrees Traveled", ) +
     theme(legend.position = "top", legend.title=element_blank()) 
@@ -4463,7 +4453,7 @@ c1
 (c1a+c1b)/c1c
 ```
 
-All correlations were Pearson except for overall (Spearman)
+All correlations were Pearson 
 
 #### {-}
 
@@ -4594,7 +4584,7 @@ c1 <- ggscatter(data_dsp, x = "avg_erc", y = "dsp_success_pct", color = "repo_st
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
           conf.int = TRUE, 
-          cor.method = "spearman",
+          cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged ERC Volume", ylab = "Averaged \nWayfinding Success (%)") +
     theme(legend.position = "top", legend.title=element_blank()) 
@@ -4639,7 +4629,7 @@ c1
 (c1a+c1b)/c1c
 ```
 
-All correlations are Pearson except for overall (Spearman)
+All correlations are Pearson 
 
 ##### Solution Index
 
@@ -6514,7 +6504,7 @@ c1
 
 All correlations were Spearman
 
-##### 
+##### Moves
 
 ```{r include=TRUE, echo=FALSE}
 #overall
@@ -6698,8 +6688,6 @@ All correlations were Spearman except for men (Pearson)
 
 Sample included HAS participants who had a T2 hipp scan and completed spatial navigation behavior. 
 
-There are 4 subjects (2 female, 2 male) still waiting to be segmented, and they will be included in the next iteration of this analysis.
-
 ## Hormones
 
 All hormones were skewed for overall and women groups, so hormone and volume correlations were Spearman rank correlations. All correlations for men were Pearson except for those involving SHBG.
@@ -6708,7 +6696,9 @@ All hormones were skewed for overall and women groups, so hormone and volume cor
 
 - Total hipp volume and MTL volumes were normally distributed. ANOVA results comparing total hipp volume and MTL by reproductive stage were not significant. T-test results comparing total hipp volume and MTL by sex were also not significant.
 
-- For progesterone, higher concentration was negatively associated with lower total hipp volumes in women (*p* = 0.04, Spearman) and in pres (*p* < 0.001, Spearman). Progesterone was marginally negatively associated with lower MTL volumes in women (*p* = 0.05, Spearman) and in pres (*p* = 0.08, Spearman)
+- For total hipp volume, higher progesterone concentration was negatively associated with lower total hipp volumes in women (*p* < 0.05, Spearman) and in pres (*p* < 0.001, Spearman). Higher FSH was marginally positively associated with total hipp volume for peris (*p* = 0.069, Spearman), and higher DHEAS was significantly negatively associated with total hipp volume for posts (*p* < 0.05, Spearman).
+
+- For MTL, progesterone was marginally negatively associated with lower MTL volumes in women (*p* = 0.051, Spearman). Higher testosterone was marginally positively associated with MTL volume for pres (*p* = 0.069, Spearman).
 
 
 **Subfields**
