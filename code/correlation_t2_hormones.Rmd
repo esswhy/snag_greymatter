@@ -241,7 +241,34 @@ tab_final %>%
                      "LOOP" = 3, "MAZE" = 3, "DSP" = 3))
 ```
 
-Above table shows the table of sample size and mean and standard deviation of age by sex for overall group who have completed spatial behavior and have a useable T2hipp scan (overall, XX women removed and XX men removed).
+Above table shows the table of sample size and mean and standard deviation of age by sex for overall group who have completed spatial behavior and have a useable T2hipp scan.
+
+```{r}
+#Women status and useable
+test <- read_csv(here("data", "HAS_SNAG_mastersheet_tidy.csv"))
+
+#Women
+test <- test %>% 
+  filter(age_group == "Midlife", 
+         t2hipp_status == "Yes",
+         sex == "Female",
+         completed_spatial == "Yes") #n = 60
+test <- test %>% 
+  filter(t2hipp_useable == "Yes") #n=55
+
+
+#Men
+test <- test %>% 
+  filter(age_group == "Midlife", 
+         t2hipp_status == "Yes",
+         sex == "Male",
+         completed_spatial == "Yes") #n = 25
+test <- test %>% 
+  filter(t2hipp_useable == "Yes") #n=22
+```
+
+
+For women, 60 had T2 hipp scan completed and completed an aspect of spatial navigation task but 5 were removed due to poor quality scans. For men, 25 had T2 hipp scan completed and completed an aspect of spatial navigation task but 3 were removed for poor quality scans. Thus *n* = 55 for women and *n* = 22 for men.
 
 All sample size for T2hipp x hormone correlations for women are listed in the table above. For men, because some participants did not have all hormones evaluated (e.g, only testosterone available), the sample size for the correlations for that hormone and with T1 hipp volume will be different.
 
@@ -6687,6 +6714,8 @@ All correlations were Spearman except for men (Pearson)
 # Summary
 
 Sample included HAS participants who had a T2 hipp scan and completed spatial navigation behavior. 
+
+As of 12/07/2022, it's likely that there are 2 more subjects to be added to analysis (subjects male 412 and pre female 425) since their MRI scans were missing.
 
 ## Hormones
 
