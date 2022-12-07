@@ -6696,26 +6696,26 @@ All hormones were skewed for overall and women groups, so hormone and volume cor
 
 - Total hipp volume and MTL volumes were normally distributed. ANOVA results comparing total hipp volume and MTL by reproductive stage were not significant. T-test results comparing total hipp volume and MTL by sex were also not significant.
 
-- For total hipp volume, higher progesterone concentration was negatively associated with lower total hipp volumes in women (*p* < 0.05, Spearman) and in pres (*p* < 0.001, Spearman). Higher FSH was marginally positively associated with total hipp volume for peris (*p* = 0.069, Spearman), and higher DHEAS was significantly negatively associated with total hipp volume for posts (*p* < 0.05, Spearman).
+- For total hipp volume, higher progesterone concentration was negatively associated with lower total hipp volumes in women (*p* < 0.05, Spearman) and in pres (*p* < 0.001, Spearman). Higher DHEAS was significantly negatively associated with total hipp volume for posts (*p* < 0.05, Spearman). Higher FSH was marginally positively associated with total hipp volume for peris (*p* = 0.069, Spearman).
 
 - For MTL, progesterone was marginally negatively associated with lower MTL volumes in women (*p* = 0.051, Spearman). Higher testosterone was marginally positively associated with MTL volume for pres (*p* = 0.069, Spearman).
 
 
 **Subfields**
 
-- Subregion volumes for women and men were generally normally distributed, except for CA1 overall and in women, ERC overall, and PHC in women. ANOVA results comparing subfields by reproductive stage were all not significant. T-test results comparing subfields by sex were all not significant except for ERC (*p* < 0.05), with women showing greater ERC subfield volume than men.
+- Subregion volumes for women and men were generally normally distributed, except for CA1 overall and in women, and PHC in women. ANOVA results comparing subfields by reproductive stage were all not significant. T-test results comparing subfields by sex were all not significant except for ERC (*p* < 0.05), with women showing greater ERC subfield volume than men.
 
 - For estradiol, it was significantly negatively correlated with PRC for posts (*p* < 0.05, Spearman). It was also marginally negatively associated with PHC for pres (*p* = 0.062, Spearman).
 
-- For progesterone, it was significantly negatively associated with SUB for pres (*p* < 0.05, Spearman), with PRC for posts (*p* < 0.05, Spearman), DG for women (*p* < 0.01, Spearman) and DG for pres (*p* < 0.01, Spearman), as well as with CA1 for pres (*p* = 0.15, Spearman). It was marginally negatively associated with PRC for women (*p* = 0.086, Spearman). Progesterone was only marginally positively associated with CA1 for posts (*p* = 0.052, Spearman). 
+- For progesterone, it was significantly negatively associated with SUB for pres (*p* < 0.05, Spearman), with PRC for posts (*p* < 0.05, Spearman), DG for women (*p* < 0.01, Spearman) and DG for pres (*p* < 0.01, Spearman), as well as with CA1 for pres (*p* < 0.05, Spearman). Progesterone was only marginally positively associated with CA1 for posts (*p* = 0.052, Spearman). 
 
-- For FSH, it was significantly negatively correlated with CA1 for posts (*p* < 0.05, Spearman). It was significantly positively correlated with ERC for peris (*p* < 0.05, Spearman) and SUB for pres (*p* < 0.05, Spearman). FSH was marginally positively correlated with CA23 for peris (*p* = 0.07, Spearman) and with DG for peris (*p* = 0.054, Spearman).
+- For FSH, it was significantly negatively correlated with CA1 for posts (*p* < 0.05, Spearman). It was significantly positively correlated with ERC for peris (*p* < 0.05, Spearman) and SUB for pres (*p* < 0.05, Spearman). FSH was marginally positively correlated with CA23 for peris (*p* = 0.058, Spearman) and with DG for peris (*p* = 0.069, Spearman) and with DG for peris (*p* = 0.069, Spearman).
 
 - For SHBG, it was significantly negatively correlated with PHC for posts (*p* < 0.05, Spearman), and marginally negatively correlated with SUB for pres (*p* = 0.068, Spearman).
 
-- For DHEAS, it was significantly negatively correlated with CA23 for posts (*p* < 0.01, Spearman) and with DG for posts (*p* < 0.05, Spearman). It was marginally negatively correlated with SUB for posts (*p* = 0.081, Spearman).
+- For DHEAS, it was significantly negatively correlated with CA23 for posts (*p* < 0.01, Spearman) and with DG for posts (*p* < 0.05, Spearman).
 
-- For testosterone, it was marginally negatively correlated with CA1 for men (*p* = 0.075, Pearson) and with SUB for pres (*p* = 0.078, Spearman). Testosterone was also marginally positively associated with PHC for peris (*p* = 0.068, Spearman).
+- For testosterone, it was significantly positively associated with PHC for peris (*p* < 0.05, Spearman). Testosterone was also marginally negatively correlated with CA1 for men (*p* = 0.066, Pearson).
 
 
 ## Behavior
@@ -6724,23 +6724,23 @@ All hormones were skewed for overall and women groups, so hormone and volume cor
 
 - LOOP greater degrees traveled was significantly negatively correlated with lower total hipp volume within overall (women and men together) (*p* < 0.01, Pearson) and within men (*p* < 0.05, Pearson).
 
-- DSP higher solution index was significantly negatively correlated with lower total hipp volume in men (*p* < 0.05, Pearson) and marginally negatively correlated with lower total hipp volume in posts (*p* = 0.08, Spearman). DSP higher solution index was significantly positively correlated with total hipp volume in peris (*p* < 0.05, Spearman).
+- DSP higher solution index was marginally negatively correlated with lower total hipp volume in men (*p* = 0.052, Pearson).
 
 - There were no significant or marginal correlations observed for MTL and navigation behaviors.
 
 
 **Subfields**
 
-- LOOP larger position error was significantly negatively correlated with lower PHC volume within overall (women and men) (*p* = 0.049, Pearson).
+- LOOP larger position error was significantly negatively correlated with lower PHC volume within overall (women and men) (*p* < 0.05, Pearson).
 
-- LOOP greater degrees traveled was significantly negatively correlated with lower volumes in CA1 for overall (*p* < 0.05, Spearman) and for men (*p* = 0.05, Pearson), in CA23 for overall (*p* < 0.01, Pearson) and for men (*p* < 0.05, Pearson), in DG for overall (*p* < 0.05, Pearson) and for men (*p* < 0.05, Pearson), in ERC for peris (*p* = 0.046, Pearson), in PRC for peris (*p* = 0.46, Pearson), and in SUB for overall (*p* < 0.05, Pearson). Basically pattern can be seen in all subfields except for PHC.
+- LOOP greater degrees traveled was significantly negatively correlated with lower volumes in CA1 for overall (*p* < 0.05, Spearman) and for men (*p* = 0.05, Pearson), in CA23 for overall (*p* < 0.01, Pearson) and for men (*p* < 0.05, Pearson), in DG for overall (*p* < 0.05, Pearson) and for men (*p* < 0.05, Pearson), in ERC for peris (*p* < 0.05, Pearson), in PRC for peris (*p* < 0.05, Pearson), and in SUB for overall (*p* < 0.05, Pearson). Basically pattern can be seen in all subfields except for PHC.
 
 - There were no significant or marginal correlations observed for MAZE accuracy.
 
-- MAZE higher moves made was significantly positively associated with higher PHC volume in pres (*p* < 0.05, Spearman) but only marginally positively associated with higher CA1 volume in women (*p* = 0.088, Spearman).
+- MAZE higher moves made was significantly positively associated with higher PHC volume in pres (*p* < 0.05, Spearman).
 
-- DSP higher wayfinding success was significantly negatively correlated lower ERC volumes in pres (*p* < 0.05, Pearson), but marginally with overall (*p* = 0.057, Spearman). It was marginally positively associated with PHC volumes in women (*p* = 0.09, Spearman) and in peris (*p* = 0.08, Spearman).
+- DSP higher wayfinding success was significantly negatively correlated lower ERC volumes in pres (*p* < 0.05, Pearson), but marginally with overall (*p* = 0.05, Spearman). It was significantly positively associated with PHC for persi (*p* < 0.05, Spearman) but only marginally in women (*p* = 0.05, Spearman).
 
-- DSP higher solution index was significantly positively correlated with higher volume in CA23 in peris (*p* < 0.05, Spearman). It was significantly negatively correlated with lower volume in DG for men (*p* < 0.05, Pearson) but marginally for posts (*p* = 0.074, Spearman).
+- DSP higher solution index was significantly positively correlated with higher volume in CA23 in peris (*p* < 0.05, Spearman). It was marginally negatively correlated with lower volume in DG for overall (*p* = 0.069, Spearman) and for men (*p* = 0.05, Pearson), and also in SUB for men (*p* = 0.063, Pear).
 
 
