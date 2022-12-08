@@ -46,19 +46,19 @@ Study 1 (aka "Study 2, part 1") has shown that there is a correlation between se
 
 **Effect of IV (Hormone) on Mediator:**
 
-Prior exploratory analysis for relationships between sex hormones and T2 subfield volume reveal certain significant relationships (`correlation_t2_hormones.Rmd`). Highlights of the results include estradiol negatively associated with ..... For progesterone, .... FSH was ...... For other brain structures, total T2 hippocampal volume was .... and MTL was ..... 
+Prior exploratory analysis for relationships between sex hormones and T2 subfield volume reveal certain significant relationships (`correlation_t2_hormones.Rmd`). Highlights of the results show that progesterone and FSH were associated with multiple subfields (e.g., CA1, CA23, ERC, DG, total hipp and MTL), whereas estradiol was only associated with ERC PHC and PRC. 
 
 For T1 hippocampal volume (`correlation_t1_hormones.Rmd`), only DHEAS was negatively correlated with volume for post-menopausal women (Spearman). 
 
-Significant effect of hormones, specifically estradiol and FSH, on the mediator (T2 subfields or T1 hippocampal volume) is an absolute prerequisite for mediation being possible.
+Significant effect of hormones on the mediator (T2 subfields or T1 hippocampal volume) is an absolute prerequisite for mediation being possible.
 
 
 **Other**
 
 
-Following the correlations between hormones and brain structure, I explored the associations between brain structure and spatial navigation behaviors (`correlation_t2_hormones.Rmd` and `correlation_t1_hormones.Rmd`). Results revealed that for T2 hippocampal volume, 
+Following the correlations between hormones and brain structure, I explored the associations between brain structure and spatial navigation behaviors (`correlation_t2_hormones.Rmd` and `correlation_t1_hormones.Rmd`). Results revealed that most subfield volumes except PHC were negatively associated with LOOP degrees traveled overall and for men. DSP solution index was mostly tied to CA23 and DG, whereas DSP wayfinding success was mainly tied to ERC. 
 
-For T1 hippocampal volume, women overall and pre-menopausal women with higher grey matter volume correlated with fewer degrees traveled in LOOP. Also within LOOP, larger grey mater was positively correlated with position error for pre-menopausal women (all Pearson). Overall, greater volume was associated with lower wayfinding success in DSP (Pearson). Higher DSP solution index was marginally positively associated with pre-manopausal women who had higher grey matter volume (Pearson).
+For T1 hippocampal volume, women overall and pre-menopausal women with higher grey matter volume correlated with fewer degrees traveled in LOOP. Also within LOOP, larger grey mater was positively correlated with position error for pre-menopausal women. Overall, greater volume was associated with lower wayfinding success in DSP. Higher DSP solution index was marginally positively associated with pre-manopausal women who had higher grey matter volume.
 
 
 # Research Question
@@ -213,6 +213,7 @@ results <- mediate(fit.mediator,
 summary(results)
 ```
 
+There is a significant total effect and ADE, but not mediated effect.
 
 #### P
 
@@ -238,6 +239,7 @@ results <- mediate(fit.mediator,
 summary(results)
 ```
 
+Neither mediated nor total effects observed.
 
 #### FSH
 
@@ -263,6 +265,7 @@ results <- mediate(fit.mediator,
 summary(results)
 ```
 
+Marginal total effect and ADE, but no significant mediated effect.
 
 ### Using `lavaan`
 
@@ -291,236 +294,30 @@ fit <- sem(model, data = data_t1_repo,
            std.ov = TRUE, #standardize variables
            meanstructure = TRUE,
            se = 'bootstrap',
-           bootstrap = 1000,
+           bootstrap = 5000,
            missing = "fiml")
 summary(fit)
 ```
 
 
 ```{r}
-#Boostrap test statistics
-
-# bootstrap test statistic + compute p-value
-T.boot <- bootstrapLavaan(fit, R=10, type="nonparametric",
-                          FUN=fitMeasures, fit.measures="chisq")
-pvalue.boot <- length(which(T.boot > T.orig))/length(T.boot)
-
+#Print all model parameters
+parameterestimates(fit, se=TRUE,
+                   pvalue=TRUE, #corresponding to the z-statistic, evaluated under a standard normal distribution
+                   fmi=TRUE, #fraction of missing info/parameter
+                   boot.ci.type = "bca.simple", #adjusted bootstrap percentile (BCa) method, but with no correction for acceleration (only for bias)
+                   standardized = TRUE) # %>% kable()
 ```
 
 
-
-
-
-#### Robust Mediation Analysis
-
-
-
-
-
-
-## T2 mediation
-
-```{r t2-data}
-#Read in the data
-##### EVENTUALLY UPDATE T2 HIPP RESULTS
-data <- read_csv(here("data", "HAS_SNAG_mastersheet_tidy.csv"))
-
-#Filter for midlife women, has dsp data, has t2hipp data
-data <- data %>% 
-  filter(age_group == "Midlife", 
-         sex == "Female",
-         t2hipp_status == "Yes",
-         dsp_useable == "Yes") %>% 
-  dplyr::select(subject_id, sex, 
-         age_scan_years:testosterone_spatial_ng_dl,
-         t2hipp_vol_left_ca1:t2hipp_vol_right_sub,
-         t1_vbm_tiv) %>% 
-  mutate(repo_status_spatial = fct_relevel(repo_status_spatial, 
-                                    c("Pre", "Peri", "Post")))
-
-#Create function for apply to variables
-#t2hipp_vol_tiv
-dividebyTIV <- function(x, na.rm = FALSE) (x/data$t1_vbm_tiv)
-
-#Correct left and right volumes with TIV
-data <- data %>% 
-  
-  #Correct using TIV from SPM
-  #CA1, CA23, DG, ERC,PHC, PRC, SUB, GMV
-  mutate_at(vars(t2hipp_vol_left_ca1:t2hipp_vol_right_sub),
-            dividebyTIV) %>% 
-  
-  #Average left and right subfields
-  mutate(avg_ca1 = (t2hipp_vol_left_ca1+t2hipp_vol_right_ca1) / 2,
-         avg_ca23 = (t2hipp_vol_left_ca23+t2hipp_vol_right_ca23) / 2,
-         avg_dg = (t2hipp_vol_left_dg+t2hipp_vol_right_dg) / 2,
-         avg_erc = (t2hipp_vol_left_erc+t2hipp_vol_right_erc) / 2,
-         avg_phc = (t2hipp_vol_left_phc+t2hipp_vol_right_phc) / 2,
-         avg_prc = (t2hipp_vol_left_prc+t2hipp_vol_right_prc) / 2,
-         avg_sub = (t2hipp_vol_left_sub+t2hipp_vol_right_sub) / 2) %>% 
-  
-  #Calculate total left and right hipp
-  mutate(total_l_hipp = (t2hipp_vol_left_ca1 + 
-                         t2hipp_vol_left_ca23 +
-                         t2hipp_vol_left_dg + 
-                         t2hipp_vol_left_sub),
-         total_r_hipp = (t2hipp_vol_right_ca1 + 
-                         t2hipp_vol_right_ca23 + 
-                         t2hipp_vol_right_dg + 
-                         t2hipp_vol_right_sub),
-         avg_total_hipp = (total_l_hipp + total_r_hipp)/2) %>% 
-  
-  #Calculate left and right MTL
-  mutate(lmtl = (t2hipp_vol_left_ca1 + 
-                 t2hipp_vol_left_ca23 +
-                 t2hipp_vol_left_dg + 
-                 t2hipp_vol_left_sub + 
-                 t2hipp_vol_left_erc + 
-                 t2hipp_vol_left_phc + 
-                 t2hipp_vol_left_prc),
-         rmtl = (t2hipp_vol_right_ca1 + 
-                 t2hipp_vol_right_ca23 +
-                 t2hipp_vol_right_dg + 
-                 t2hipp_vol_right_sub + 
-                 t2hipp_vol_right_erc + 
-                 t2hipp_vol_right_phc + 
-                 t2hipp_vol_right_prc),
-         avg_mtl = (lmtl + rmtl)/2)
-```
-
-
-### EDA
-
-```{r distributions}
-data_select <- data %>% 
-  dplyr::select(estradiol_scan_pg_ml,
-         avg_ca1, dsp_si_true_pct)
-
-ggpairs(data_select,  
-        lower = list(continuous = "smooth")) + theme_bw()
-```
-
-
-Estradiol looks exponentially distributed, and SI is right-skewed
-
-
-```{r descriptive-raw-vars}
-#Descriptive stats
-describe(data_select)
-```
-
-
-```{r boxcox}
-##### Estradiol
-
-#Check histogram and normality
-hist(data$estradiol_scan_pg_ml)
-shapiro.test(data$estradiol_scan_pg_ml) #yes
-
-#Box-Cox transformation plot
-bc <- MASS::boxcox(data$estradiol_scan_pg_ml ~ 1, 
-                   plotit = TRUE)
-
-#However, log transformation for estradiol doesn't fix normality
-hist(log(data$estradiol_scan_pg_ml))
-shapiro.test(log(data$estradiol_scan_pg_ml)) #yes
-shapiro.test(sqrt(data$estradiol_scan_pg_ml)) #yes
-shapiro.test(1/(data$estradiol_scan_pg_ml)) #yes
-
-#Extract exact lambda from plot
-lambda_e <- bc$x[which.max(bc$y)]
-lambda_e #0.02020202
-
-#New estradiol
-data <- data %>% 
-  mutate(new_estradiol = ((estradiol_scan_pg_ml^lambda_e) - 1) / lambda_e)
-
-#Check transformed histogram
-hist(data$new_estradiol)
-shapiro.test(data$new_estradiol) #yes, p = 0.03883
-
-
-##### CA1
-#Check histogram
-hist(data$avg_ca1)
-shapiro.test(data$avg_ca1) #no
-
-
-##### DSP Solution Index
-hist(data$dsp_si_true_pct)
-shapiro.test(data$dsp_si_true_pct) #yes
-shapiro.test(log(data$dsp_si_true_pct)) #yes
-shapiro.test(sqrt(data$dsp_si_true_pct)) #yes
-
-#Make solution index positive
-data_dsp <- data %>% 
-  filter(dsp_useable == "Yes") %>% 
-  mutate(dsp_si_pos = dsp_si_true_pct * 100)
-
-#Box-Cox transformation plot
-#Can't run with 0 in dataset, so use
-
-hist(log(data$dsp_si_true_pct))
-```
-
-### Frequentist
-
-
-#### Using `mediation`
-
-With regards to mediation, bootstrapping is often used where normality does not seem like a reasonable assumption. We can do so using `mediation` package.
-
-
-1. Estradiol predicting Solution Index
-
-Total effect
-
-```{r}
-fit.totaleffect <- lm(dsp_si_true_pct ~ estradiol_scan_pg_ml, data=data)
-tidy(fit.totaleffect)
-```
-
-
-2. Estradiol predicting CA1
-
-Effect of IV on mediatior
-
-```{r}
-fit.mediator <- lm(avg_ca1 ~ estradiol_scan_pg_ml, data=data)
-tidy(fit.mediator)
-```
-
-
-3. Estradiol and CA1 predicting SOlution Index
-
-Effect of mediator on DV
-
-```{r}
-fit.dv <- lm(dsp_si_true_pct ~ estradiol_scan_pg_ml + avg_ca1, data=data)
-tidy(fit.dv)
-```
-
-
-```{r}
-results <- mediate(fit.mediator, 
-                   fit.dv, 
-                   treat = 'estradiol_scan_pg_ml', 
-                   mediator = 'avg_ca23', 
-                   SI = TRUE, # sequential ignorability assumption
-                   boot = TRUE, sims = 100)
-summary(results)
-```
-
-
-
-#### Using `lavaan`
+#### P
 
 ```{r}
 model <- ' # direct effect
-             dsp_si_true_pct ~ c*estradiol_scan_pg_ml
+             dsp_si_true_pct ~ c*progesterone_spatial_ng_ml
            # mediator
-             avg_ca1 ~ a*estradiol_scan_pg_ml
-             dsp_si_true_pct ~ b*avg_ca1
+             avg_t1_hipp ~ a*progesterone_spatial_ng_ml
+             dsp_si_true_pct ~ b*avg_t1_hipp
            # indirect effect (a*b)
              ab := a*b
            # total effect
@@ -533,38 +330,226 @@ model <- ' # direct effect
 #            missing = "fiml")
 # summary(fit)
 
-fit <- sem(model, data = data,
+fit <- sem(model, data = data_t1_repo,
            std.ov = TRUE, #standardize variables
            meanstructure = TRUE,
            se = 'bootstrap',
-           bootstrap = 100,
+           bootstrap = 5000,
            missing = "fiml")
 summary(fit)
 ```
 
-```{r}
-#Boostrap test statistics
-
-# bootstrap test statistic + compute p-value
-T.boot <- bootstrapLavaan(fit, R=10, type="nonparametric",
-                          FUN=fitMeasures, fit.measures="chisq")
-pvalue.boot <- length(which(T.boot > T.orig))/length(T.boot)
-
-```
-
-
-
-#### Robust Mediation Analysis
-
-
-
-
-### Bayesian
+#### FSH
 
 
 ```{r}
+model <- ' # direct effect
+             dsp_si_true_pct ~ c*fsh_spatial_miu_ml
+           # mediator
+             avg_t1_hipp ~ a*fsh_spatial_miu_ml
+             dsp_si_true_pct ~ b*avg_t1_hipp
+           # indirect effect (a*b)
+             ab := a*b
+           # total effect
+             total := c + (a*b)
+         '
+# fit <- sem(model, data = data,
+#            std.ov = TRUE, #standardize variables
+#            meanstructure = TRUE,
+#            #se = 'robust.mlr', #incomplete data
+#            missing = "fiml")
+# summary(fit)
 
+fit <- sem(model, data = data_t1_repo,
+           std.ov = TRUE, #standardize variables
+           meanstructure = TRUE,
+           se = 'bootstrap',
+           bootstrap = 5000,
+           missing = "fiml")
+summary(fit)
 ```
+
+
+```{r}
+#Print all model parameters
+parameterestimates(fit, se=TRUE,
+                   pvalue=TRUE, #corresponding to the z-statistic, evaluated under a standard normal distribution
+                   fmi=TRUE, #fraction of missing info/parameter
+                   boot.ci.type = "bca.simple", #adjusted bootstrap percentile (BCa) method, but with no correction for acceleration (only for bias)
+                   standardized = TRUE) # %>% kable()
+```
+Lavaan packages shows that C and B pathways are significant.
+
+
+
+## T2 mediation: women
+
+```{r t2-data}
+#Read in the data
+##### EVENTUALLY UPDATE T2 HIPP RESULTS
+data_t2 <- read_csv(here("data", "HAS_SNAG_mastersheet_tidy.csv"))
+
+#Filter for midlife women, has dsp data, has t2hipp data
+data_t2 <- data_t2 %>% 
+  filter(age_group == "Midlife", 
+         #t2hipp_useable == "Yes",
+         dsp_useable == "Yes") %>% 
+  dplyr::select(subject_id, sex, 
+         age_scan_years:testosterone_spatial_ng_dl,
+         t2hipp_vol_avg_ca1:t2hipp_vol_avg_sub,
+         t2hipp_vol_left_ca1:t2hipp_vol_right_sub,
+         t1_vbm_tiv) %>% 
+  mutate(repo_status = fct_relevel(repo_status_spatial, 
+                                    c("Pre", "Peri", "Post", "Men"))) %>% 
+  #Further exclude these subjects:
+  filter(!subject_id %in% c(
+    #"309", #bad participant
+    #"316", #vertigo/took Wellbutrin for mood and Lipitor for cholesterol 7 days/week of scan
+     "329", #on prednisone 7 days/week of scan
+    #"352", #current MDD/depression
+     "372" #past neuroschistosomiasis at 24 years old
+  ))
+
+
+########## Create T2 total hipp and MTL volumes
+data_t2 <- data_t2 %>% 
+  
+  #Rename columns
+  rename(avg_ca1 = t2hipp_vol_avg_ca1,
+         avg_ca23 = t2hipp_vol_avg_ca23,
+         avg_dg = t2hipp_vol_avg_dg,
+         avg_erc = t2hipp_vol_avg_erc,
+         avg_phc = t2hipp_vol_avg_phc,
+         avg_prc = t2hipp_vol_avg_prc,
+         avg_sub = t2hipp_vol_avg_sub) %>% 
+  
+  #Create T2 total hipp and MTL
+  mutate(avg_total_hipp = avg_ca1 + avg_ca23 + avg_dg + avg_sub,
+         avg_mtl = avg_ca1 + avg_ca23 + avg_dg + avg_sub +
+           avg_erc + avg_phc + avg_prc)
+
+
+#Women and men
+data_t2_repo <- data_t2 %>% 
+  filter(sex == "Female") %>% 
+  mutate(repo_status = fct_relevel(repo_status_spatial, 
+                                    c("Pre", "Peri", "Post"))) 
+data_t2_men <- data_t2 %>% 
+  filter(sex == "Male") 
+
+
+########## Correct using TIV, then average left and right
+
+##### T2hipp
+
+
+# #Create function for apply to variables
+# #t2hipp_vol_tiv
+# dividebyTIV <- function(x, na.rm = FALSE) (x/data$t1_vbm_tiv)
+# 
+# #Correct left and right volumes with TIV
+# data <- data %>% 
+#   
+#   #Correct using TIV from SPM
+#   #CA1, CA23, DG, ERC,PHC, PRC, SUB, GMV
+#   mutate_at(vars(t2hipp_vol_left_ca1:t2hipp_vol_right_sub),
+#             dividebyTIV) %>% 
+#   
+#   #Average left and right subfields
+#   mutate(avg_ca1 = (t2hipp_vol_left_ca1+t2hipp_vol_right_ca1) / 2,
+#          avg_ca23 = (t2hipp_vol_left_ca23+t2hipp_vol_right_ca23) / 2,
+#          avg_dg = (t2hipp_vol_left_dg+t2hipp_vol_right_dg) / 2,
+#          avg_erc = (t2hipp_vol_left_erc+t2hipp_vol_right_erc) / 2,
+#          avg_phc = (t2hipp_vol_left_phc+t2hipp_vol_right_phc) / 2,
+#          avg_prc = (t2hipp_vol_left_prc+t2hipp_vol_right_prc) / 2,
+#          avg_sub = (t2hipp_vol_left_sub+t2hipp_vol_right_sub) / 2) %>% 
+#   
+#   #Calculate total left and right hipp
+#   mutate(total_l_hipp = (t2hipp_vol_left_ca1 + 
+#                          t2hipp_vol_left_ca23 +
+#                          t2hipp_vol_left_dg + 
+#                          t2hipp_vol_left_sub),
+#          total_r_hipp = (t2hipp_vol_right_ca1 + 
+#                          t2hipp_vol_right_ca23 + 
+#                          t2hipp_vol_right_dg + 
+#                          t2hipp_vol_right_sub),
+#          avg_total_hipp = (total_l_hipp + total_r_hipp)/2) %>% 
+#   
+#   #Calculate left and right MTL
+#   mutate(lmtl = (t2hipp_vol_left_ca1 + 
+#                  t2hipp_vol_left_ca23 +
+#                  t2hipp_vol_left_dg + 
+#                  t2hipp_vol_left_sub + 
+#                  t2hipp_vol_left_erc + 
+#                  t2hipp_vol_left_phc + 
+#                  t2hipp_vol_left_prc),
+#          rmtl = (t2hipp_vol_right_ca1 + 
+#                  t2hipp_vol_right_ca23 +
+#                  t2hipp_vol_right_dg + 
+#                  t2hipp_vol_right_sub + 
+#                  t2hipp_vol_right_erc + 
+#                  t2hipp_vol_right_phc + 
+#                  t2hipp_vol_right_prc),
+#          avg_mtl = (lmtl + rmtl)/2)
+```
+
+
+### Total Hipp
+
+#### E
+
+```{r}
+model <- ' # direct effect
+             dsp_si_true_pct ~ c*estradiol_spatial_pg_ml
+           # mediator
+             avg_total_hipp ~ a*estradiol_spatial_pg_ml
+             dsp_si_true_pct ~ b*avg_total_hipp
+           # indirect effect (a*b)
+             ab := a*b
+           # total effect
+             total := c + (a*b)
+         '
+# fit <- sem(model, data = data,
+#            std.ov = TRUE, #standardize variables
+#            meanstructure = TRUE,
+#            #se = 'robust.mlr', #incomplete data
+#            missing = "fiml")
+# summary(fit)
+
+fit <- sem(model, data = data_t2_repo,
+           std.ov = TRUE, #standardize variables
+           meanstructure = TRUE,
+           se = 'bootstrap',
+           bootstrap = 5000,
+           missing = "fiml")
+summary(fit)
+```
+Total effect observed.
+
+#### P
+
+#### FSH
+
+### CA1
+
+### CA23
+
+
+### DG
+
+
+### ERC
+
+### PHC
+
+### PRC
+
+
+### SUB
+
+
+
+
 
 
 
