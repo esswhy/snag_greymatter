@@ -86,7 +86,7 @@ data_t1 <- data_t1 %>%
   filter(age_group == "Midlife", 
          #t1_status == "Yes",
          dsp_useable == "Yes") %>% 
-  dplyr::select(subject_id, sex,
+  dplyr::select(subject_id, sex, t1_status,
          age_scan_years:testosterone_spatial_ng_dl,
          t1_vol_left_hipp_aal_2d_d1_r, t1_vol_right_hipp_aal_2d_d1_r,
          t1_vbm_tiv) %>% 
@@ -290,6 +290,8 @@ model <- ' # direct effect
 #            missing = "fiml")
 # summary(fit)
 
+
+#lavaan
 fit <- sem(model, data = data_t1_repo,
            std.ov = TRUE, #standardize variables
            meanstructure = TRUE,
@@ -338,6 +340,16 @@ fit <- sem(model, data = data_t1_repo,
            missing = "fiml")
 summary(fit)
 ```
+
+```{r}
+#Print all model parameters
+parameterestimates(fit, se=TRUE,
+                   pvalue=TRUE, #corresponding to the z-statistic, evaluated under a standard normal distribution
+                   fmi=TRUE, #fraction of missing info/parameter
+                   boot.ci.type = "bca.simple", #adjusted bootstrap percentile (BCa) method, but with no correction for acceleration (only for bias)
+                   standardized = TRUE) # %>% kable()
+```
+
 
 #### FSH
 
@@ -526,29 +538,916 @@ summary(fit)
 ```
 Total effect observed.
 
+```{r}
+#Print all model parameters
+parameterestimates(fit, se=TRUE,
+                   pvalue=TRUE, #corresponding to the z-statistic, evaluated under a standard normal distribution
+                   fmi=TRUE, #fraction of missing info/parameter
+                   boot.ci.type = "bca.simple", #adjusted bootstrap percentile (BCa) method, but with no correction for acceleration (only for bias)
+                   standardized = TRUE) # %>% kable()
+```
+
 #### P
+
+```{r}
+model <- ' # direct effect
+             dsp_si_true_pct ~ c*progesterone_spatial_ng_ml
+           # mediator
+             avg_total_hipp ~ a*progesterone_spatial_ng_ml
+             dsp_si_true_pct ~ b*avg_total_hipp
+           # indirect effect (a*b)
+             ab := a*b
+           # total effect
+             total := c + (a*b)
+         '
+# fit <- sem(model, data = data,
+#            std.ov = TRUE, #standardize variables
+#            meanstructure = TRUE,
+#            #se = 'robust.mlr', #incomplete data
+#            missing = "fiml")
+# summary(fit)
+
+fit <- sem(model, data = data_t2_repo,
+           std.ov = TRUE, #standardize variables
+           meanstructure = TRUE,
+           se = 'bootstrap',
+           bootstrap = 5000,
+           missing = "fiml")
+summary(fit)
+```
+
+No effects
+
+```{r}
+#Print all model parameters
+parameterestimates(fit, se=TRUE,
+                   pvalue=TRUE, #corresponding to the z-statistic, evaluated under a standard normal distribution
+                   fmi=TRUE, #fraction of missing info/parameter
+                   boot.ci.type = "bca.simple", #adjusted bootstrap percentile (BCa) method, but with no correction for acceleration (only for bias)
+                   standardized = TRUE) # %>% kable()
+```
 
 #### FSH
 
+```{r}
+model <- ' # direct effect
+             dsp_si_true_pct ~ c*fsh_spatial_miu_ml
+           # mediator
+             avg_total_hipp ~ a*fsh_spatial_miu_ml
+             dsp_si_true_pct ~ b*avg_total_hipp
+           # indirect effect (a*b)
+             ab := a*b
+           # total effect
+             total := c + (a*b)
+         '
+# fit <- sem(model, data = data,
+#            std.ov = TRUE, #standardize variables
+#            meanstructure = TRUE,
+#            #se = 'robust.mlr', #incomplete data
+#            missing = "fiml")
+# summary(fit)
+
+fit <- sem(model, data = data_t2_repo,
+           std.ov = TRUE, #standardize variables
+           meanstructure = TRUE,
+           se = 'bootstrap',
+           bootstrap = 5000,
+           missing = "fiml")
+summary(fit)
+```
+
+Only total effect observed.
+
+```{r}
+#Print all model parameters
+parameterestimates(fit, se=TRUE,
+                   pvalue=TRUE, #corresponding to the z-statistic, evaluated under a standard normal distribution
+                   fmi=TRUE, #fraction of missing info/parameter
+                   boot.ci.type = "bca.simple", #adjusted bootstrap percentile (BCa) method, but with no correction for acceleration (only for bias)
+                   standardized = TRUE) # %>% kable()
+```
+
 ### CA1
+
+#### E
+
+```{r}
+model <- ' # direct effect
+             dsp_si_true_pct ~ c*estradiol_spatial_pg_ml
+           # mediator
+             avg_ca1 ~ a*estradiol_spatial_pg_ml
+             dsp_si_true_pct ~ b*avg_ca1
+           # indirect effect (a*b)
+             ab := a*b
+           # total effect
+             total := c + (a*b)
+         '
+# fit <- sem(model, data = data,
+#            std.ov = TRUE, #standardize variables
+#            meanstructure = TRUE,
+#            #se = 'robust.mlr', #incomplete data
+#            missing = "fiml")
+# summary(fit)
+
+fit <- sem(model, data = data_t2_repo,
+           std.ov = TRUE, #standardize variables
+           meanstructure = TRUE,
+           se = 'bootstrap',
+           bootstrap = 5000,
+           missing = "fiml")
+summary(fit)
+```
+```{r}
+#Print all model parameters
+parameterestimates(fit, se=TRUE,
+                   pvalue=TRUE, #corresponding to the z-statistic, evaluated under a standard normal distribution
+                   fmi=TRUE, #fraction of missing info/parameter
+                   boot.ci.type = "bca.simple", #adjusted bootstrap percentile (BCa) method, but with no correction for acceleration (only for bias)
+                   standardized = TRUE) # %>% kable()
+```
+
+#### P
+
+```{r}
+model <- ' # direct effect
+             dsp_si_true_pct ~ c*progesterone_spatial_ng_ml
+           # mediator
+             avg_ca1 ~ a*progesterone_spatial_ng_ml
+             dsp_si_true_pct ~ b*avg_ca1
+           # indirect effect (a*b)
+             ab := a*b
+           # total effect
+             total := c + (a*b)
+         '
+# fit <- sem(model, data = data,
+#            std.ov = TRUE, #standardize variables
+#            meanstructure = TRUE,
+#            #se = 'robust.mlr', #incomplete data
+#            missing = "fiml")
+# summary(fit)
+
+fit <- sem(model, data = data_t2_repo,
+           std.ov = TRUE, #standardize variables
+           meanstructure = TRUE,
+           se = 'bootstrap',
+           bootstrap = 5000,
+           missing = "fiml")
+summary(fit)
+```
+
+```{r}
+#Print all model parameters
+parameterestimates(fit, se=TRUE,
+                   pvalue=TRUE, #corresponding to the z-statistic, evaluated under a standard normal distribution
+                   fmi=TRUE, #fraction of missing info/parameter
+                   boot.ci.type = "bca.simple", #adjusted bootstrap percentile (BCa) method, but with no correction for acceleration (only for bias)
+                   standardized = TRUE) # %>% kable()
+```
+
+#### FSH
+
+```{r}
+model <- ' # direct effect
+             dsp_si_true_pct ~ c*fsh_spatial_miu_ml
+           # mediator
+             avg_ca1 ~ a*fsh_spatial_miu_ml
+             dsp_si_true_pct ~ b*avg_ca1
+           # indirect effect (a*b)
+             ab := a*b
+           # total effect
+             total := c + (a*b)
+         '
+# fit <- sem(model, data = data,
+#            std.ov = TRUE, #standardize variables
+#            meanstructure = TRUE,
+#            #se = 'robust.mlr', #incomplete data
+#            missing = "fiml")
+# summary(fit)
+
+fit <- sem(model, data = data_t2_repo,
+           std.ov = TRUE, #standardize variables
+           meanstructure = TRUE,
+           se = 'bootstrap',
+           bootstrap = 5000,
+           missing = "fiml")
+summary(fit)
+```
+
+```{r}
+#Print all model parameters
+parameterestimates(fit, se=TRUE,
+                   pvalue=TRUE, #corresponding to the z-statistic, evaluated under a standard normal distribution
+                   fmi=TRUE, #fraction of missing info/parameter
+                   boot.ci.type = "bca.simple", #adjusted bootstrap percentile (BCa) method, but with no correction for acceleration (only for bias)
+                   standardized = TRUE) # %>% kable()
+```
 
 ### CA23
 
+#### E
+
+```{r}
+model <- ' # direct effect
+             dsp_si_true_pct ~ c*estradiol_spatial_pg_ml
+           # mediator
+             avg_ca23 ~ a*estradiol_spatial_pg_ml
+             dsp_si_true_pct ~ b*avg_ca23
+           # indirect effect (a*b)
+             ab := a*b
+           # total effect
+             total := c + (a*b)
+         '
+# fit <- sem(model, data = data,
+#            std.ov = TRUE, #standardize variables
+#            meanstructure = TRUE,
+#            #se = 'robust.mlr', #incomplete data
+#            missing = "fiml")
+# summary(fit)
+
+fit <- sem(model, data = data_t2_repo,
+           std.ov = TRUE, #standardize variables
+           meanstructure = TRUE,
+           se = 'bootstrap',
+           bootstrap = 5000,
+           missing = "fiml")
+summary(fit)
+```
+
+
+
+
+```{r}
+#Print all model parameters
+parameterestimates(fit, se=TRUE,
+                   pvalue=TRUE, #corresponding to the z-statistic, evaluated under a standard normal distribution
+                   fmi=TRUE, #fraction of missing info/parameter
+                   boot.ci.type = "bca.simple", #adjusted bootstrap percentile (BCa) method, but with no correction for acceleration (only for bias)
+                   standardized = TRUE) # %>% kable()
+```
+#### P
+
+```{r}
+model <- ' # direct effect
+             dsp_si_true_pct ~ c*progesterone_spatial_ng_ml
+           # mediator
+             avg_ca23 ~ a*progesterone_spatial_ng_ml
+             dsp_si_true_pct ~ b*avg_ca23
+           # indirect effect (a*b)
+             ab := a*b
+           # total effect
+             total := c + (a*b)
+         '
+# fit <- sem(model, data = data,
+#            std.ov = TRUE, #standardize variables
+#            meanstructure = TRUE,
+#            #se = 'robust.mlr', #incomplete data
+#            missing = "fiml")
+# summary(fit)
+
+fit <- sem(model, data = data_t2_repo,
+           std.ov = TRUE, #standardize variables
+           meanstructure = TRUE,
+           se = 'bootstrap',
+           bootstrap = 5000,
+           missing = "fiml")
+summary(fit)
+```
+
+
+
+```{r}
+#Print all model parameters
+parameterestimates(fit, se=TRUE,
+                   pvalue=TRUE, #corresponding to the z-statistic, evaluated under a standard normal distribution
+                   fmi=TRUE, #fraction of missing info/parameter
+                   boot.ci.type = "bca.simple", #adjusted bootstrap percentile (BCa) method, but with no correction for acceleration (only for bias)
+                   standardized = TRUE) # %>% kable()
+```
+
+#### FSH
+
+```{r}
+model <- ' # direct effect
+             dsp_si_true_pct ~ c*fsh_spatial_miu_ml
+           # mediator
+             avg_ca23 ~ a*fsh_spatial_miu_ml
+             dsp_si_true_pct ~ b*avg_ca23
+           # indirect effect (a*b)
+             ab := a*b
+           # total effect
+             total := c + (a*b)
+         '
+# fit <- sem(model, data = data,
+#            std.ov = TRUE, #standardize variables
+#            meanstructure = TRUE,
+#            #se = 'robust.mlr', #incomplete data
+#            missing = "fiml")
+# summary(fit)
+
+fit <- sem(model, data = data_t2_repo,
+           std.ov = TRUE, #standardize variables
+           meanstructure = TRUE,
+           se = 'bootstrap',
+           bootstrap = 5000,
+           missing = "fiml")
+summary(fit)
+```
+
+
+
+```{r}
+#Print all model parameters
+parameterestimates(fit, se=TRUE,
+                   pvalue=TRUE, #corresponding to the z-statistic, evaluated under a standard normal distribution
+                   fmi=TRUE, #fraction of missing info/parameter
+                   boot.ci.type = "bca.simple", #adjusted bootstrap percentile (BCa) method, but with no correction for acceleration (only for bias)
+                   standardized = TRUE) # %>% kable()
+```
 
 ### DG
+
+#### E
+
+```{r}
+model <- ' # direct effect
+             dsp_si_true_pct ~ c*estradiol_spatial_pg_ml
+           # mediator
+             avg_dg ~ a*estradiol_spatial_pg_ml
+             dsp_si_true_pct ~ b*avg_dg
+           # indirect effect (a*b)
+             ab := a*b
+           # total effect
+             total := c + (a*b)
+         '
+# fit <- sem(model, data = data,
+#            std.ov = TRUE, #standardize variables
+#            meanstructure = TRUE,
+#            #se = 'robust.mlr', #incomplete data
+#            missing = "fiml")
+# summary(fit)
+
+fit <- sem(model, data = data_t2_repo,
+           std.ov = TRUE, #standardize variables
+           meanstructure = TRUE,
+           se = 'bootstrap',
+           bootstrap = 5000,
+           missing = "fiml")
+summary(fit)
+```
+
+```{r}
+#Print all model parameters
+parameterestimates(fit, se=TRUE,
+                   pvalue=TRUE, #corresponding to the z-statistic, evaluated under a standard normal distribution
+                   fmi=TRUE, #fraction of missing info/parameter
+                   boot.ci.type = "bca.simple", #adjusted bootstrap percentile (BCa) method, but with no correction for acceleration (only for bias)
+                   standardized = TRUE) # %>% kable()
+```
+#### P
+
+```{r}
+model <- ' # direct effect
+             dsp_si_true_pct ~ c*progesterone_spatial_ng_ml
+           # mediator
+             avg_dg ~ a*progesterone_spatial_ng_ml
+             dsp_si_true_pct ~ b*avg_dg
+           # indirect effect (a*b)
+             ab := a*b
+           # total effect
+             total := c + (a*b)
+         '
+# fit <- sem(model, data = data,
+#            std.ov = TRUE, #standardize variables
+#            meanstructure = TRUE,
+#            #se = 'robust.mlr', #incomplete data
+#            missing = "fiml")
+# summary(fit)
+
+fit <- sem(model, data = data_t2_repo,
+           std.ov = TRUE, #standardize variables
+           meanstructure = TRUE,
+           se = 'bootstrap',
+           bootstrap = 5000,
+           missing = "fiml")
+summary(fit)
+```
+
+```{r}
+#Print all model parameters
+parameterestimates(fit, se=TRUE,
+                   pvalue=TRUE, #corresponding to the z-statistic, evaluated under a standard normal distribution
+                   fmi=TRUE, #fraction of missing info/parameter
+                   boot.ci.type = "bca.simple", #adjusted bootstrap percentile (BCa) method, but with no correction for acceleration (only for bias)
+                   standardized = TRUE) # %>% kable()
+```
+#### FSH
+
+```{r}
+model <- ' # direct effect
+             dsp_si_true_pct ~ c*fsh_spatial_miu_ml
+           # mediator
+             avg_dg ~ a*fsh_spatial_miu_ml
+             dsp_si_true_pct ~ b*avg_dg
+           # indirect effect (a*b)
+             ab := a*b
+           # total effect
+             total := c + (a*b)
+         '
+# fit <- sem(model, data = data,
+#            std.ov = TRUE, #standardize variables
+#            meanstructure = TRUE,
+#            #se = 'robust.mlr', #incomplete data
+#            missing = "fiml")
+# summary(fit)
+
+fit <- sem(model, data = data_t2_repo,
+           std.ov = TRUE, #standardize variables
+           meanstructure = TRUE,
+           se = 'bootstrap',
+           bootstrap = 5000,
+           missing = "fiml")
+summary(fit)
+```
+
+```{r}
+#Print all model parameters
+parameterestimates(fit, se=TRUE,
+                   pvalue=TRUE, #corresponding to the z-statistic, evaluated under a standard normal distribution
+                   fmi=TRUE, #fraction of missing info/parameter
+                   boot.ci.type = "bca.simple", #adjusted bootstrap percentile (BCa) method, but with no correction for acceleration (only for bias)
+                   standardized = TRUE) # %>% kable()
+```
+
 
 
 ### ERC
 
+#### E
+
+```{r}
+model <- ' # direct effect
+             dsp_si_true_pct ~ c*estradiol_spatial_pg_ml
+           # mediator
+             avg_erc ~ a*estradiol_spatial_pg_ml
+             dsp_si_true_pct ~ b*avg_erc
+           # indirect effect (a*b)
+             ab := a*b
+           # total effect
+             total := c + (a*b)
+         '
+# fit <- sem(model, data = data,
+#            std.ov = TRUE, #standardize variables
+#            meanstructure = TRUE,
+#            #se = 'robust.mlr', #incomplete data
+#            missing = "fiml")
+# summary(fit)
+
+fit <- sem(model, data = data_t2_repo,
+           std.ov = TRUE, #standardize variables
+           meanstructure = TRUE,
+           se = 'bootstrap',
+           bootstrap = 5000,
+           missing = "fiml")
+summary(fit)
+```
+
+```{r}
+#Print all model parameters
+parameterestimates(fit, se=TRUE,
+                   pvalue=TRUE, #corresponding to the z-statistic, evaluated under a standard normal distribution
+                   fmi=TRUE, #fraction of missing info/parameter
+                   boot.ci.type = "bca.simple", #adjusted bootstrap percentile (BCa) method, but with no correction for acceleration (only for bias)
+                   standardized = TRUE) # %>% kable()
+```
+
+#### P
+
+```{r}
+model <- ' # direct effect
+             dsp_si_true_pct ~ c*progesterone_spatial_ng_ml
+           # mediator
+             avg_erc ~ a*progesterone_spatial_ng_ml
+             dsp_si_true_pct ~ b*avg_erc
+           # indirect effect (a*b)
+             ab := a*b
+           # total effect
+             total := c + (a*b)
+         '
+# fit <- sem(model, data = data,
+#            std.ov = TRUE, #standardize variables
+#            meanstructure = TRUE,
+#            #se = 'robust.mlr', #incomplete data
+#            missing = "fiml")
+# summary(fit)
+
+fit <- sem(model, data = data_t2_repo,
+           std.ov = TRUE, #standardize variables
+           meanstructure = TRUE,
+           se = 'bootstrap',
+           bootstrap = 5000,
+           missing = "fiml")
+summary(fit)
+```
+
+```{r}
+#Print all model parameters
+parameterestimates(fit, se=TRUE,
+                   pvalue=TRUE, #corresponding to the z-statistic, evaluated under a standard normal distribution
+                   fmi=TRUE, #fraction of missing info/parameter
+                   boot.ci.type = "bca.simple", #adjusted bootstrap percentile (BCa) method, but with no correction for acceleration (only for bias)
+                   standardized = TRUE) # %>% kable()
+```
+
+#### FSH
+
+```{r}
+model <- ' # direct effect
+             dsp_si_true_pct ~ c*fsh_spatial_miu_ml
+           # mediator
+             avg_erc ~ a*fsh_spatial_miu_ml
+             dsp_si_true_pct ~ b*avg_erc
+           # indirect effect (a*b)
+             ab := a*b
+           # total effect
+             total := c + (a*b)
+         '
+# fit <- sem(model, data = data,
+#            std.ov = TRUE, #standardize variables
+#            meanstructure = TRUE,
+#            #se = 'robust.mlr', #incomplete data
+#            missing = "fiml")
+# summary(fit)
+
+fit <- sem(model, data = data_t2_repo,
+           std.ov = TRUE, #standardize variables
+           meanstructure = TRUE,
+           se = 'bootstrap',
+           bootstrap = 5000,
+           missing = "fiml")
+summary(fit)
+```
+
+```{r}
+#Print all model parameters
+parameterestimates(fit, se=TRUE,
+                   pvalue=TRUE, #corresponding to the z-statistic, evaluated under a standard normal distribution
+                   fmi=TRUE, #fraction of missing info/parameter
+                   boot.ci.type = "bca.simple", #adjusted bootstrap percentile (BCa) method, but with no correction for acceleration (only for bias)
+                   standardized = TRUE) # %>% kable()
+```
+
 ### PHC
 
+#### E
+
+```{r}
+model <- ' # direct effect
+             dsp_si_true_pct ~ c*estradiol_spatial_pg_ml
+           # mediator
+             avg_phc ~ a*estradiol_spatial_pg_ml
+             dsp_si_true_pct ~ b*avg_phc
+           # indirect effect (a*b)
+             ab := a*b
+           # total effect
+             total := c + (a*b)
+         '
+# fit <- sem(model, data = data,
+#            std.ov = TRUE, #standardize variables
+#            meanstructure = TRUE,
+#            #se = 'robust.mlr', #incomplete data
+#            missing = "fiml")
+# summary(fit)
+
+fit <- sem(model, data = data_t2_repo,
+           std.ov = TRUE, #standardize variables
+           meanstructure = TRUE,
+           se = 'bootstrap',
+           bootstrap = 5000,
+           missing = "fiml")
+summary(fit)
+```
+```{r}
+#Print all model parameters
+parameterestimates(fit, se=TRUE,
+                   pvalue=TRUE, #corresponding to the z-statistic, evaluated under a standard normal distribution
+                   fmi=TRUE, #fraction of missing info/parameter
+                   boot.ci.type = "bca.simple", #adjusted bootstrap percentile (BCa) method, but with no correction for acceleration (only for bias)
+                   standardized = TRUE) # %>% kable()
+```
+
+#### P
+
+```{r}
+model <- ' # direct effect
+             dsp_si_true_pct ~ c*progesterone_spatial_ng_ml
+           # mediator
+             avg_phc ~ a*progesterone_spatial_ng_ml
+             dsp_si_true_pct ~ b*avg_phc
+           # indirect effect (a*b)
+             ab := a*b
+           # total effect
+             total := c + (a*b)
+         '
+# fit <- sem(model, data = data,
+#            std.ov = TRUE, #standardize variables
+#            meanstructure = TRUE,
+#            #se = 'robust.mlr', #incomplete data
+#            missing = "fiml")
+# summary(fit)
+
+fit <- sem(model, data = data_t2_repo,
+           std.ov = TRUE, #standardize variables
+           meanstructure = TRUE,
+           se = 'bootstrap',
+           bootstrap = 5000,
+           missing = "fiml")
+summary(fit)
+```
+
+
+```{r}
+#Print all model parameters
+parameterestimates(fit, se=TRUE,
+                   pvalue=TRUE, #corresponding to the z-statistic, evaluated under a standard normal distribution
+                   fmi=TRUE, #fraction of missing info/parameter
+                   boot.ci.type = "bca.simple", #adjusted bootstrap percentile (BCa) method, but with no correction for acceleration (only for bias)
+                   standardized = TRUE) # %>% kable()
+```
+
+#### FSH
+
+```{r}
+model <- ' # direct effect
+             dsp_si_true_pct ~ c*fsh_spatial_miu_ml
+           # mediator
+             avg_phc ~ a*fsh_spatial_miu_ml
+             dsp_si_true_pct ~ b*avg_phc
+           # indirect effect (a*b)
+             ab := a*b
+           # total effect
+             total := c + (a*b)
+         '
+# fit <- sem(model, data = data,
+#            std.ov = TRUE, #standardize variables
+#            meanstructure = TRUE,
+#            #se = 'robust.mlr', #incomplete data
+#            missing = "fiml")
+# summary(fit)
+
+fit <- sem(model, data = data_t2_repo,
+           std.ov = TRUE, #standardize variables
+           meanstructure = TRUE,
+           se = 'bootstrap',
+           bootstrap = 5000,
+           missing = "fiml")
+summary(fit)
+```
+
+
+```{r}
+#Print all model parameters
+parameterestimates(fit, se=TRUE,
+                   pvalue=TRUE, #corresponding to the z-statistic, evaluated under a standard normal distribution
+                   fmi=TRUE, #fraction of missing info/parameter
+                   boot.ci.type = "bca.simple", #adjusted bootstrap percentile (BCa) method, but with no correction for acceleration (only for bias)
+                   standardized = TRUE) # %>% kable()
+```
+
+
 ### PRC
+
+#### E
+
+```{r}
+model <- ' # direct effect
+             dsp_si_true_pct ~ c*estradiol_spatial_pg_ml
+           # mediator
+             avg_prc ~ a*estradiol_spatial_pg_ml
+             dsp_si_true_pct ~ b*avg_prc
+           # indirect effect (a*b)
+             ab := a*b
+           # total effect
+             total := c + (a*b)
+         '
+# fit <- sem(model, data = data,
+#            std.ov = TRUE, #standardize variables
+#            meanstructure = TRUE,
+#            #se = 'robust.mlr', #incomplete data
+#            missing = "fiml")
+# summary(fit)
+
+fit <- sem(model, data = data_t2_repo,
+           std.ov = TRUE, #standardize variables
+           meanstructure = TRUE,
+           se = 'bootstrap',
+           bootstrap = 5000,
+           missing = "fiml")
+summary(fit)
+```
+```{r}
+#Print all model parameters
+parameterestimates(fit, se=TRUE,
+                   pvalue=TRUE, #corresponding to the z-statistic, evaluated under a standard normal distribution
+                   fmi=TRUE, #fraction of missing info/parameter
+                   boot.ci.type = "bca.simple", #adjusted bootstrap percentile (BCa) method, but with no correction for acceleration (only for bias)
+                   standardized = TRUE) # %>% kable()
+```
+
+#### P
+
+```{r}
+model <- ' # direct effect
+             dsp_si_true_pct ~ c*progesterone_spatial_ng_ml
+           # mediator
+             avg_prc ~ a*progesterone_spatial_ng_ml
+             dsp_si_true_pct ~ b*avg_prc
+           # indirect effect (a*b)
+             ab := a*b
+           # total effect
+             total := c + (a*b)
+         '
+# fit <- sem(model, data = data,
+#            std.ov = TRUE, #standardize variables
+#            meanstructure = TRUE,
+#            #se = 'robust.mlr', #incomplete data
+#            missing = "fiml")
+# summary(fit)
+
+fit <- sem(model, data = data_t2_repo,
+           std.ov = TRUE, #standardize variables
+           meanstructure = TRUE,
+           se = 'bootstrap',
+           bootstrap = 5000,
+           missing = "fiml")
+summary(fit)
+```
+
+
+```{r}
+#Print all model parameters
+parameterestimates(fit, se=TRUE,
+                   pvalue=TRUE, #corresponding to the z-statistic, evaluated under a standard normal distribution
+                   fmi=TRUE, #fraction of missing info/parameter
+                   boot.ci.type = "bca.simple", #adjusted bootstrap percentile (BCa) method, but with no correction for acceleration (only for bias)
+                   standardized = TRUE) # %>% kable()
+```
+
+#### FSH
+
+```{r}
+model <- ' # direct effect
+             dsp_si_true_pct ~ c*fsh_spatial_miu_ml
+           # mediator
+             avg_prc ~ a*fsh_spatial_miu_ml
+             dsp_si_true_pct ~ b*avg_prc
+           # indirect effect (a*b)
+             ab := a*b
+           # total effect
+             total := c + (a*b)
+         '
+# fit <- sem(model, data = data,
+#            std.ov = TRUE, #standardize variables
+#            meanstructure = TRUE,
+#            #se = 'robust.mlr', #incomplete data
+#            missing = "fiml")
+# summary(fit)
+
+fit <- sem(model, data = data_t2_repo,
+           std.ov = TRUE, #standardize variables
+           meanstructure = TRUE,
+           se = 'bootstrap',
+           bootstrap = 5000,
+           missing = "fiml")
+summary(fit)
+```
+
+
+
+```{r}
+#Print all model parameters
+parameterestimates(fit, se=TRUE,
+                   pvalue=TRUE, #corresponding to the z-statistic, evaluated under a standard normal distribution
+                   fmi=TRUE, #fraction of missing info/parameter
+                   boot.ci.type = "bca.simple", #adjusted bootstrap percentile (BCa) method, but with no correction for acceleration (only for bias)
+                   standardized = TRUE) # %>% kable()
+```
 
 
 ### SUB
 
+#### E
+
+```{r}
+model <- ' # direct effect
+             dsp_si_true_pct ~ c*estradiol_spatial_pg_ml
+           # mediator
+             avg_sub ~ a*estradiol_spatial_pg_ml
+             dsp_si_true_pct ~ b*avg_sub
+           # indirect effect (a*b)
+             ab := a*b
+           # total effect
+             total := c + (a*b)
+         '
+# fit <- sem(model, data = data,
+#            std.ov = TRUE, #standardize variables
+#            meanstructure = TRUE,
+#            #se = 'robust.mlr', #incomplete data
+#            missing = "fiml")
+# summary(fit)
+
+fit <- sem(model, data = data_t2_repo,
+           std.ov = TRUE, #standardize variables
+           meanstructure = TRUE,
+           se = 'bootstrap',
+           bootstrap = 5000,
+           missing = "fiml")
+summary(fit)
+```
+```{r}
+#Print all model parameters
+parameterestimates(fit, se=TRUE,
+                   pvalue=TRUE, #corresponding to the z-statistic, evaluated under a standard normal distribution
+                   fmi=TRUE, #fraction of missing info/parameter
+                   boot.ci.type = "bca.simple", #adjusted bootstrap percentile (BCa) method, but with no correction for acceleration (only for bias)
+                   standardized = TRUE) # %>% kable()
+```
+#### P
+
+```{r}
+model <- ' # direct effect
+             dsp_si_true_pct ~ c*progesterone_spatial_ng_ml
+           # mediator
+             avg_sub ~ a*progesterone_spatial_ng_ml
+             dsp_si_true_pct ~ b*avg_sub
+           # indirect effect (a*b)
+             ab := a*b
+           # total effect
+             total := c + (a*b)
+         '
+# fit <- sem(model, data = data,
+#            std.ov = TRUE, #standardize variables
+#            meanstructure = TRUE,
+#            #se = 'robust.mlr', #incomplete data
+#            missing = "fiml")
+# summary(fit)
+
+fit <- sem(model, data = data_t2_repo,
+           std.ov = TRUE, #standardize variables
+           meanstructure = TRUE,
+           se = 'bootstrap',
+           bootstrap = 5000,
+           missing = "fiml")
+summary(fit)
+```
+
+```{r}
+#Print all model parameters
+parameterestimates(fit, se=TRUE,
+                   pvalue=TRUE, #corresponding to the z-statistic, evaluated under a standard normal distribution
+                   fmi=TRUE, #fraction of missing info/parameter
+                   boot.ci.type = "bca.simple", #adjusted bootstrap percentile (BCa) method, but with no correction for acceleration (only for bias)
+                   standardized = TRUE) # %>% kable()
+```
 
 
+
+#### FSH
+
+```{r}
+model <- ' # direct effect
+             dsp_si_true_pct ~ c*fsh_spatial_miu_ml
+           # mediator
+             avg_sub ~ a*fsh_spatial_miu_ml
+             dsp_si_true_pct ~ b*avg_sub
+           # indirect effect (a*b)
+             ab := a*b
+           # total effect
+             total := c + (a*b)
+         '
+# fit <- sem(model, data = data,
+#            std.ov = TRUE, #standardize variables
+#            meanstructure = TRUE,
+#            #se = 'robust.mlr', #incomplete data
+#            missing = "fiml")
+# summary(fit)
+
+fit <- sem(model, data = data_t2_repo,
+           std.ov = TRUE, #standardize variables
+           meanstructure = TRUE,
+           se = 'bootstrap',
+           bootstrap = 5000,
+           missing = "fiml")
+summary(fit)
+```
+
+```{r}
+#Print all model parameters
+parameterestimates(fit, se=TRUE,
+                   pvalue=TRUE, #corresponding to the z-statistic, evaluated under a standard normal distribution
+                   fmi=TRUE, #fraction of missing info/parameter
+                   boot.ci.type = "bca.simple", #adjusted bootstrap percentile (BCa) method, but with no correction for acceleration (only for bias)
+                   standardized = TRUE) # %>% kable()
+```
 
 
 
