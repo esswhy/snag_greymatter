@@ -52,6 +52,116 @@ This report provides exploratory and preliminary correlation analyses between se
 - Sum up the averaged CA1, CA23, DG, SUB, ERC, PHC, PRC to get MTL volume
 
 
+```{r dsi-check}
+#Read in the data
+data <- read_csv(here("data", "HAS_SNAG_mastersheet_tidy.csv"))
+
+#Filter for dsi data
+data <- data %>% 
+  filter(age_group == "Midlife", 
+         dsi_status == "Yes") %>% 
+  dplyr::select(subject_id, sex, dsi_status,
+         age_scan_years:testosterone_spatial_ng_dl) %>% 
+  mutate(repo_status = fct_relevel(repo_status_spatial, 
+                                    c("Pre", "Peri", "Post", "Men"))) %>% 
+  #Further exclude these subjects:
+  filter(!subject_id %in% c(
+    #"309", #bad participant
+    #"316", #vertigo/took Wellbutrin for mood and Lipitor for cholesterol 7 days/week of scan
+     "329", #on prednisone 7 days/week of scan
+    #"352", #current MDD/depression
+     "372" #past neuroschistosomiasis at 24 years old
+  ))
+
+
+#Subset for women by repo status
+data_repo <- data %>% 
+  filter(sex == "Female") %>% 
+  mutate(repo_status = fct_relevel(repo_status, 
+                                    c("Pre", "Peri", "Post")))
+
+#Subset for men
+data_men <- data %>% 
+  filter(sex == "Male")
+
+
+#Table overall
+tab_overall <- data %>% 
+  group_by(sex) %>% 
+  summarize(n_subject = n(),
+            age_mean = mean(age_spatial_years),
+            age_Sd = sd(age_spatial_years))
+
+#Table LOOP
+tab_loop <- data %>% 
+  filter(loop_useable == "Yes") %>% 
+  group_by(sex) %>% 
+  summarize(n_subject = n(),
+            age_mean = mean(age_spatial_years),
+            age_Sd = sd(age_spatial_years))
+
+#Table MAZE
+tab_maze <- data %>% 
+  filter(maze_useable == "Yes") %>% 
+  group_by(sex) %>% 
+  summarize(n_subject = n(),
+            age_mean = mean(age_spatial_years),
+            age_Sd = sd(age_spatial_years))
+
+
+#Table DSP
+tab_dsp <- data %>% 
+  filter(dsp_useable == "Yes") %>% 
+  group_by(sex) %>% 
+  summarize(n_subject = n(),
+            age_mean = mean(age_spatial_years),
+            age_Sd = sd(age_spatial_years))
+
+
+#Join df based on sex
+tab1 <- merge(tab_overall, tab_loop, by = "sex")
+
+#Rename columns
+tab1 <- tab1 %>% 
+  rename(n_subject_overall = n_subject.x,
+         age_mean_overall = age_mean.x,
+         age_sd_overall = age_Sd.x,
+         n_subject_loop = n_subject.y,
+         age_mean_loop = age_mean.y,
+         age_sd_loop = age_Sd.y)
+
+#Rest of the merge
+tab2 <- merge(tab1, tab_maze, by = "sex")
+tab_final <- merge(tab2, tab_dsp, by = "sex")
+
+
+#Rename columns
+tab_final <- tab_final %>% 
+  rename(n_subject_maze = n_subject.x,
+         age_mean_maze = age_mean.x,
+         age_sd_maze = age_Sd.x,
+         n_subject_dsp = n_subject.y,
+         age_mean_dsp = age_mean.y,
+         age_sd_dsp = age_Sd.y)
+
+#Kable presentation (ideal if we had all hormones)
+tab_final %>% 
+  kable(col.names = c("Sex", "n","Mean Age","SD Age",
+                      "n","Mean Age","SD Age",
+                      "n","Mean Age","SD Age",
+                      "n","Mean Age","SD Age"),
+        caption = "Sample size and age for women and men grouped by overall completion of spatial navigation behavior with useable DSI data.",
+        digits = 2,
+        align = c("l", rep("c", times = 11))) %>% 
+  kable_styling("striped", full_width = FALSE,
+                position = "center", 
+                font_size = 12) %>%
+  add_header_above(c(" " = 1, "Overall" = 3, 
+                     "LOOP" = 3, "MAZE" = 3, "DSP" = 3))
+
+```
+
+
 ```{r data_wrangling}
 ########## Data 
 

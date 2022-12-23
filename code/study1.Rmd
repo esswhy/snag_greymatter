@@ -28,7 +28,7 @@ library(readr)
 ```
 
 
-*Modified on:* November 30th, 2022
+*Modified on:* December 22nd, 2022
 
 # Introduction
 
@@ -76,8 +76,8 @@ aim1_men <- aim1 %>%
 aim1_women <- aim1 %>% 
   filter(sex == "Female") %>% 
   #Reorder repo status
-  mutate(repo_status_spatial = fct_relevel(repo_status_spatial, 
-                                         c("Pre", "Peri", "Post")))
+  mutate(repo_status = fct_relevel(repo_status, 
+                                  c("Pre", "Peri", "Post")))
 
 #Table overall
 tab_overall <- aim1 %>% 
@@ -191,6 +191,23 @@ Thus for men, sample sizes in the following correlation analyses are *n* = 21 fo
 
 Same as those reported in *Yu et al. (2021)*. Hormones are testosterone for men; and estradiol, progesterone, FSH for women. Hormones are taken during time of spatial navigation task.
 
+```{r dsp-pe-plot}
+#Grid vs weighted general
+par(mfrow = c(1,2))
+hist(aim1$dsp_path_efficiency_grid, main = "Grid", xlab = "Path Efficiency")
+hist(aim1$dsp_path_efficiency_grid_weighted, main = "Weighted", xlab = "Path Efficiency")
+t.test(aim1$dsp_path_efficiency_grid, aim1$dsp_path_efficiency_grid_weighted) #no
+
+#separated by men
+t.test(aim1_men$dsp_path_efficiency_grid, aim1_men$dsp_path_efficiency_grid_weighted) #no
+
+#women
+t.test(aim1_women$dsp_path_efficiency_grid, aim1_women$dsp_path_efficiency_grid_weighted) #no
+```
+
+
+Difference between DSP path efficiency using grid distance and grid distance weighted are not statistically different, so use the weighted version.
+
 
 # Results
 
@@ -207,11 +224,11 @@ shapiro.test(aim1_men$loop_ae_avg_degree) #no
 
 shapiro.test(aim1_men$maze_accuracy_pct) #yes
 shapiro.test(aim1_men$maze_moves) #no
-#shapiro.test(aim1_men$maze_path_efficiency) #tbd
+shapiro.test(aim1_men$maze_path_efficiency) #no
 
 shapiro.test(aim1_men$dsp_si_true_pct) #yes
 shapiro.test(aim1_men$dsp_success_pct) #no
-shapiro.test(aim1_men$dsp_path_efficiency_new) #no
+shapiro.test(aim1_men$dsp_path_efficiency_grid_weighted) #no
 
 shapiro.test(aim1_men$testosterone_spatial_ng_dl) #no
 ```
@@ -276,6 +293,42 @@ cor.test(aim1_men_loop$testosterone_spatial_ng_dl,
 
 Degrees traveled at 3.0m was negatively correlated with testosterone ($\rho$ = -0.484, *p* < 0.05). No other significant correlations for position error or angular error.
 
+```{r loop-plot, include=TRUE, echo=FALSE}
+ggplot(data = aim1_men_loop, aes(x = testosterone_spatial_ng_dl,
+                                 y = loop_de_rad3_degree)) +
+  
+  #Define scatter, change size and alpha
+  geom_point(color = "#00AFBB", size = 3, 
+             alpha = 0.6, show.legend = FALSE) +
+  
+  #Add LM line
+  geom_smooth(
+              # method = 'loess',
+              # formula = 'y ~ x',
+              method = lm,
+              formula = y ~ splines::bs(x, 0.5), 
+              se = FALSE,
+              color = "grey50") +
+  
+  #Change labels
+  labs(x = "\nTestosterone (ng/dL)",
+       y = "Degrees Traveled (3.0m)",
+       caption = "Smoothing applied using `method = lm` and `formula = y ~ splines::bs(x, 0.5)`") +
+  
+  #Change theme
+  theme_minimal() +
+  
+  #Customize theme
+  theme(axis.title = element_text(size = 11, face = "bold"),
+        axis.title.x = element_text(vjust = 2),
+        axis.text = element_text(size= 10))
+
+#save
+#ggsave("study1_loop_t_spatial_gam.png")
+```
+
+
+
 
 ### MAZE
 
@@ -292,7 +345,7 @@ aim1_men_maze <- aim1_men %>%
 #Normality test
 shapiro.test(aim1_men_maze$maze_accuracy_pct) #yes
 shapiro.test(aim1_men_maze$maze_moves) #no
-#shapiro.test(aim1_men_maze$maze_path_efficiency) #tbd
+shapiro.test(aim1_men_maze$maze_path_efficiency) #no
 shapiro.test(aim1_men_maze$testosterone_spatial_ng_dl) #no
 
 
@@ -309,13 +362,13 @@ cor.test(aim1_men_maze$testosterone_spatial_ng_dl,
          method = "pearson")
 
 ########## Pearson for path efficiency
-# cor.test(aim1_men_maze$testosterone_spatial_ng_dl,
-#          aim1_men_maze$maze_path_efficiency,
-#          conf.level = 0.95,
-#          method = "pearson")
+cor.test(aim1_men_maze$testosterone_spatial_ng_dl,
+         aim1_men_maze$maze_path_efficiency,
+         conf.level = 0.95,
+         method = "pearson")
 ```
 
-No significant correlations for accuracy or moves. Waiting on path efficiency data.
+No significant correlations for accuracy, movees, or path efficiency.
 
  
 ### DSP
@@ -324,7 +377,8 @@ No significant correlations for accuracy or moves. Waiting on path efficiency da
 #Filter for men with dsp and testosterone
 aim1_men_dsp <- aim1_men %>% 
   dplyr::select(subject_id, dsp_useable, 
-                dsp_success_pct, dsp_si_true_pct, dsp_path_efficiency_new,
+                dsp_success_pct, dsp_si_true_pct, 
+                dsp_path_efficiency_grid_weighted,
                 testosterone_spatial_ng_dl) %>% 
     filter(dsp_useable == "Yes",
          is.na(testosterone_spatial_ng_dl) != TRUE)
@@ -333,7 +387,7 @@ aim1_men_dsp <- aim1_men %>%
 #Normality test
 shapiro.test(aim1_men_dsp$dsp_success_pct) #no
 shapiro.test(aim1_men_dsp$dsp_si_true_pct) #yes
-shapiro.test(aim1_men_dsp$dsp_path_efficiency_new) #no
+shapiro.test(aim1_men_dsp$dsp_path_efficiency_grid_weighted) #no
 shapiro.test(aim1_men_dsp$testosterone_spatial_ng_dl) #no
 
 
@@ -351,7 +405,7 @@ cor.test(aim1_men$testosterone_spatial_ng_dl,
 
 ########## pearson for path efficiency
 cor.test(aim1_men$testosterone_spatial_ng_dl,
-         aim1_men$dsp_path_efficiency_new,
+         aim1_men$dsp_path_efficiency_grid_weighted,
          conf.level = 0.95,
          method = "pearson")
 ```
@@ -366,7 +420,7 @@ Hormones bar plot using spatial hormones
 ```{r}
 #Summary of hormones
 ehormones_fig <- aim1_women %>% 
-  group_by(repo_status_spatial) %>% 
+  group_by(repo_status) %>% 
   summarize(mean_estradiol = mean(estradiol_spatial_pg_ml),
             sd_estradiol = sd(estradiol_spatial_pg_ml),
             n_estradiol = n(),
@@ -374,7 +428,7 @@ ehormones_fig <- aim1_women %>%
             .groups = "keep")
 
 phormones_fig <- aim1_women %>% 
-  group_by(repo_status_spatial) %>% 
+  group_by(repo_status) %>% 
   summarize(mean_progesterone = mean(progesterone_spatial_ng_ml),
             sd_progesterone = sd(progesterone_spatial_ng_ml),
             n_progesterone = n(),
@@ -382,7 +436,7 @@ phormones_fig <- aim1_women %>%
             .groups = "keep")
 
 fhormones_fig <- aim1_women %>% 
-  group_by(repo_status_spatial) %>% 
+  group_by(repo_status) %>% 
   summarize(mean_estradiol = mean(fsh_spatial_miu_ml),
             sd_estradiol = sd(fsh_spatial_miu_ml),
             n_estradiol = n(),
@@ -393,9 +447,9 @@ fhormones_fig <- aim1_women %>%
 
 ```{r hormone-plot, include = TRUE, echo=FALSE}
 #Estradiol plot
-ggplot(data = aim1_women, aes(x = repo_status_spatial, 
+ggplot(data = aim1_women, aes(x = repo_status, 
                             y = estradiol_spatial_pg_ml, 
-                            fill = repo_status_spatial))+
+                            fill = repo_status))+
   
   #Define bar plot by mean
   geom_bar(stat="summary", fun= "mean",
@@ -433,9 +487,9 @@ ggplot(data = aim1_women, aes(x = repo_status_spatial,
 
 
 #Progesterone plot
-ggplot(data = aim1_women, aes(x = repo_status_spatial,
+ggplot(data = aim1_women, aes(x = repo_status,
                               y = progesterone_spatial_ng_ml,
-                              fill = repo_status_spatial)) +
+                              fill = repo_status)) +
   
   #Define bar pplot by mean
   geom_bar(stat = "summary", fun = "mean",
@@ -467,9 +521,9 @@ ggplot(data = aim1_women, aes(x = repo_status_spatial,
 
 
 #FSH plot
-ggplot(data = aim1_women, aes(x = repo_status_spatial, 
+ggplot(data = aim1_women, aes(x = repo_status, 
                             y = fsh_spatial_miu_ml, 
-                            fill = repo_status_spatial))+
+                            fill = repo_status))+
   
   #Define bar plot by mean
   geom_bar(stat="summary", fun= "mean",
@@ -504,15 +558,15 @@ ggplot(data = aim1_women, aes(x = repo_status_spatial,
 
 ```{r}
 #ANOVA of hormones
-hormone_mod <- aov(estradiol_spatial_pg_ml ~ repo_status_spatial,
+hormone_mod <- aov(estradiol_spatial_pg_ml ~ repo_status,
       data = aim1_women)
 TukeyHSD(hormone_mod)
 
-hormone_mod <- aov(progesterone_spatial_ng_ml ~ repo_status_spatial,
+hormone_mod <- aov(progesterone_spatial_ng_ml ~ repo_status,
       data = aim1_women)
 TukeyHSD(hormone_mod)
 
-hormone_mod2 <- aov(fsh_spatial_miu_ml ~ repo_status_spatial,
+hormone_mod2 <- aov(fsh_spatial_miu_ml ~ repo_status,
       data = aim1_women)
 TukeyHSD(hormone_mod2)
 ```
@@ -533,7 +587,7 @@ shapiro.test(aim1_women$maze_moves) #yes
 
 shapiro.test(aim1_women$dsp_si_true_pct) #yes
 shapiro.test(aim1_women$dsp_success_pct) #no
-shapiro.test(aim1_women$dsp_path_efficiency_new) #no
+shapiro.test(aim1_women$dsp_path_efficiency_grid_weighted) #yes
 
 shapiro.test(aim1_women$estradiol_spatial_pg_ml) #yes
 shapiro.test(aim1_women$progesterone_spatial_ng_ml) #yes
@@ -551,7 +605,7 @@ Hormones were skewed despite log transformations, thus Spearman rank correlation
 ```{r}
 #Filter for women with loop and hormones
 aim1_women_loop <- aim1_women %>% 
-  dplyr::select(subject_id, repo_status_spatial, loop_useable, 
+  dplyr::select(subject_id, repo_status, loop_useable, 
                 loop_pe_rad3_m, 
                 loop_de_rad3_degree, loop_de_avg_degree,
                 loop_ae_rad3_degree, loop_ae_avg_degree,
@@ -660,7 +714,7 @@ No significant correlations for position error, degrees traveled, or angular err
 ```{r}
 #Filter for women with maze and hormones
 aim1_women_maze <- aim1_women %>% 
-  dplyr::select(subject_id, repo_status_spatial, maze_useable, 
+  dplyr::select(subject_id, repo_status, maze_useable, 
                 maze_accuracy_pct, maze_moves, maze_path_efficiency,
                 estradiol_spatial_pg_ml,
                 progesterone_spatial_ng_ml,
@@ -677,7 +731,7 @@ aim1_women_maze %>% filter(is.na(fsh_spatial_miu_ml) != TRUE) %>% count() #61
 #Normality test
 shapiro.test(aim1_women_maze$maze_accuracy_pct) #yes
 shapiro.test(aim1_women_maze$maze_moves) #yes
-#shapiro.test(aim1_women_maze$maze_path_efficiency) #tbd
+shapiro.test(aim1_women_maze$maze_path_efficiency) #yes
 shapiro.test(aim1_women_maze$estradiol_spatial_pg_ml) #yes
 shapiro.test(aim1_women_maze$progesterone_spatial_ng_ml) #yes
 shapiro.test(aim1_women_maze$fsh_spatial_miu_ml) #yes
@@ -718,9 +772,28 @@ cor.test(aim1_women_maze$fsh_spatial_miu_ml,
          aim1_women_maze$maze_moves,
          conf.level = 0.95,
          method = "spearman")
+
+
+########## Spearman for path efficiency
+
+#Estradiol
+cor.test(aim1_women_maze$estradiol_spatial_pg_ml,
+         aim1_women_maze$maze_path_efficiency,
+         conf.level = 0.95,
+         method = "spearman")
+#Progesterone
+cor.test(aim1_women_maze$progesterone_spatial_ng_ml,
+         aim1_women_maze$maze_path_efficiency,
+         conf.level = 0.95,
+         method = "spearman")
+#FSH
+cor.test(aim1_women_maze$fsh_spatial_miu_ml,
+         aim1_women_maze$maze_path_efficiency,
+         conf.level = 0.95,
+         method = "spearman")
 ```
 
-No correlations for accuracy or moves made. Waiting for path efficiency data.
+No correlations for accuracy, moves, or path efficiency.
 
 
 ### DSP
@@ -728,8 +801,9 @@ No correlations for accuracy or moves made. Waiting for path efficiency data.
 ```{r}
 #Filter for women with dsp and hormones
 aim1_women_dsp <- aim1_women %>% 
-  dplyr::select(subject_id, repo_status_spatial, dsp_useable, 
-                dsp_success_pct, dsp_si_true_pct, dsp_path_efficiency_new,
+  dplyr::select(subject_id, repo_status, dsp_useable, 
+                dsp_success_pct, dsp_si_true_pct, 
+                dsp_path_efficiency_grid_weighted,
                 estradiol_spatial_pg_ml,
                 progesterone_spatial_ng_ml,
                 fsh_spatial_miu_ml) %>% 
@@ -746,7 +820,7 @@ aim1_women_dsp %>% filter(is.na(fsh_spatial_miu_ml) != TRUE) %>% count() #46
 #Normality test
 shapiro.test(aim1_women_dsp$dsp_success_pct) #no
 shapiro.test(aim1_women_dsp$dsp_si_true_pct) #yes
-shapiro.test(aim1_women_dsp$dsp_path_efficiency_new) #no
+shapiro.test(aim1_women_dsp$dsp_path_efficiency_grid_weighted) #yes
 shapiro.test(aim1_women_dsp$estradiol_spatial_pg_ml) #yes
 shapiro.test(aim1_women_dsp$progesterone_spatial_ng_ml) #yes
 shapiro.test(aim1_women_dsp$fsh_spatial_miu_ml) #yes
@@ -792,17 +866,17 @@ cor.test(aim1_women_dsp$fsh_spatial_miu_ml,
 ########## Spearman for path efficiency
 #Estradiol
 cor.test(aim1_women_dsp$estradiol_spatial_pg_ml,
-         aim1_women_dsp$dsp_path_efficiency_new,
+         aim1_women_dsp$dsp_path_efficiency_grid_weighted,
          conf.level = 0.95,
          method = "spearman")
 #Progesterone
 cor.test(aim1_women_dsp$progesterone_spatial_ng_ml,
-         aim1_women_dsp$dsp_path_efficiency_new,
+         aim1_women_dsp$dsp_path_efficiency_grid_weighted,
          conf.level = 0.95,
          method = "spearman")
 #FSH
 cor.test(aim1_women_dsp$fsh_spatial_miu_ml,
-         aim1_women_dsp$dsp_path_efficiency_new,
+         aim1_women_dsp$dsp_path_efficiency_grid_weighted,
          conf.level = 0.95,
          method = "spearman")
 ```
@@ -812,7 +886,7 @@ No correlation for wayfinding success or path efficiency, but significant positi
 
 
 ```{r dsp-anova}
-si_mod <- aov(dsp_si_true_pct ~ repo_status_spatial,
+si_mod <- aov(dsp_si_true_pct ~ repo_status,
               data = aim1_women_dsp)
 summary(si_mod)
 ```
@@ -825,7 +899,7 @@ ANOVA of DSP solution index by reproductive status for women was not significant
 #n=46
 aim1_women_dsp <- aim1_women %>% 
   dplyr::select(dsp_useable, dsp_success_pct, dsp_si_true_pct,
-                repo_status_spatial,
+                repo_status,
                 estradiol_spatial_pg_ml,
                 progesterone_spatial_ng_ml,
                 fsh_spatial_miu_ml) %>% 
@@ -835,7 +909,7 @@ a <- ggplot(data = aim1_women_dsp, aes(x = estradiol_spatial_pg_ml,
                                         y = dsp_si_true_pct)) +
   
   #Define scatter, change size and alpha
-  geom_point(aes(color = repo_status_spatial),
+  geom_point(aes(color = repo_status),
              size = 3, alpha = 0.6, show.legend = FALSE) +
   
   #Add LM line
@@ -865,10 +939,10 @@ a <- ggplot(data = aim1_women_dsp, aes(x = estradiol_spatial_pg_ml,
 
 b <- ggplot(data = aim1_women_dsp, aes(x = fsh_spatial_miu_ml,
                             y = dsp_si_true_pct,
-                            color = repo_status_spatial)) +
+                            color = repo_status)) +
   
   #Define scatter, change size and alpha
-  geom_point(aes(color = repo_status_spatial),
+  geom_point(aes(color = repo_status),
              size = 3, alpha = 0.6) +
   
   #Add LM line
@@ -903,7 +977,7 @@ combined <- a + b & theme(legend.position = "top")
 combined + plot_layout(guides = "collect")
 
 #save
-ggsave("study1_dsp_e_fsh_spatial_gam.png")
+#ggsave("study1_dsp_e_fsh_spatial_gam.png")
 ```
 
 
@@ -930,7 +1004,7 @@ ggplot(data = aim1_women_dsp, aes(x = e_fsh_ratio,
                             text = subject_id)) +
   
   #Define scatter, change size and alpha
-  geom_point(aes(color = repo_status_spatial),
+  geom_point(aes(color = repo_status),
              size = 3, alpha = 0.6) +
   
   #Add LM line
@@ -965,7 +1039,7 @@ ggplot(data = aim1_women_dsp, aes(x = fsh_e_ratio,
                             text = subject_id)) +
   
   #Define scatter, change size and alpha
-  geom_point(aes(color = repo_status_spatial),
+  geom_point(aes(color = repo_status),
              size = 3, alpha = 0.6) +
   
   #Add LM line
@@ -1092,7 +1166,7 @@ cor.test(aim1_women$fsh_e_ratio,
 #Combine dataframes
 long_viz <- df_all %>% 
   select(subject_id, completed_spatial, sex, age_group,
-         age_spatial_years, repo_status_spatial, straw_status,
+         age_spatial_years, repo_status, straw_status,
          loop_useable:dsp_si_true_pct)
 ```
 
@@ -1210,7 +1284,9 @@ a1+a2
 
 - No significant correlations for LOOP or MAZE among women.
 
-- While there were no significant correlations for DSP wayfinding success, there was a positive correlation between estradiol and solution index ($\rho$ = 0.421, *p* < 0.01, Spearman), and a marginal negative association between FSH and solution index ($\rho$ = -0.281, *p* = 0.058, Spearman). There was no significant correlation with progesterone and solution index ($\rho$ = 0.16, *p* = 0.29, Spearman). This was true when using hormone measurements from spatial timepoints. The statistics reported in this summary are using the hormones from when spatial study occurred.
+- While there were no significant correlations for DSP wayfinding success or path efficiency, there was a positive correlation between estradiol and solution index ($\rho$ = 0.421, *p* < 0.01, Spearman), and a marginal negative association between FSH and solution index ($\rho$ = -0.281, *p* = 0.058, Spearman). There was also no significant correlation with progesterone and solution index ($\rho$ = 0.16, *p* = 0.29, Spearman). This was true when using hormone measurements from spatial timepoints.
+
+- ANOVA results reveal that difference in DSP solution index by reproductive status was not significant. 
 
 - When using estradiol to FSH ratio (or FSH to estradiol ratio) as a single measure for hormone concentration, the relationship with DSP solution index remained significant ($\rho$ = 0.420, *p* < 0.01, Spearman).
 
