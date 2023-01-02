@@ -28,12 +28,12 @@ library(purrr)
 ```
 
 
-*Modified on:* November 30th, 2022
+*Modified on:* December 23rd, 2022
 
 # Overview
 
 
-This report provides exploratory and preliminary correlation analyses between sex hormones and T1 hippocampal ROI data extracted from AAL for the Healthy Aging Study sample that have completed spatial navigation behavior. Mask was selected for left and right hippocampus, using 2D dilation 1 on registered (not smoothed) segmented grey matter using Wake Forest Univeristy PickAtlas and MarsBaR toolboxes in SPM12.
+This report provides exploratory and preliminary correlation analyses between sex hormones and T1 hippocampal ROI data extracted from AAL for the Healthy Aging Study sample that have completed spatial navigation behavior. Mask was selected for left and right hippocampus, using 2D dilation 1 on registered (not smoothed) segmented grey matter using Wake Forest University PickAtlas and MarsBaR toolboxes in SPM12.
 
 **Cleaning data steps included (T1 hipp):**
 
@@ -55,10 +55,10 @@ data <- data %>%
   filter(age_group == "Midlife",
          t1_status == "Yes",
          completed_spatial == "Yes") %>% 
-  dplyr::select(subject_id, sex, age_spatial_years, repo_status_spatial,
+  dplyr::select(subject_id, sex, age_spatial_years, repo_status,
          loop_useable:testosterone_spatial_ng_dl,
          t1_vbm_tiv:t1_vol_right_hipp_aal_3d_d1_s) %>% 
-  mutate(repo_status = fct_relevel(repo_status_spatial, 
+  mutate(repo_status = fct_relevel(repo_status, 
                                     c("Pre", "Peri", "Post", "Men"))) %>% 
 
   #Further exclude this subject:
@@ -94,7 +94,7 @@ data <- data %>%
 #Subset for women by repo status
 data_repo <- data %>% 
   filter(sex == "Female") %>% 
-  mutate(repo_status = fct_relevel(repo_status_spatial, 
+  mutate(repo_status = fct_relevel(repo_status, 
                                     c("Pre", "Peri", "Post")))
 #Subset for men
 data_men <- data %>% 
@@ -789,34 +789,28 @@ h6bq <- ggqqplot(data = sqrt(data_dsp$dsp_si_true_pct)) +
 ## is the DV significantly different than normal?
 
 #LOOP
-shapiro.test(data_loop$loop_pe_avg_m) #no
+shapiro.test(data_loop$loop_pe_rad3_m) #no
+shapiro.test(data_loop$loop_de_rad3_degree) #yes
 shapiro.test(data_loop$loop_de_avg_degree) #no
+shapiro.test(data_loop$loop_ae_rad3_degree) #no
+shapiro.test(data_loop$loop_ae_avg_degree) #yes
+
 
 #MAZE
 shapiro.test(data_maze$maze_accuracy_pct) #yes
 shapiro.test(data_maze$maze_moves) #yes
-
-shapiro.test(log(data_maze$maze_accuracy_pct)) #yes
-shapiro.test(log(data_maze$maze_moves)) #yes
-
-shapiro.test(sqrt(data_maze$maze_accuracy_pct)) #yes
-shapiro.test(sqrt(data_maze$maze_moves)) #yes
+shapiro.test(data_maze$maze_path_efficiency) #yes
 
 #DSP
 shapiro.test(data_dsp$dsp_success_pct) #no
 shapiro.test(data_dsp$dsp_si_true_pct) #yes
-
-shapiro.test(log(data_dsp$dsp_success_pct)) #yes
-shapiro.test(log(data_dsp$dsp_si_true_pct)) #yes
-
-shapiro.test(sqrt(data_dsp$dsp_success_pct)) #yes
-shapiro.test(sqrt(data_dsp$dsp_si_true_pct)) #yes
+shapiro.test(data_dsp$dsp_path_efficiency_grid_weighted) #no
 
 ```
 
 **Overall:**
 
-Shapiro-Wilk's test reveal that LOOP dependent variables and DSP wayfinding success are normally distributed, but MAZE dependent variables and DSP solution index are not even after log and square root transformations. Thus, all correlations with GMV for these DV will be spearman rank correlations.
+Shapiro-Wilk's test reveal that LOOP position error at 3.0m, degrees traveled averaged, angular error at 3.0m; and DSP wayfinding success are normally distributed, but MAZE dependent variables and DSP solution index and DSP path efficiency are not. Thus, all correlations with GMV for these DV will be spearman rank correlations.
 
 
 ```{r log-transformation}
@@ -965,31 +959,26 @@ h6bq <- ggqqplot(data = sqrt(data_dsp_women$dsp_si_true_pct)) +
 ## is the DV significantly diffrent than normal?
 
 #LOOP
-shapiro.test(data_loop_women$loop_pe_avg_m) #no
+shapiro.test(data_loop_women$loop_pe_rad3_m) #no
+shapiro.test(data_loop_women$loop_de_rad3_degree) #no
 shapiro.test(data_loop_women$loop_de_avg_degree) #no
+shapiro.test(data_loop_women$loop_ae_rad3_degree) #no
+shapiro.test(data_loop_women$loop_ae_avg_degree) #yes
 
 #MAZE
 shapiro.test(data_maze_women$maze_accuracy_pct) #yes
 shapiro.test(data_maze_women$maze_moves) #yes
-
-shapiro.test(log(data_maze_women$maze_accuracy_pct)) #yes
-shapiro.test(log(data_maze_women$maze_moves)) #yes
-
-shapiro.test(sqrt(data_maze_women$maze_accuracy_pct)) #yes
-shapiro.test(sqrt(data_maze_women$maze_moves)) #yes
+shapiro.test(data_maze_women$maze_path_efficiency) #yes
 
 #DSP
 shapiro.test(data_dsp_women$dsp_success_pct) #no
 shapiro.test(data_dsp_women$dsp_si_true_pct) #yes
-
-shapiro.test(log(data_dsp_women$dsp_si_true_pct)) #yes
-
-shapiro.test(sqrt(data_dsp_women$dsp_si_true_pct)) #yes
+shapiro.test(data_dsp_women$dsp_path_efficiency_grid_weighted) #yes
 
 ```
 **Women:**
 
-MAZE dependent variables and DSP solution index success were significantly different than normal. MAZE and DSP solution index was still skewed after transformations, so correlations with MAZE variables and DSP solution index for women will be using Spearman rank correlation.
+LOOP average angualr error, MAZE dependent variables, and DSP solution index and path efficiency were significantly different than normal. These dependent variables for women will be using Spearman rank correlation.
 
 
 
@@ -1123,28 +1112,28 @@ Like the overall distributions, LOOP DVs look normal but MAZE and DSP variables 
 ## is the DV significantly diffrent than normal?
 
 #LOOP
-shapiro.test(data_loop_men$loop_pe_avg_m) #no
+shapiro.test(data_loop_men$loop_pe_rad3_m) #no
+shapiro.test(data_loop_men$loop_de_rad3_degree) #yes
 shapiro.test(data_loop_men$loop_de_avg_degree) #no
+shapiro.test(data_loop_men$loop_ae_rad3_degree) #no
+shapiro.test(data_loop_men$loop_ae_avg_degree) #no
 
 #MAZE
 shapiro.test(data_maze_men$maze_accuracy_pct) #yes
 shapiro.test(data_maze_men$maze_moves) #no
+shapiro.test(data_maze_men$maze_path_efficiency) #no
 
-shapiro.test(log(data_maze_men$maze_accuracy_pct)) #yes
-
-shapiro.test(sqrt(data_maze_men$maze_accuracy_pct)) #yes
 
 #DSP
 shapiro.test(data_dsp_men$dsp_success_pct) #no
 shapiro.test(data_dsp_men$dsp_si_true_pct) #yes
-
-shapiro.test(log(data_dsp_men$dsp_si_true_pct)) #yes
+shapiro.test(data_dsp_men$dsp_path_efficiency_grid_weighted) #no
 ```
 
 
 **Men:**
 
-LOOP variables, DSP wayfinding success, and MAZE moves variables were not significantly different than normal, but MAZE accuracy and DSP solution index were. Despite transformations, MAZE moves and DSP solution index accuracy was still pretty skewed so Spearman rank correlations will be applied for associations with GMV for men here.
+LOOP degrees traveled at 3.0m, MAZE accuracy, and DSP solution index were significantly different from normal. Spearman rank correlations will be applied for associations with GMV for men here.
 
 ## LOOP {.tabset}
 
@@ -1152,48 +1141,48 @@ LOOP variables, DSP wayfinding success, and MAZE moves variables were not signif
 
 ```{r include=TRUE, echo=FALSE}
 #All
-c1 <- ggscatter(data_loop, x = "avg_t1_hipp", y = "loop_pe_avg_m", color = "repo_status",
+c1 <- ggscatter(data_loop, x = "avg_t1_hipp", y = "loop_pe_rad3_m", color = "repo_status",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
           conf.int = TRUE, 
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
-          xlab = "Averaged GMV Volume", ylab = "Averaged \nPosition Error (m)", ) +
+          xlab = "Averaged GMV Volume", ylab = "Position Error at 3.0 (m)", ) +
     theme(legend.position = "top", legend.title=element_blank()) 
 
 
 #By sex
-c1a <- ggscatter(data_loop_women, x = "avg_t1_hipp", y = "loop_pe_avg_m", color = "red", alpha = 0.6, title = "Women",
+c1a <- ggscatter(data_loop_women, x = "avg_t1_hipp", y = "loop_pe_rad3_m", color = "red", alpha = 0.6, title = "Women",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
           conf.int = TRUE, 
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
-          xlab = "Averaged GMV Volume", ylab = "Averaged \nPosition Error (m)") +
+          xlab = "Averaged GMV Volume", ylab = "Position Error at 3.0 (m)") +
      theme_bw() +
      theme(legend.position = "none")
-c1b <- ggscatter(data_loop_men, x = "avg_t1_hipp", y = "loop_pe_avg_m", color = "#00AFBB", alpha = 0.6, title = "Men",
+c1b <- ggscatter(data_loop_men, x = "avg_t1_hipp", y = "loop_pe_rad3_m", color = "#00AFBB", alpha = 0.6, title = "Men",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
           conf.int = TRUE, 
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
-          xlab = "Averaged GMV Volume", ylab = "Averaged \nPosition Error (m)") +
+          xlab = "Averaged GMV Volume", ylab = "Position Error at 3.0 (m)") +
      theme_bw() +
      theme(legend.position = "none")
 
 #By repo
-c1c <- ggscatter(data_loop_women, x = "avg_t1_hipp", y = "loop_pe_avg_m", color = "repo_status",
+c1c <- ggscatter(data_loop_women, x = "avg_t1_hipp", y = "loop_pe_rad3_m", color = "repo_status",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
           conf.int = TRUE, 
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
-          xlab = "Averaged GMV Volume", ylab = "Averaged \nPosition Error (m)") +
+          xlab = "Averaged GMV Volume", ylab = "Position Error at 3.0 (m)") +
     facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
      theme(legend.position = "none")
@@ -1204,13 +1193,76 @@ c1
 (c1a+c1b)/c1c
 ```
 
-All are Pearson correlations. Larger T1 hipp volumes is positively associated with position error in pres (*p* < 0.05, Pearson).
+All are Pearson correlations. 
+
 
 ### Degrees Traveled
 
-```{r include=TRUE, echo=FALSE}
+#### 3.0m
+
+```{r loop-de-3, include=TRUE, echo=FALSE}
 #all
-c1 <- ggscatter(data_loop, x = "avg_t1_hipp", y = "loop_de_avg_degree", color = "repo_status",
+c1 <- ggscatter(data_loop, x = "avg_t1_hipp", y = "loop_de_rad3_degree", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged GMV Volume", ylab = "Degrees Traveled at 3.0m", ) +
+    theme(legend.position = "top", legend.title=element_blank()) +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
+
+#sex
+c1a <- ggscatter(data_loop_women, x = "avg_t1_hipp", y = "loop_de_rad3_degree", color = "red", alpha = 0.6, title = "Women",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged GMV Volume", ylab = "Degrees Traveled at 3.0m") +
+     theme_bw() +
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
+c1b <- ggscatter(data_loop_men, x = "avg_t1_hipp", y = "loop_de_rad3_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged GMV Volume", ylab = "Degrees Traveled at 3.0m") +
+     theme_bw() +
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
+
+#By repo
+c1c <- ggscatter(data_loop_women, x = "avg_t1_hipp", y = "loop_de_rad3_degree", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged GMV Volume", ylab = "Degrees Traveled at 3.0m") +
+    facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
+     theme_bw() +
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
+
+#Present
+c1
+(c1a+c1b)/c1c
+```
+
+All correlations were Spearman except for women (Pearson). Women with higher GMV marginally correlated with fewer degrees traveled at 3.0m (*p* = 0.07, Pearson). Pres who had higher GMV correlated with lower degrees traveled at 3.0m (*p* < 0.05, Pearson). 
+
+#### Averaged
+
+```{r loop-de-avg, include=TRUE, echo=FALSE}
+#all
+c1 <- ggscatter(data_loop, x = "avg_t1_hipp", y = "loop_de__degree", color = "repo_status",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -1218,7 +1270,8 @@ c1 <- ggscatter(data_loop, x = "avg_t1_hipp", y = "loop_de_avg_degree", color = 
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged GMV Volume", ylab = "Averaged \nDegrees Traveled", ) +
-    theme(legend.position = "top", legend.title=element_blank()) 
+    theme(legend.position = "top", legend.title=element_blank()) +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #sex
 c1a <- ggscatter(data_loop_women, x = "avg_t1_hipp", y = "loop_de_avg_degree", color = "red", alpha = 0.6, title = "Women",
@@ -1230,7 +1283,8 @@ c1a <- ggscatter(data_loop_women, x = "avg_t1_hipp", y = "loop_de_avg_degree", c
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged GMV Volume", ylab = "Averaged \nDegrees Traveled") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 c1b <- ggscatter(data_loop_men, x = "avg_t1_hipp", y = "loop_de_avg_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
@@ -1240,7 +1294,8 @@ c1b <- ggscatter(data_loop_men, x = "avg_t1_hipp", y = "loop_de_avg_degree", col
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged GMV Volume", ylab = "Averaged \nDegrees Traveled") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #By repo
 c1c <- ggscatter(data_loop_women, x = "avg_t1_hipp", y = "loop_de_avg_degree", color = "repo_status",
@@ -1253,7 +1308,8 @@ c1c <- ggscatter(data_loop_women, x = "avg_t1_hipp", y = "loop_de_avg_degree", c
           xlab = "Averaged GMV Volume", ylab = "Averaged \nDegrees Traveled") +
     facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #Present
 c1
@@ -1261,6 +1317,15 @@ c1
 ```
 
 All correlations are Pearson. Women with higher GMV correlated with fewer degrees traveled (*p* < 0.05, Pearson). Pres who had higher GMV correlated with lower degrees traveled (*p* < 0.01, Pearson). 
+
+
+### Angular Error
+
+
+#### 3.0m
+
+#### Averaged
+
 
 ## {-}
 
