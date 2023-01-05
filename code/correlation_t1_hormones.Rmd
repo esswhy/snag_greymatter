@@ -30,6 +30,7 @@ library(purrr)
 
 *Modified on:* December 23rd, 2022
 
+
 # Overview
 
 
@@ -1160,7 +1161,7 @@ c1a <- ggscatter(data_loop_women, x = "avg_t1_hipp", y = "loop_pe_rad3_m", color
           conf.int = TRUE, 
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
-          xlab = "Averaged GMV Volume", ylab = "Position Error at 3.0 (m)") +
+          xlab = "Averaged GMV Volume", ylab = "Position Error at 3.0m") +
      theme_bw() +
      theme(legend.position = "none")
 c1b <- ggscatter(data_loop_men, x = "avg_t1_hipp", y = "loop_pe_rad3_m", color = "#00AFBB", alpha = 0.6, title = "Men",
@@ -1170,7 +1171,7 @@ c1b <- ggscatter(data_loop_men, x = "avg_t1_hipp", y = "loop_pe_rad3_m", color =
           conf.int = TRUE, 
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
-          xlab = "Averaged GMV Volume", ylab = "Position Error at 3.0 (m)") +
+          xlab = "Averaged GMV Volume", ylab = "Position Error at 3.0m") +
      theme_bw() +
      theme(legend.position = "none")
 
@@ -1182,7 +1183,7 @@ c1c <- ggscatter(data_loop_women, x = "avg_t1_hipp", y = "loop_pe_rad3_m", color
           conf.int = TRUE, 
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
-          xlab = "Averaged GMV Volume", ylab = "Position Error at 3.0 (m)") +
+          xlab = "Averaged GMV Volume", ylab = "Position Error at 3.0m") +
     facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
      theme(legend.position = "none")
@@ -1262,7 +1263,7 @@ All correlations were Spearman except for women (Pearson). Women with higher GMV
 
 ```{r loop-de-avg, include=TRUE, echo=FALSE}
 #all
-c1 <- ggscatter(data_loop, x = "avg_t1_hipp", y = "loop_de__degree", color = "repo_status",
+c1 <- ggscatter(data_loop, x = "avg_t1_hipp", y = "loop_de_avg_degree", color = "repo_status",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -1324,8 +1325,116 @@ All correlations are Pearson. Women with higher GMV correlated with fewer degree
 
 #### 3.0m
 
+```{r loop-ae-3, include=TRUE, echo=FALSE}
+#all
+c1 <- ggscatter(data_loop, x = "avg_t1_hipp", y = "loop_ae_rad3_degree", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged GMV Volume", ylab = "Angular Error at 3.0m", ) +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+#sex
+c1a <- ggscatter(data_loop_women, x = "avg_t1_hipp", y = "loop_ae_rad3_degree", color = "red", alpha = 0.6, title = "Women",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged GMV Volume", ylab = "Angular Error at 3.0m") +
+     theme_bw() +
+     theme(legend.position = "none") 
+c1b <- ggscatter(data_loop_men, x = "avg_t1_hipp", y = "loop_ae_rad3_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged GMV Volume", ylab = "Angular Error at 3.0m") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#By repo
+c1c <- ggscatter(data_loop_women, x = "avg_t1_hipp", y = "loop_ae_rad3_degree", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged GMV Volume", ylab = "Angular Error at 3.0m") +
+    facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
+     theme_bw() +
+     theme(legend.position = "none") 
+
+#Present
+c1
+(c1a+c1b)/c1c
+```
+
+All correlations were Pearson.
+
 #### Averaged
 
+```{r loop-ae-avg, include=TRUE, echo=FALSE}
+#all
+c1 <- ggscatter(data_loop, x = "avg_t1_hipp", y = "loop_ae_avg_degree", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged GMV Volume", ylab = "Averaged \nAngular Error") +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+#sex
+c1a <- ggscatter(data_loop_women, x = "avg_t1_hipp", y = "loop_ae_avg_degree", color = "red", alpha = 0.6, title = "Women",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged GMV Volume", ylab = "Averaged \nAngular Error") +
+     theme_bw() +
+     theme(legend.position = "none") 
+c1b <- ggscatter(data_loop_men, x = "avg_t1_hipp", y = "loop_ae_avg_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged GMV Volume", ylab = "Averaged \nAngular Error") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#By repo
+c1c <- ggscatter(data_loop_women, x = "avg_t1_hipp", y = "loop_ae_avg_degree", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged GMV Volume", ylab = "Averaged \nAngular Error") +
+    facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
+     theme_bw() +
+     theme(legend.position = "none") 
+
+#Present
+c1
+(c1a+c1b)/c1c
+```
+
+
+All correlations were Spearman except for men (Pearson)
 
 ## {-}
 
@@ -1443,6 +1552,63 @@ c1
 
 All Spearman correlations except for men (Pearson)
 
+
+### Path Efficiency
+
+```{r include=TRUE, echo=FALSE}
+#overall
+c1 <- ggscatter(data_maze, x = "avg_t1_hipp", y = "maze_path_efficiency", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged GMV Volume", ylab = "Path Efficiency") +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+#sex
+c1a <- ggscatter(data_maze_women, x = "avg_t1_hipp", y = "maze_path_efficiency", color = "red", alpha = 0.6, title = "Women",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged GMV Volume", ylab = "Path Efficiency") +
+     theme_bw() +
+     theme(legend.position = "none")
+c1b <- ggscatter(data_maze_men, x = "avg_t1_hipp", y = "maze_path_efficiency", color = "#00AFBB", alpha = 0.6, title = "Men",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged GMV Volume", ylab = "Path Efficiency") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#by repo
+c1c <- ggscatter(data_maze_women, x = "avg_t1_hipp", y = "maze_path_efficiency", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged GMV Volume", ylab = "Path Efficiency") +
+    facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#Present
+c1
+(c1a+c1b)/c1c
+```
+
+All Spearman correlations except for men (Pearson). Higher average GMV volume was negatively correlated with path efficiency for peri-menopausal women (*p* < 0.05, Spearman)
+
 ## {-}
 
 ## DSP {.tabset}
@@ -1559,6 +1725,62 @@ c1
 
 All correlations are Spearman except for women groups (Spearman). T1 volume is positively marginally associated with DSP solution index in pres (*p* = 0.051, Pearson).
 
+### Path Efficiency
+
+```{r include=TRUE, echo=FALSE}
+#all
+c1 <- ggscatter(data_dsp, x = "avg_t1_hipp", y = "dsp_path_efficiency_grid_weighted", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged GMV Volume", ylab = "Path Efficiency") +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+#sex
+c1a <- ggscatter(data_dsp_women, x = "avg_t1_hipp", y = "dsp_path_efficiency_grid_weighted", color = "red", alpha = 0.6, title = "Women",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged GMV Volume", ylab = "Path Efficiency") +
+     theme_bw() +
+     theme(legend.position = "none")
+c1b <- ggscatter(data_dsp_men, x = "avg_t1_hipp", y = "dsp_path_efficiency_grid_weighted", color = "#00AFBB", alpha = 0.6, title = "Men",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged GMV Volume", ylab = "Path Efficiency") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#repo
+c1c <- ggscatter(data_dsp_women, x = "avg_t1_hipp", y = "dsp_path_efficiency_grid_weighted", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged GMV Volume", ylab = "Path Efficiency") +
+    facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#Present
+c1
+(c1a+c1b)/c1c
+```
+
+All correlations were Pearson except for women (Spearman)
+
 ## {-}
 
 # {-}
@@ -1575,9 +1797,9 @@ Sample included HAS participants who had a T1 scan and completed spatial navigat
 
 ## Behavior
 
-- For LOOP, larger T1 hipp GMV is positively correlated with position error for pres (*p* < 0.05, Pearson). Women with higher GMV correlated with fewer degrees traveled (*p* < 0.05, Pearson). Pres who had higher GMV also correlated with fewer degrees traveled (*p* < 0.01, Pearson). 
+- For LOOP, women with higher GMV marginally correlated with fewer degrees traveled at 3.0m (*p* = 0.07, Pearson). Pres who had higher GMV correlated with lower degrees traveled at 3.0m (*p* < 0.05, Pearson). Similarly, women with higher GMV correlated with lower averaged degrees traveled (*p* < 0.05, Pearson). Pres who had higher GMV also correlated with lower averaged degrees traveled (*p* < 0.01, Pearson). 
 
-- For MAZE, there were no significant correlations observed for men or women.
+- For MAZE, higher average GMV volume was negatively correlated with path efficiency for peri-menopausal women (*p* < 0.05, Spearman).
 
 - For DSP, overall (women and men) higher T1 hipp GMV was associated with lower wayfinding success in DSP (*p* < 0.05, Pearson). This pattern was also observed marginally in men (*p* = 0.055, Pearson), but not in women (*p* = 0.84, Spearman). Higher DSP solution index was marginally positively associated with pres who had higher GMV (*p* = 0.051, Pearson). 
 
