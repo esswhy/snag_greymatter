@@ -13860,6 +13860,119 @@ c1
 
 All correlations were Pearson
 
+###### LEFT
+
+```{r include=TRUE, echo=FALSE}
+#all
+c1 <- ggscatter(data_dsp, x = "left_dg", y = "dsp_success_pct", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged DG Volume", ylab = "Averaged \nWayfinding Success (%)") +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+#sex
+c1a <- ggscatter(data_dsp_women, x = "left_dg", y = "dsp_success_pct", color = "red", alpha = 0.6, title = "Women",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged DG Volume", ylab = "Averaged \nWayfinding Success (%)") +
+     theme_bw() +
+     theme(legend.position = "none")
+c1b <- ggscatter(data_dsp_men, x = "left_dg", y = "dsp_success_pct", color = "#00AFBB", alpha = 0.6, title = "Men",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged DG Volume", ylab = "Averaged \nWayfinding Success (%)") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#repo
+c1c <- ggscatter(data_dsp_women, x = "left_dg", y = "dsp_success_pct", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged DG Volume", ylab = "Averaged \nWayfinding Success (%)") +
+    facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#Present
+c1
+(c1a+c1b)/c1c
+```
+
+All correlations were Pearson
+
+
+###### RIGHT
+
+```{r include=TRUE, echo=FALSE}
+#all
+c1 <- ggscatter(data_dsp, x = "right_dg", y = "dsp_success_pct", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged DG Volume", ylab = "Averaged \nWayfinding Success (%)") +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+#sex
+c1a <- ggscatter(data_dsp_women, x = "right_dg", y = "dsp_success_pct", color = "red", alpha = 0.6, title = "Women",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged DG Volume", ylab = "Averaged \nWayfinding Success (%)") +
+     theme_bw() +
+     theme(legend.position = "none")
+c1b <- ggscatter(data_dsp_men, x = "right_dg", y = "dsp_success_pct", color = "#00AFBB", alpha = 0.6, title = "Men",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged DG Volume", ylab = "Averaged \nWayfinding Success (%)") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#repo
+c1c <- ggscatter(data_dsp_women, x = "right_dg", y = "dsp_success_pct", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged DG Volume", ylab = "Averaged \nWayfinding Success (%)") +
+    facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#Present
+c1
+(c1a+c1b)/c1c
+```
+
+All correlations were Pearson
+
 ##### Solution Index
 
 ```{r include=TRUE, echo=FALSE}
@@ -13915,6 +14028,286 @@ c1
 ```
 
 All correlations were Spearman except for men (Pearson)
+
+###### LEFT
+
+```{r include=TRUE, echo=FALSE}
+#all
+c1 <- ggscatter(data_dsp, x = "left_dg", y = "dsp_si_true_pct", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged DG Volume", ylab = "Averaged \nSolution Index (%)") +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+#sex
+c1a <- ggscatter(data_dsp_women, x = "left_dg", y = "dsp_si_true_pct", color = "red", alpha = 0.6, title = "Women",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged DG Volume", ylab = "Averaged \nSolution Index (%)") +
+     theme_bw() +
+     theme(legend.position = "none")
+c1b <- ggscatter(data_dsp_men, x = "left_dg", y = "dsp_si_true_pct", color = "#00AFBB", alpha = 0.6, title = "Men",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged DG Volume", ylab = "Averaged \nSolution Index (%)") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#repo
+c1c <- ggscatter(data_dsp_women, x = "left_dg", y = "dsp_si_true_pct", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged DG Volume", ylab = "Averaged \nSolution Index (%)") +
+    facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#Present
+c1
+(c1a+c1b)/c1c
+```
+
+All correlations were Spearman except for men (Pearson)
+
+###### RIGHT
+
+```{r include=TRUE, echo=FALSE}
+#all
+c1 <- ggscatter(data_dsp, x = "right_dg", y = "dsp_si_true_pct", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged DG Volume", ylab = "Averaged \nSolution Index (%)") +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+#sex
+c1a <- ggscatter(data_dsp_women, x = "right_dg", y = "dsp_si_true_pct", color = "red", alpha = 0.6, title = "Women",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged DG Volume", ylab = "Averaged \nSolution Index (%)") +
+     theme_bw() +
+     theme(legend.position = "none")
+c1b <- ggscatter(data_dsp_men, x = "right_dg", y = "dsp_si_true_pct", color = "#00AFBB", alpha = 0.6, title = "Men",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged DG Volume", ylab = "Averaged \nSolution Index (%)") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#repo
+c1c <- ggscatter(data_dsp_women, x = "right_dg", y = "dsp_si_true_pct", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged DG Volume", ylab = "Averaged \nSolution Index (%)") +
+    facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#Present
+c1
+(c1a+c1b)/c1c
+```
+
+All correlations were Spearman except for men (Pearson)
+
+##### Path Efficiency
+
+```{r include=TRUE, echo=FALSE}
+#all
+c1 <- ggscatter(data_dsp, x = "avg_dg", y = "dsp_path_efficiency_grid_weighted", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged DG Volume", ylab = "Averaged \nPath Efficiency") +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+#sex
+c1a <- ggscatter(data_dsp_women, x = "avg_dg", y = "dsp_path_efficiency_grid_weighted", color = "red", alpha = 0.6, title = "Women",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged DG Volume", ylab = "Averaged \nPath Efficiency") +
+     theme_bw() +
+     theme(legend.position = "none")
+c1b <- ggscatter(data_dsp_men, x = "avg_dg", y = "dsp_path_efficiency_grid_weighted", color = "#00AFBB", alpha = 0.6, title = "Men",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged DG Volume", ylab = "Averaged \nPath Efficiency") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#repo
+c1c <- ggscatter(data_dsp_women, x = "avg_dg", y = "dsp_path_efficiency_grid_weighted", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged DG Volume", ylab = "Averaged \nPath Efficiency") +
+    facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#Present
+c1
+(c1a+c1b)/c1c
+```
+
+All correlations are Pearson except for women/repo
+
+###### LEFT
+
+```{r include=TRUE, echo=FALSE}
+#all
+c1 <- ggscatter(data_dsp, x = "left_dg", y = "dsp_path_efficiency_grid_weighted", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged DG Volume", ylab = "Averaged \nPath Efficiency") +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+#sex
+c1a <- ggscatter(data_dsp_women, x = "left_dg", y = "dsp_path_efficiency_grid_weighted", color = "red", alpha = 0.6, title = "Women",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged DG Volume", ylab = "Averaged \nPath Efficiency") +
+     theme_bw() +
+     theme(legend.position = "none")
+c1b <- ggscatter(data_dsp_men, x = "left_dg", y = "dsp_path_efficiency_grid_weighted", color = "#00AFBB", alpha = 0.6, title = "Men",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged DG Volume", ylab = "Averaged \nPath Efficiency") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#repo
+c1c <- ggscatter(data_dsp_women, x = "left_dg", y = "dsp_path_efficiency_grid_weighted", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged DG Volume", ylab = "Averaged \nPath Efficiency") +
+    facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#Present
+c1
+(c1a+c1b)/c1c
+```
+
+All correlations are Pearson except for women/repo
+
+###### RIGHT
+
+```{r include=TRUE, echo=FALSE}
+#all
+c1 <- ggscatter(data_dsp, x = "right_dg", y = "dsp_path_efficiency_grid_weighted", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged DG Volume", ylab = "Averaged \nPath Efficiency") +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+#sex
+c1a <- ggscatter(data_dsp_women, x = "right_dg", y = "dsp_path_efficiency_grid_weighted", color = "red", alpha = 0.6, title = "Women",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged DG Volume", ylab = "Averaged \nPath Efficiency") +
+     theme_bw() +
+     theme(legend.position = "none")
+c1b <- ggscatter(data_dsp_men, x = "right_dg", y = "dsp_path_efficiency_grid_weighted", color = "#00AFBB", alpha = 0.6, title = "Men",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged DG Volume", ylab = "Averaged \nPath Efficiency") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#repo
+c1c <- ggscatter(data_dsp_women, x = "right_dg", y = "dsp_path_efficiency_grid_weighted", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged DG Volume", ylab = "Averaged \nPath Efficiency") +
+    facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#Present
+c1
+(c1a+c1b)/c1c
+```
+
+All correlations are Pearson except for women/repo
 
 #### {-}
 
