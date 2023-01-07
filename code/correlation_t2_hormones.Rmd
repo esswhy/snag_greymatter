@@ -18855,48 +18855,48 @@ All correlations are Pearson except SHBG (Spearman)
 
 ```{r include=TRUE, echo=FALSE}
 #All
-c1 <- ggscatter(data_loop, x = "avg_prc", y = "loop_pe_avg_m", color = "repo_status",
+c1 <- ggscatter(data_loop, x = "avg_prc", y = "loop_pe_rad3_m", color = "repo_status",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
           conf.int = TRUE, 
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
-          xlab = "Averaged PRC Volume", ylab = "Averaged \nPosition Error (m)", ) +
+          xlab = "Averaged PRC Volume", ylab = "Position Error at 3.0m", ) +
     theme(legend.position = "top", legend.title=element_blank()) 
 
 
 #By sex
-c1a <- ggscatter(data_loop_women, x = "avg_prc", y = "loop_pe_avg_m", color = "red", alpha = 0.6, title = "Women",
+c1a <- ggscatter(data_loop_women, x = "avg_prc", y = "loop_pe_rad3_m", color = "red", alpha = 0.6, title = "Women",
           add = "reg.line", 
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
           conf.int = TRUE, 
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
-          xlab = "Averaged PRC Volume", ylab = "Averaged \nPosition Error (m)") +
+          xlab = "Averaged PRC Volume", ylab = "Position Error at 3.0m") +
      theme_bw() +
      theme(legend.position = "none")
-c1b <- ggscatter(data_loop_men, x = "avg_prc", y = "loop_pe_avg_m", color = "#00AFBB", alpha = 0.6, title = "Men",
+c1b <- ggscatter(data_loop_men, x = "avg_prc", y = "loop_pe_rad3_m", color = "#00AFBB", alpha = 0.6, title = "Men",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
           conf.int = TRUE, 
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
-          xlab = "Averaged PRC Volume", ylab = "Averaged \nPosition Error (m)") +
+          xlab = "Averaged PRC Volume", ylab = "Position Error at 3.0m") +
      theme_bw() +
      theme(legend.position = "none")
 
 #By repo
-c1c <- ggscatter(data_loop_women, x = "avg_prc", y = "loop_pe_avg_m", color = "repo_status", 
+c1c <- ggscatter(data_loop_women, x = "avg_prc", y = "loop_pe_rad3_m", color = "repo_status", 
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
           conf.int = TRUE, 
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
-          xlab = "Averaged PRC Volume", ylab = "Averaged \nPosition Error (m)") +
+          xlab = "Averaged PRC Volume", ylab = "Position Error at 3.0m") +
     facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
      theme(legend.position = "none")
@@ -18909,11 +18909,134 @@ c1
 
 All correlations were Pearson
 
-##### Degrees Traveled
+
+###### LEFT
+
+```{r include=TRUE, echo=FALSE}
+#All
+c1 <- ggscatter(data_loop, x = "left_prc", y = "loop_pe_rad3_m", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged PRC Volume", ylab = "Position Error at 3.0m", ) +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+
+#By sex
+c1a <- ggscatter(data_loop_women, x = "left_prc", y = "loop_pe_rad3_m", color = "red", alpha = 0.6, title = "Women",
+          add = "reg.line", 
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged PRC Volume", ylab = "Position Error at 3.0m") +
+     theme_bw() +
+     theme(legend.position = "none")
+c1b <- ggscatter(data_loop_men, x = "left_prc", y = "loop_pe_rad3_m", color = "#00AFBB", alpha = 0.6, title = "Men",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged PRC Volume", ylab = "Position Error at 3.0m") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#By repo
+c1c <- ggscatter(data_loop_women, x = "left_prc", y = "loop_pe_rad3_m", color = "repo_status", 
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged PRC Volume", ylab = "Position Error at 3.0m") +
+    facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+
+#Present
+c1
+(c1a+c1b)/c1c
+```
+
+All correlations were Pearson
+
+###### RIGHT
+
+```{r include=TRUE, echo=FALSE}
+#All
+c1 <- ggscatter(data_loop, x = "right_prc", y = "loop_pe_rad3_m", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged PRC Volume", ylab = "Position Error at 3.0m", ) +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+
+#By sex
+c1a <- ggscatter(data_loop_women, x = "right_prc", y = "loop_pe_rad3_m", color = "red", alpha = 0.6, title = "Women",
+          add = "reg.line", 
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged PRC Volume", ylab = "Position Error at 3.0m") +
+     theme_bw() +
+     theme(legend.position = "none")
+c1b <- ggscatter(data_loop_men, x = "right_prc", y = "loop_pe_rad3_m", color = "#00AFBB", alpha = 0.6, title = "Men",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged PRC Volume", ylab = "Position Error at 3.0m") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#By repo
+c1c <- ggscatter(data_loop_women, x = "right_prc", y = "loop_pe_rad3_m", color = "repo_status", 
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged PRC Volume", ylab = "Position Error at 3.0m") +
+    facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+
+#Present
+c1
+(c1a+c1b)/c1c
+```
+
+All correlations were Pearson
+
+##### Degrees Traveled - 3.0m
+
+###### LEFT
+
+###### RIGHT
+
+##### Degrees Traveled - Averaged
 
 ```{r include=TRUE, echo=FALSE}
 #all
-c1 <- ggscatter(data_loop, x = "avg_erc", y = "loop_de_avg_degree", color = "repo_status",
+c1 <- ggscatter(data_loop, x = "avg_prc", y = "loop_de_avg_degree", color = "repo_status",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -18924,7 +19047,7 @@ c1 <- ggscatter(data_loop, x = "avg_erc", y = "loop_de_avg_degree", color = "rep
     theme(legend.position = "top", legend.title=element_blank()) 
 
 #sex
-c1a <- ggscatter(data_loop_women, x = "avg_erc", y = "loop_de_avg_degree", color = "red", alpha = 0.6, title = "Women",
+c1a <- ggscatter(data_loop_women, x = "avg_prc", y = "loop_de_avg_degree", color = "red", alpha = 0.6, title = "Women",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -18934,7 +19057,7 @@ c1a <- ggscatter(data_loop_women, x = "avg_erc", y = "loop_de_avg_degree", color
           xlab = "Averaged PRC Volume", ylab = "Averaged \nDegrees Traveled") +
      theme_bw() +
      theme(legend.position = "none")
-c1b <- ggscatter(data_loop_men, x = "avg_erc", y = "loop_de_avg_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
+c1b <- ggscatter(data_loop_men, x = "avg_prc", y = "loop_de_avg_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -18946,7 +19069,7 @@ c1b <- ggscatter(data_loop_men, x = "avg_erc", y = "loop_de_avg_degree", color =
      theme(legend.position = "none")
 
 #By repo
-c1c <- ggscatter(data_loop_women, x = "avg_erc", y = "loop_de_avg_degree", color = "repo_status",
+c1c <- ggscatter(data_loop_women, x = "avg_prc", y = "loop_de_avg_degree", color = "repo_status",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
           cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
@@ -18963,6 +19086,118 @@ c1
 (c1a+c1b)/c1c
 ```
 
+
+All correlations were Pearson
+
+###### LEFT
+
+```{r include=TRUE, echo=FALSE}
+#all
+c1 <- ggscatter(data_loop, x = "left_prc", y = "loop_de_avg_degree", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged PRC Volume", ylab = "Averaged \nDegrees Traveled", ) +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+#sex
+c1a <- ggscatter(data_loop_women, x = "left_prc", y = "loop_de_avg_degree", color = "red", alpha = 0.6, title = "Women",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged PRC Volume", ylab = "Averaged \nDegrees Traveled") +
+     theme_bw() +
+     theme(legend.position = "none")
+c1b <- ggscatter(data_loop_men, x = "left_prc", y = "loop_de_avg_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged PRC Volume", ylab = "Averaged \nDegrees Traveled") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#By repo
+c1c <- ggscatter(data_loop_women, x = "left_prc", y = "loop_de_avg_degree", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged PRC Volume", ylab = "Averaged \nDegrees Traveled") +
+    facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#Present
+c1
+(c1a+c1b)/c1c
+```
+
+All correlations were Pearson
+
+###### RIGHT
+
+```{r include=TRUE, echo=FALSE}
+#all
+c1 <- ggscatter(data_loop, x = "right_prc", y = "loop_de_avg_degree", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged PRC Volume", ylab = "Averaged \nDegrees Traveled", ) +
+    theme(legend.position = "top", legend.title=element_blank()) 
+
+#sex
+c1a <- ggscatter(data_loop_women, x = "right_prc", y = "loop_de_avg_degree", color = "red", alpha = 0.6, title = "Women",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged PRC Volume", ylab = "Averaged \nDegrees Traveled") +
+     theme_bw() +
+     theme(legend.position = "none")
+c1b <- ggscatter(data_loop_men, x = "right_prc", y = "loop_de_avg_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged PRC Volume", ylab = "Averaged \nDegrees Traveled") +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#By repo
+c1c <- ggscatter(data_loop_women, x = "right_prc", y = "loop_de_avg_degree", color = "repo_status",
+          add = "reg.line",
+          add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "pearson",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Averaged PRC Volume", ylab = "Averaged \nDegrees Traveled") +
+    facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
+     theme_bw() +
+     theme(legend.position = "none")
+
+#Present
+c1
+(c1a+c1b)/c1c
+```
 
 All correlations were Pearson
 
