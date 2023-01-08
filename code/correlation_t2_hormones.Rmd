@@ -1998,7 +1998,8 @@ c1 <- ggscatter(data_loop, x = "avg_total_hipp", y = "loop_de_rad3_degree", colo
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged GMV Volume", ylab = "Degrees Traveled at 3.0m", ) +
-    theme(legend.position = "top", legend.title=element_blank()) 
+    theme(legend.position = "top", legend.title=element_blank())  +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #sex
 c1a <- ggscatter(data_loop_women, x = "avg_total_hipp", y = "loop_de_rad3_degree", color = "red", alpha = 0.6, title = "Women",
@@ -2010,7 +2011,8 @@ c1a <- ggscatter(data_loop_women, x = "avg_total_hipp", y = "loop_de_rad3_degree
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged GMV Volume", ylab = "Degrees Traveled at 3.0m") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 c1b <- ggscatter(data_loop_men, x = "avg_total_hipp", y = "loop_de_rad3_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
@@ -2020,7 +2022,8 @@ c1b <- ggscatter(data_loop_men, x = "avg_total_hipp", y = "loop_de_rad3_degree",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged GMV Volume", ylab = "Degrees Traveled at 3.0m") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #By repo
 c1c <- ggscatter(data_loop_women, x = "avg_total_hipp", y = "loop_de_rad3_degree", color = "repo_status",
@@ -2033,7 +2036,8 @@ c1c <- ggscatter(data_loop_women, x = "avg_total_hipp", y = "loop_de_rad3_degree
           xlab = "Averaged GMV Volume", ylab = "Degrees Traveled at 3.0m") +
     facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #Present
 c1
@@ -2054,7 +2058,8 @@ c1 <- ggscatter(data_loop, x = "left_total_hipp", y = "loop_de_rad3_degree", col
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged GMV Volume", ylab = "Degrees Traveled at 3.0m", ) +
-    theme(legend.position = "top", legend.title=element_blank()) 
+    theme(legend.position = "top", legend.title=element_blank())  +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #sex
 c1a <- ggscatter(data_loop_women, x = "left_total_hipp", y = "loop_de_rad3_degree", color = "red", alpha = 0.6, title = "Women",
@@ -2066,7 +2071,8 @@ c1a <- ggscatter(data_loop_women, x = "left_total_hipp", y = "loop_de_rad3_degre
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged GMV Volume", ylab = "Degrees Traveled at 3.0m") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 c1b <- ggscatter(data_loop_men, x = "left_total_hipp", y = "loop_de_rad3_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
@@ -2076,7 +2082,8 @@ c1b <- ggscatter(data_loop_men, x = "left_total_hipp", y = "loop_de_rad3_degree"
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged GMV Volume", ylab = "Degrees Traveled at 3.0m") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #By repo
 c1c <- ggscatter(data_loop_women, x = "left_total_hipp", y = "loop_de_rad3_degree", color = "repo_status",
@@ -2089,7 +2096,8 @@ c1c <- ggscatter(data_loop_women, x = "left_total_hipp", y = "loop_de_rad3_degre
           xlab = "Averaged GMV Volume", ylab = "Degrees Traveled at 3.0m") +
     facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #Present
 c1
@@ -2110,7 +2118,8 @@ c1 <- ggscatter(data_loop, x = "right_total_hipp", y = "loop_de_rad3_degree", co
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged GMV Volume", ylab = "Degrees Traveled at 3.0m", ) +
-    theme(legend.position = "top", legend.title=element_blank()) 
+    theme(legend.position = "top", legend.title=element_blank())  +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #sex
 c1a <- ggscatter(data_loop_women, x = "right_total_hipp", y = "loop_de_rad3_degree", color = "red", alpha = 0.6, title = "Women",
@@ -2122,7 +2131,8 @@ c1a <- ggscatter(data_loop_women, x = "right_total_hipp", y = "loop_de_rad3_degr
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged GMV Volume", ylab = "Degrees Traveled at 3.0m") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 c1b <- ggscatter(data_loop_men, x = "right_total_hipp", y = "loop_de_rad3_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
@@ -2132,7 +2142,8 @@ c1b <- ggscatter(data_loop_men, x = "right_total_hipp", y = "loop_de_rad3_degree
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged GMV Volume", ylab = "Degrees Traveled at 3.0m") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #By repo
 c1c <- ggscatter(data_loop_women, x = "right_total_hipp", y = "loop_de_rad3_degree", color = "repo_status",
@@ -2145,7 +2156,8 @@ c1c <- ggscatter(data_loop_women, x = "right_total_hipp", y = "loop_de_rad3_degr
           xlab = "Averaged GMV Volume", ylab = "Degrees Traveled at 3.0m") +
     facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #Present
 c1
@@ -2166,7 +2178,8 @@ c1 <- ggscatter(data_loop, x = "avg_total_hipp", y = "loop_de_avg_degree", color
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged GMV Volume", ylab = "Averaged \nDegrees Traveled", ) +
-    theme(legend.position = "top", legend.title=element_blank()) 
+    theme(legend.position = "top", legend.title=element_blank())  +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #sex
 c1a <- ggscatter(data_loop_women, x = "avg_total_hipp", y = "loop_de_avg_degree", color = "red", alpha = 0.6, title = "Women",
@@ -2178,7 +2191,8 @@ c1a <- ggscatter(data_loop_women, x = "avg_total_hipp", y = "loop_de_avg_degree"
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged GMV Volume", ylab = "Averaged \nDegrees Traveled") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 c1b <- ggscatter(data_loop_men, x = "avg_total_hipp", y = "loop_de_avg_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
@@ -2188,7 +2202,8 @@ c1b <- ggscatter(data_loop_men, x = "avg_total_hipp", y = "loop_de_avg_degree", 
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged GMV Volume", ylab = "Averaged \nDegrees Traveled") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #By repo
 c1c <- ggscatter(data_loop_women, x = "avg_total_hipp", y = "loop_de_avg_degree", color = "repo_status",
@@ -2201,7 +2216,8 @@ c1c <- ggscatter(data_loop_women, x = "avg_total_hipp", y = "loop_de_avg_degree"
           xlab = "Averaged GMV Volume", ylab = "Averaged \nDegrees Traveled") +
     facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #Present
 c1
@@ -2223,7 +2239,8 @@ c1 <- ggscatter(data_loop, x = "left_total_hipp", y = "loop_de_avg_degree", colo
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged GMV Volume", ylab = "Averaged \nDegrees Traveled", ) +
-    theme(legend.position = "top", legend.title=element_blank()) 
+    theme(legend.position = "top", legend.title=element_blank())  +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #sex
 c1a <- ggscatter(data_loop_women, x = "left_total_hipp", y = "loop_de_avg_degree", color = "red", alpha = 0.6, title = "Women",
@@ -2235,7 +2252,8 @@ c1a <- ggscatter(data_loop_women, x = "left_total_hipp", y = "loop_de_avg_degree
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged GMV Volume", ylab = "Averaged \nDegrees Traveled") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 c1b <- ggscatter(data_loop_men, x = "left_total_hipp", y = "loop_de_avg_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
@@ -2245,7 +2263,8 @@ c1b <- ggscatter(data_loop_men, x = "left_total_hipp", y = "loop_de_avg_degree",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged GMV Volume", ylab = "Averaged \nDegrees Traveled") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #By repo
 c1c <- ggscatter(data_loop_women, x = "left_total_hipp", y = "loop_de_avg_degree", color = "repo_status",
@@ -2258,7 +2277,8 @@ c1c <- ggscatter(data_loop_women, x = "left_total_hipp", y = "loop_de_avg_degree
           xlab = "Averaged GMV Volume", ylab = "Averaged \nDegrees Traveled") +
     facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #Present
 c1
@@ -2280,7 +2300,8 @@ c1 <- ggscatter(data_loop, x = "right_total_hipp", y = "loop_de_avg_degree", col
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged GMV Volume", ylab = "Averaged \nDegrees Traveled", ) +
-    theme(legend.position = "top", legend.title=element_blank()) 
+    theme(legend.position = "top", legend.title=element_blank())  +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #sex
 c1a <- ggscatter(data_loop_women, x = "right_total_hipp", y = "loop_de_avg_degree", color = "red", alpha = 0.6, title = "Women",
@@ -2292,7 +2313,8 @@ c1a <- ggscatter(data_loop_women, x = "right_total_hipp", y = "loop_de_avg_degre
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged GMV Volume", ylab = "Averaged \nDegrees Traveled") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 c1b <- ggscatter(data_loop_men, x = "right_total_hipp", y = "loop_de_avg_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
@@ -2302,7 +2324,8 @@ c1b <- ggscatter(data_loop_men, x = "right_total_hipp", y = "loop_de_avg_degree"
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged GMV Volume", ylab = "Averaged \nDegrees Traveled") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #By repo
 c1c <- ggscatter(data_loop_women, x = "right_total_hipp", y = "loop_de_avg_degree", color = "repo_status",
@@ -2315,7 +2338,8 @@ c1c <- ggscatter(data_loop_women, x = "right_total_hipp", y = "loop_de_avg_degre
           xlab = "Averaged GMV Volume", ylab = "Averaged \nDegrees Traveled") +
     facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #Present
 c1
@@ -4821,7 +4845,8 @@ c1 <- ggscatter(data_loop, x = "avg_mtl", y = "loop_de_rad3_degree", color = "re
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged MTL Volume", ylab = "Degrees Traveled at 3.0m", ) +
-    theme(legend.position = "top", legend.title=element_blank()) 
+    theme(legend.position = "top", legend.title=element_blank())  +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #sex
 c1a <- ggscatter(data_loop_women, x = "avg_mtl", y = "loop_de_rad3_degree", color = "red", alpha = 0.6, title = "Women",
@@ -4833,7 +4858,8 @@ c1a <- ggscatter(data_loop_women, x = "avg_mtl", y = "loop_de_rad3_degree", colo
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged MTL Volume", ylab = "Degrees Traveled at 3.0m") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 c1b <- ggscatter(data_loop_men, x = "avg_mtl", y = "loop_de_rad3_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
@@ -4843,7 +4869,8 @@ c1b <- ggscatter(data_loop_men, x = "avg_mtl", y = "loop_de_rad3_degree", color 
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged MTL Volume", ylab = "Degrees Traveled at 3.0m") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #By repo
 c1c <- ggscatter(data_loop_women, x = "avg_mtl", y = "loop_de_rad3_degree", color = "repo_status",
@@ -4856,7 +4883,8 @@ c1c <- ggscatter(data_loop_women, x = "avg_mtl", y = "loop_de_rad3_degree", colo
           xlab = "Averaged MTL Volume", ylab = "Degrees Traveled at 3.0m") +
     facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #Present
 c1
@@ -4878,7 +4906,8 @@ c1 <- ggscatter(data_loop, x = "left_mtl", y = "loop_de_rad3_degree", color = "r
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged MTL Volume", ylab = "Degrees Traveled at 3.0m", ) +
-    theme(legend.position = "top", legend.title=element_blank()) 
+    theme(legend.position = "top", legend.title=element_blank())  +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #sex
 c1a <- ggscatter(data_loop_women, x = "left_mtl", y = "loop_de_rad3_degree", color = "red", alpha = 0.6, title = "Women",
@@ -4890,7 +4919,8 @@ c1a <- ggscatter(data_loop_women, x = "left_mtl", y = "loop_de_rad3_degree", col
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged MTL Volume", ylab = "Degrees Traveled at 3.0m") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 c1b <- ggscatter(data_loop_men, x = "left_mtl", y = "loop_de_rad3_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
@@ -4900,7 +4930,8 @@ c1b <- ggscatter(data_loop_men, x = "left_mtl", y = "loop_de_rad3_degree", color
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged MTL Volume", ylab = "Degrees Traveled at 3.0m") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #By repo
 c1c <- ggscatter(data_loop_women, x = "left_mtl", y = "loop_de_rad3_degree", color = "repo_status",
@@ -4913,7 +4944,8 @@ c1c <- ggscatter(data_loop_women, x = "left_mtl", y = "loop_de_rad3_degree", col
           xlab = "Averaged MTL Volume", ylab = "Degrees Traveled at 3.0m") +
     facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #Present
 c1
@@ -4934,7 +4966,8 @@ c1 <- ggscatter(data_loop, x = "right_mtl", y = "loop_de_rad3_degree", color = "
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged MTL Volume", ylab = "Degrees Traveled at 3.0m", ) +
-    theme(legend.position = "top", legend.title=element_blank()) 
+    theme(legend.position = "top", legend.title=element_blank())  +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #sex
 c1a <- ggscatter(data_loop_women, x = "right_mtl", y = "loop_de_rad3_degree", color = "red", alpha = 0.6, title = "Women",
@@ -4946,7 +4979,8 @@ c1a <- ggscatter(data_loop_women, x = "right_mtl", y = "loop_de_rad3_degree", co
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged MTL Volume", ylab = "Degrees Traveled at 3.0m") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 c1b <- ggscatter(data_loop_men, x = "right_mtl", y = "loop_de_rad3_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
@@ -4956,7 +4990,8 @@ c1b <- ggscatter(data_loop_men, x = "right_mtl", y = "loop_de_rad3_degree", colo
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged MTL Volume", ylab = "Degrees Traveled at 3.0m") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #By repo
 c1c <- ggscatter(data_loop_women, x = "right_mtl", y = "loop_de_rad3_degree", color = "repo_status",
@@ -4969,7 +5004,8 @@ c1c <- ggscatter(data_loop_women, x = "right_mtl", y = "loop_de_rad3_degree", co
           xlab = "Averaged MTL Volume", ylab = "Degrees Traveled at 3.0m") +
     facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #Present
 c1
@@ -4991,7 +5027,8 @@ c1 <- ggscatter(data_loop, x = "avg_mtl", y = "loop_de_avg_degree", color = "rep
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged MTL Volume", ylab = "Averaged \nDegrees Traveled", ) +
-    theme(legend.position = "top", legend.title=element_blank()) 
+    theme(legend.position = "top", legend.title=element_blank())  +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #sex
 c1a <- ggscatter(data_loop_women, x = "avg_mtl", y = "loop_de_avg_degree", color = "red", alpha = 0.6, title = "Women",
@@ -5003,7 +5040,8 @@ c1a <- ggscatter(data_loop_women, x = "avg_mtl", y = "loop_de_avg_degree", color
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged MTL Volume", ylab = "Averaged \nDegrees Traveled") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 c1b <- ggscatter(data_loop_men, x = "avg_mtl", y = "loop_de_avg_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
@@ -5013,7 +5051,8 @@ c1b <- ggscatter(data_loop_men, x = "avg_mtl", y = "loop_de_avg_degree", color =
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged MTL Volume", ylab = "Averaged \nDegrees Traveled") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #By repo
 c1c <- ggscatter(data_loop_women, x = "avg_mtl", y = "loop_de_avg_degree", color = "repo_status",
@@ -5026,7 +5065,8 @@ c1c <- ggscatter(data_loop_women, x = "avg_mtl", y = "loop_de_avg_degree", color
           xlab = "Averaged MTL Volume", ylab = "Averaged \nDegrees Traveled") +
     facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #Present
 c1
@@ -5047,7 +5087,8 @@ c1 <- ggscatter(data_loop, x = "left_mtl", y = "loop_de_avg_degree", color = "re
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged MTL Volume", ylab = "Averaged \nDegrees Traveled", ) +
-    theme(legend.position = "top", legend.title=element_blank()) 
+    theme(legend.position = "top", legend.title=element_blank())  +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #sex
 c1a <- ggscatter(data_loop_women, x = "left_mtl", y = "loop_de_avg_degree", color = "red", alpha = 0.6, title = "Women",
@@ -5059,7 +5100,8 @@ c1a <- ggscatter(data_loop_women, x = "left_mtl", y = "loop_de_avg_degree", colo
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged MTL Volume", ylab = "Averaged \nDegrees Traveled") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 c1b <- ggscatter(data_loop_men, x = "left_mtl", y = "loop_de_avg_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
@@ -5069,7 +5111,8 @@ c1b <- ggscatter(data_loop_men, x = "left_mtl", y = "loop_de_avg_degree", color 
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged MTL Volume", ylab = "Averaged \nDegrees Traveled") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #By repo
 c1c <- ggscatter(data_loop_women, x = "left_mtl", y = "loop_de_avg_degree", color = "repo_status",
@@ -5082,7 +5125,8 @@ c1c <- ggscatter(data_loop_women, x = "left_mtl", y = "loop_de_avg_degree", colo
           xlab = "Averaged MTL Volume", ylab = "Averaged \nDegrees Traveled") +
     facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #Present
 c1
@@ -5103,7 +5147,8 @@ c1 <- ggscatter(data_loop, x = "right_mtl", y = "loop_de_avg_degree", color = "r
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged MTL Volume", ylab = "Averaged \nDegrees Traveled", ) +
-    theme(legend.position = "top", legend.title=element_blank()) 
+    theme(legend.position = "top", legend.title=element_blank())  +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #sex
 c1a <- ggscatter(data_loop_women, x = "right_mtl", y = "loop_de_avg_degree", color = "red", alpha = 0.6, title = "Women",
@@ -5115,7 +5160,8 @@ c1a <- ggscatter(data_loop_women, x = "right_mtl", y = "loop_de_avg_degree", col
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged MTL Volume", ylab = "Averaged \nDegrees Traveled") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 c1b <- ggscatter(data_loop_men, x = "right_mtl", y = "loop_de_avg_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
@@ -5125,7 +5171,8 @@ c1b <- ggscatter(data_loop_men, x = "right_mtl", y = "loop_de_avg_degree", color
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged MTL Volume", ylab = "Averaged \nDegrees Traveled") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #By repo
 c1c <- ggscatter(data_loop_women, x = "right_mtl", y = "loop_de_avg_degree", color = "repo_status",
@@ -5138,7 +5185,8 @@ c1c <- ggscatter(data_loop_women, x = "right_mtl", y = "loop_de_avg_degree", col
           xlab = "Averaged MTL Volume", ylab = "Averaged \nDegrees Traveled") +
     facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #Present
 c1
@@ -7648,7 +7696,8 @@ c1 <- ggscatter(data_loop, x = "avg_ca1", y = "loop_de_rad3_degree", color = "re
           cor.method = "spearman",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged CA1 Volume", ylab = "Degrees Traveled at 3.0m", ) +
-    theme(legend.position = "top", legend.title=element_blank()) 
+    theme(legend.position = "top", legend.title=element_blank())  +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #sex
 c1a <- ggscatter(data_loop_women, x = "avg_ca1", y = "loop_de_rad3_degree", color = "red", alpha = 0.6, title = "Women",
@@ -7660,7 +7709,8 @@ c1a <- ggscatter(data_loop_women, x = "avg_ca1", y = "loop_de_rad3_degree", colo
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged CA1 Volume", ylab = "Degrees Traveled at 3.0m") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 c1b <- ggscatter(data_loop_men, x = "avg_ca1", y = "loop_de_rad3_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
@@ -7670,7 +7720,8 @@ c1b <- ggscatter(data_loop_men, x = "avg_ca1", y = "loop_de_rad3_degree", color 
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged CA1 Volume", ylab = "Degrees Traveled at 3.0m") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #By repo
 c1c <- ggscatter(data_loop_women, x = "avg_ca1", y = "loop_de_rad3_degree", color = "repo_status",
@@ -7683,7 +7734,8 @@ c1c <- ggscatter(data_loop_women, x = "avg_ca1", y = "loop_de_rad3_degree", colo
           xlab = "Averaged CA1 Volume", ylab = "Degrees Traveled at 3.0m") +
     facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #Present
 c1
@@ -7704,7 +7756,8 @@ c1 <- ggscatter(data_loop, x = "left_ca1", y = "loop_de_rad3_degree", color = "r
           cor.method = "spearman",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged CA1 Volume", ylab = "Degrees Traveled at 3.0m", ) +
-    theme(legend.position = "top", legend.title=element_blank()) 
+    theme(legend.position = "top", legend.title=element_blank())  +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #sex
 c1a <- ggscatter(data_loop_women, x = "left_ca1", y = "loop_de_rad3_degree", color = "red", alpha = 0.6, title = "Women",
@@ -7716,7 +7769,8 @@ c1a <- ggscatter(data_loop_women, x = "left_ca1", y = "loop_de_rad3_degree", col
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged CA1 Volume", ylab = "Degrees Traveled at 3.0m") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 c1b <- ggscatter(data_loop_men, x = "left_ca1", y = "loop_de_rad3_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
@@ -7726,7 +7780,8 @@ c1b <- ggscatter(data_loop_men, x = "left_ca1", y = "loop_de_rad3_degree", color
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged CA1 Volume", ylab = "Degrees Traveled at 3.0m") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #By repo
 c1c <- ggscatter(data_loop_women, x = "left_ca1", y = "loop_de_rad3_degree", color = "repo_status",
@@ -7739,7 +7794,8 @@ c1c <- ggscatter(data_loop_women, x = "left_ca1", y = "loop_de_rad3_degree", col
           xlab = "Averaged CA1 Volume", ylab = "Degrees Traveled at 3.0m") +
     facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #Present
 c1
@@ -7760,7 +7816,8 @@ c1 <- ggscatter(data_loop, x = "right_ca1", y = "loop_de_rad3_degree", color = "
           cor.method = "spearman",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged CA1 Volume", ylab = "Degrees Traveled at 3.0m", ) +
-    theme(legend.position = "top", legend.title=element_blank()) 
+    theme(legend.position = "top", legend.title=element_blank())  +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #sex
 c1a <- ggscatter(data_loop_women, x = "right_ca1", y = "loop_de_rad3_degree", color = "red", alpha = 0.6, title = "Women",
@@ -7772,7 +7829,8 @@ c1a <- ggscatter(data_loop_women, x = "right_ca1", y = "loop_de_rad3_degree", co
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged CA1 Volume", ylab = "Degrees Traveled at 3.0m") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 c1b <- ggscatter(data_loop_men, x = "right_ca1", y = "loop_de_rad3_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
@@ -7782,7 +7840,8 @@ c1b <- ggscatter(data_loop_men, x = "right_ca1", y = "loop_de_rad3_degree", colo
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged CA1 Volume", ylab = "Degrees Traveled at 3.0m") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #By repo
 c1c <- ggscatter(data_loop_women, x = "right_ca1", y = "loop_de_rad3_degree", color = "repo_status",
@@ -7795,7 +7854,8 @@ c1c <- ggscatter(data_loop_women, x = "right_ca1", y = "loop_de_rad3_degree", co
           xlab = "Averaged CA1 Volume", ylab = "Degrees Traveled at 3.0m") +
     facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #Present
 c1
@@ -7818,7 +7878,8 @@ c1 <- ggscatter(data_loop, x = "avg_ca1", y = "loop_de_avg_degree", color = "rep
           cor.method = "spearman",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged CA1 Volume", ylab = "Averaged \nDegrees Traveled", ) +
-    theme(legend.position = "top", legend.title=element_blank()) 
+    theme(legend.position = "top", legend.title=element_blank())  +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #sex
 c1a <- ggscatter(data_loop_women, x = "avg_ca1", y = "loop_de_avg_degree", color = "red", alpha = 0.6, title = "Women",
@@ -7830,7 +7891,8 @@ c1a <- ggscatter(data_loop_women, x = "avg_ca1", y = "loop_de_avg_degree", color
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged CA1 Volume", ylab = "Averaged \nDegrees Traveled") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 c1b <- ggscatter(data_loop_men, x = "avg_ca1", y = "loop_de_avg_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
@@ -7840,7 +7902,8 @@ c1b <- ggscatter(data_loop_men, x = "avg_ca1", y = "loop_de_avg_degree", color =
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged CA1 Volume", ylab = "Averaged \nDegrees Traveled") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #By repo
 c1c <- ggscatter(data_loop_women, x = "avg_ca1", y = "loop_de_avg_degree", color = "repo_status",
@@ -7853,7 +7916,8 @@ c1c <- ggscatter(data_loop_women, x = "avg_ca1", y = "loop_de_avg_degree", color
           xlab = "Averaged CA1 Volume", ylab = "Averaged \nDegrees Traveled") +
     facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #Present
 c1
@@ -7874,7 +7938,8 @@ c1 <- ggscatter(data_loop, x = "left_ca1", y = "loop_de_avg_degree", color = "re
           cor.method = "spearman",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged CA1 Volume", ylab = "Averaged \nDegrees Traveled", ) +
-    theme(legend.position = "top", legend.title=element_blank()) 
+    theme(legend.position = "top", legend.title=element_blank())  +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #sex
 c1a <- ggscatter(data_loop_women, x = "left_ca1", y = "loop_de_avg_degree", color = "red", alpha = 0.6, title = "Women",
@@ -7886,7 +7951,8 @@ c1a <- ggscatter(data_loop_women, x = "left_ca1", y = "loop_de_avg_degree", colo
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged CA1 Volume", ylab = "Averaged \nDegrees Traveled") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 c1b <- ggscatter(data_loop_men, x = "left_ca1", y = "loop_de_avg_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
@@ -7896,7 +7962,8 @@ c1b <- ggscatter(data_loop_men, x = "left_ca1", y = "loop_de_avg_degree", color 
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged CA1 Volume", ylab = "Averaged \nDegrees Traveled") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #By repo
 c1c <- ggscatter(data_loop_women, x = "left_ca1", y = "loop_de_avg_degree", color = "repo_status",
@@ -7909,7 +7976,8 @@ c1c <- ggscatter(data_loop_women, x = "left_ca1", y = "loop_de_avg_degree", colo
           xlab = "Averaged CA1 Volume", ylab = "Averaged \nDegrees Traveled") +
     facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #Present
 c1
@@ -7930,7 +7998,8 @@ c1 <- ggscatter(data_loop, x = "right_ca1", y = "loop_de_avg_degree", color = "r
           cor.method = "spearman",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged CA1 Volume", ylab = "Averaged \nDegrees Traveled", ) +
-    theme(legend.position = "top", legend.title=element_blank()) 
+    theme(legend.position = "top", legend.title=element_blank())  +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #sex
 c1a <- ggscatter(data_loop_women, x = "right_ca1", y = "loop_de_avg_degree", color = "red", alpha = 0.6, title = "Women",
@@ -7942,7 +8011,8 @@ c1a <- ggscatter(data_loop_women, x = "right_ca1", y = "loop_de_avg_degree", col
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged CA1 Volume", ylab = "Averaged \nDegrees Traveled") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 c1b <- ggscatter(data_loop_men, x = "right_ca1", y = "loop_de_avg_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
@@ -7952,7 +8022,8 @@ c1b <- ggscatter(data_loop_men, x = "right_ca1", y = "loop_de_avg_degree", color
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged CA1 Volume", ylab = "Averaged \nDegrees Traveled") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #By repo
 c1c <- ggscatter(data_loop_women, x = "right_ca1", y = "loop_de_avg_degree", color = "repo_status",
@@ -7965,7 +8036,8 @@ c1c <- ggscatter(data_loop_women, x = "right_ca1", y = "loop_de_avg_degree", col
           xlab = "Averaged CA1 Volume", ylab = "Averaged \nDegrees Traveled") +
     facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #Present
 c1
@@ -10437,7 +10509,8 @@ c1 <- ggscatter(data_loop, x = "avg_ca23", y = "loop_de_rad3_degree", color = "r
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged CA23 Volume", ylab = "Degrees Traveled at 3.0m", ) +
-    theme(legend.position = "top", legend.title=element_blank()) 
+    theme(legend.position = "top", legend.title=element_blank())  +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #sex
 c1a <- ggscatter(data_loop_women, x = "avg_ca23", y = "loop_de_rad3_degree", color = "red", alpha = 0.6, title = "Women",
@@ -10449,7 +10522,8 @@ c1a <- ggscatter(data_loop_women, x = "avg_ca23", y = "loop_de_rad3_degree", col
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged CA23 Volume", ylab = "Degrees Traveled at 3.0m") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 c1b <- ggscatter(data_loop_men, x = "avg_ca23", y = "loop_de_rad3_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
@@ -10459,7 +10533,8 @@ c1b <- ggscatter(data_loop_men, x = "avg_ca23", y = "loop_de_rad3_degree", color
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged CA23 Volume", ylab = "Degrees Traveled at 3.0m") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #By repo
 c1c <- ggscatter(data_loop_women, x = "avg_ca23", y = "loop_de_rad3_degree", color = "repo_status",
@@ -10472,7 +10547,8 @@ c1c <- ggscatter(data_loop_women, x = "avg_ca23", y = "loop_de_rad3_degree", col
           xlab = "Averaged CA23 Volume", ylab = "Degrees Traveled at 3.0m") +
     facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #Present
 c1
@@ -10493,7 +10569,8 @@ c1 <- ggscatter(data_loop, x = "left_ca23", y = "loop_de_rad3_degree", color = "
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged CA23 Volume", ylab = "Degrees Traveled at 3.0m", ) +
-    theme(legend.position = "top", legend.title=element_blank()) 
+    theme(legend.position = "top", legend.title=element_blank())  +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #sex
 c1a <- ggscatter(data_loop_women, x = "left_ca23", y = "loop_de_rad3_degree", color = "red", alpha = 0.6, title = "Women",
@@ -10505,7 +10582,8 @@ c1a <- ggscatter(data_loop_women, x = "left_ca23", y = "loop_de_rad3_degree", co
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged CA23 Volume", ylab = "Degrees Traveled at 3.0m") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 c1b <- ggscatter(data_loop_men, x = "left_ca23", y = "loop_de_rad3_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
@@ -10515,7 +10593,8 @@ c1b <- ggscatter(data_loop_men, x = "left_ca23", y = "loop_de_rad3_degree", colo
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged CA23 Volume", ylab = "Degrees Traveled at 3.0m") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #By repo
 c1c <- ggscatter(data_loop_women, x = "left_ca23", y = "loop_de_rad3_degree", color = "repo_status",
@@ -10528,7 +10607,8 @@ c1c <- ggscatter(data_loop_women, x = "left_ca23", y = "loop_de_rad3_degree", co
           xlab = "Averaged CA23 Volume", ylab = "Degrees Traveled at 3.0m") +
     facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #Present
 c1
@@ -10549,7 +10629,8 @@ c1 <- ggscatter(data_loop, x = "right_ca23", y = "loop_de_rad3_degree", color = 
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged CA23 Volume", ylab = "Degrees Traveled at 3.0m", ) +
-    theme(legend.position = "top", legend.title=element_blank()) 
+    theme(legend.position = "top", legend.title=element_blank())  +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #sex
 c1a <- ggscatter(data_loop_women, x = "right_ca23", y = "loop_de_rad3_degree", color = "red", alpha = 0.6, title = "Women",
@@ -10561,7 +10642,8 @@ c1a <- ggscatter(data_loop_women, x = "right_ca23", y = "loop_de_rad3_degree", c
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged CA23 Volume", ylab = "Degrees Traveled at 3.0m") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 c1b <- ggscatter(data_loop_men, x = "right_ca23", y = "loop_de_rad3_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
@@ -10571,7 +10653,8 @@ c1b <- ggscatter(data_loop_men, x = "right_ca23", y = "loop_de_rad3_degree", col
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged CA23 Volume", ylab = "Degrees Traveled at 3.0m") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #By repo
 c1c <- ggscatter(data_loop_women, x = "right_ca23", y = "loop_de_rad3_degree", color = "repo_status",
@@ -10584,7 +10667,8 @@ c1c <- ggscatter(data_loop_women, x = "right_ca23", y = "loop_de_rad3_degree", c
           xlab = "Averaged CA23 Volume", ylab = "Degrees Traveled at 3.0m") +
     facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #Present
 c1
@@ -10605,7 +10689,8 @@ c1 <- ggscatter(data_loop, x = "avg_ca23", y = "loop_de_avg_degree", color = "re
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged CA23 Volume", ylab = "Averaged \nDegrees Traveled", ) +
-    theme(legend.position = "top", legend.title=element_blank()) 
+    theme(legend.position = "top", legend.title=element_blank())  +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #sex
 c1a <- ggscatter(data_loop_women, x = "avg_ca23", y = "loop_de_avg_degree", color = "red", alpha = 0.6, title = "Women",
@@ -10617,7 +10702,8 @@ c1a <- ggscatter(data_loop_women, x = "avg_ca23", y = "loop_de_avg_degree", colo
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged CA23 Volume", ylab = "Averaged \nDegrees Traveled") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 c1b <- ggscatter(data_loop_men, x = "avg_ca23", y = "loop_de_avg_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
@@ -10627,7 +10713,8 @@ c1b <- ggscatter(data_loop_men, x = "avg_ca23", y = "loop_de_avg_degree", color 
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged CA23 Volume", ylab = "Averaged \nDegrees Traveled") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #By repo
 c1c <- ggscatter(data_loop_women, x = "avg_ca23", y = "loop_de_avg_degree", color = "repo_status",
@@ -10640,7 +10727,8 @@ c1c <- ggscatter(data_loop_women, x = "avg_ca23", y = "loop_de_avg_degree", colo
           xlab = "Averaged CA23 Volume", ylab = "Averaged \nDegrees Traveled") +
     facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #Present
 c1
@@ -10661,7 +10749,8 @@ c1 <- ggscatter(data_loop, x = "left_ca23", y = "loop_de_avg_degree", color = "r
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged CA23 Volume", ylab = "Averaged \nDegrees Traveled", ) +
-    theme(legend.position = "top", legend.title=element_blank()) 
+    theme(legend.position = "top", legend.title=element_blank())  +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #sex
 c1a <- ggscatter(data_loop_women, x = "left_ca23", y = "loop_de_avg_degree", color = "red", alpha = 0.6, title = "Women",
@@ -10673,7 +10762,8 @@ c1a <- ggscatter(data_loop_women, x = "left_ca23", y = "loop_de_avg_degree", col
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged CA23 Volume", ylab = "Averaged \nDegrees Traveled") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 c1b <- ggscatter(data_loop_men, x = "left_ca23", y = "loop_de_avg_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
@@ -10683,7 +10773,8 @@ c1b <- ggscatter(data_loop_men, x = "left_ca23", y = "loop_de_avg_degree", color
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged CA23 Volume", ylab = "Averaged \nDegrees Traveled") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #By repo
 c1c <- ggscatter(data_loop_women, x = "left_ca23", y = "loop_de_avg_degree", color = "repo_status",
@@ -10696,7 +10787,8 @@ c1c <- ggscatter(data_loop_women, x = "left_ca23", y = "loop_de_avg_degree", col
           xlab = "Averaged CA23 Volume", ylab = "Averaged \nDegrees Traveled") +
     facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #Present
 c1
@@ -10717,7 +10809,8 @@ c1 <- ggscatter(data_loop, x = "right_ca23", y = "loop_de_avg_degree", color = "
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged CA23 Volume", ylab = "Averaged \nDegrees Traveled", ) +
-    theme(legend.position = "top", legend.title=element_blank()) 
+    theme(legend.position = "top", legend.title=element_blank())  +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #sex
 c1a <- ggscatter(data_loop_women, x = "right_ca23", y = "loop_de_avg_degree", color = "red", alpha = 0.6, title = "Women",
@@ -10729,7 +10822,8 @@ c1a <- ggscatter(data_loop_women, x = "right_ca23", y = "loop_de_avg_degree", co
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged CA23 Volume", ylab = "Averaged \nDegrees Traveled") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 c1b <- ggscatter(data_loop_men, x = "right_ca23", y = "loop_de_avg_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
@@ -10739,7 +10833,8 @@ c1b <- ggscatter(data_loop_men, x = "right_ca23", y = "loop_de_avg_degree", colo
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged CA23 Volume", ylab = "Averaged \nDegrees Traveled") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #By repo
 c1c <- ggscatter(data_loop_women, x = "right_ca23", y = "loop_de_avg_degree", color = "repo_status",
@@ -10752,7 +10847,8 @@ c1c <- ggscatter(data_loop_women, x = "right_ca23", y = "loop_de_avg_degree", co
           xlab = "Averaged CA23 Volume", ylab = "Averaged \nDegrees Traveled") +
     facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #Present
 c1
@@ -12621,7 +12717,8 @@ c1 <- ggscatter(data_loop, x = "avg_dg", y = "loop_de_rad3_degree", color = "rep
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged DG Volume", ylab = "Degrees Traveled at 3.0m", ) +
-    theme(legend.position = "top", legend.title=element_blank()) 
+    theme(legend.position = "top", legend.title=element_blank())  +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #sex
 c1a <- ggscatter(data_loop_women, x = "avg_dg", y = "loop_de_rad3_degree", color = "red", alpha = 0.6, title = "Women",
@@ -12633,7 +12730,8 @@ c1a <- ggscatter(data_loop_women, x = "avg_dg", y = "loop_de_rad3_degree", color
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged DG Volume", ylab = "Degrees Traveled at 3.0m") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 c1b <- ggscatter(data_loop_men, x = "avg_dg", y = "loop_de_rad3_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
@@ -12643,7 +12741,8 @@ c1b <- ggscatter(data_loop_men, x = "avg_dg", y = "loop_de_rad3_degree", color =
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged DG Volume", ylab = "Degrees Traveled at 3.0m") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #By repo
 c1c <- ggscatter(data_loop_women, x = "avg_dg", y = "loop_de_rad3_degree", color = "repo_status",
@@ -12656,7 +12755,8 @@ c1c <- ggscatter(data_loop_women, x = "avg_dg", y = "loop_de_rad3_degree", color
           xlab = "Averaged DG Volume", ylab = "Degrees Traveled at 3.0m") +
     facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #Present
 c1
@@ -12678,7 +12778,8 @@ c1 <- ggscatter(data_loop, x = "left_dg", y = "loop_de_rad3_degree", color = "re
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged DG Volume", ylab = "Degrees Traveled at 3.0m", ) +
-    theme(legend.position = "top", legend.title=element_blank()) 
+    theme(legend.position = "top", legend.title=element_blank())  +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #sex
 c1a <- ggscatter(data_loop_women, x = "left_dg", y = "loop_de_rad3_degree", color = "red", alpha = 0.6, title = "Women",
@@ -12690,7 +12791,8 @@ c1a <- ggscatter(data_loop_women, x = "left_dg", y = "loop_de_rad3_degree", colo
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged DG Volume", ylab = "Degrees Traveled at 3.0m") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 c1b <- ggscatter(data_loop_men, x = "left_dg", y = "loop_de_rad3_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
@@ -12700,7 +12802,8 @@ c1b <- ggscatter(data_loop_men, x = "left_dg", y = "loop_de_rad3_degree", color 
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged DG Volume", ylab = "Degrees Traveled at 3.0m") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #By repo
 c1c <- ggscatter(data_loop_women, x = "left_dg", y = "loop_de_rad3_degree", color = "repo_status",
@@ -12713,7 +12816,8 @@ c1c <- ggscatter(data_loop_women, x = "left_dg", y = "loop_de_rad3_degree", colo
           xlab = "Averaged DG Volume", ylab = "Degrees Traveled at 3.0m") +
     facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #Present
 c1
@@ -12734,7 +12838,8 @@ c1 <- ggscatter(data_loop, x = "right_dg", y = "loop_de_rad3_degree", color = "r
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged DG Volume", ylab = "Degrees Traveled at 3.0m", ) +
-    theme(legend.position = "top", legend.title=element_blank()) 
+    theme(legend.position = "top", legend.title=element_blank())  +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #sex
 c1a <- ggscatter(data_loop_women, x = "right_dg", y = "loop_de_rad3_degree", color = "red", alpha = 0.6, title = "Women",
@@ -12746,7 +12851,8 @@ c1a <- ggscatter(data_loop_women, x = "right_dg", y = "loop_de_rad3_degree", col
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged DG Volume", ylab = "Degrees Traveled at 3.0m") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 c1b <- ggscatter(data_loop_men, x = "right_dg", y = "loop_de_rad3_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
@@ -12756,7 +12862,8 @@ c1b <- ggscatter(data_loop_men, x = "right_dg", y = "loop_de_rad3_degree", color
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged DG Volume", ylab = "Degrees Traveled at 3.0m") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #By repo
 c1c <- ggscatter(data_loop_women, x = "right_dg", y = "loop_de_rad3_degree", color = "repo_status",
@@ -12769,7 +12876,8 @@ c1c <- ggscatter(data_loop_women, x = "right_dg", y = "loop_de_rad3_degree", col
           xlab = "Averaged DG Volume", ylab = "Degrees Traveled at 3.0m") +
     facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #Present
 c1
@@ -12790,7 +12898,8 @@ c1 <- ggscatter(data_loop, x = "avg_dg", y = "loop_de_avg_degree", color = "repo
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged DG Volume", ylab = "Averaged \nDegrees Traveled", ) +
-    theme(legend.position = "top", legend.title=element_blank()) 
+    theme(legend.position = "top", legend.title=element_blank())  +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #sex
 c1a <- ggscatter(data_loop_women, x = "avg_dg", y = "loop_de_avg_degree", color = "red", alpha = 0.6, title = "Women",
@@ -12802,7 +12911,8 @@ c1a <- ggscatter(data_loop_women, x = "avg_dg", y = "loop_de_avg_degree", color 
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged DG Volume", ylab = "Averaged \nDegrees Traveled") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 c1b <- ggscatter(data_loop_men, x = "avg_dg", y = "loop_de_avg_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
@@ -12812,7 +12922,8 @@ c1b <- ggscatter(data_loop_men, x = "avg_dg", y = "loop_de_avg_degree", color = 
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged DG Volume", ylab = "Averaged \nDegrees Traveled") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #By repo
 c1c <- ggscatter(data_loop_women, x = "avg_dg", y = "loop_de_avg_degree", color = "repo_status",
@@ -12825,7 +12936,8 @@ c1c <- ggscatter(data_loop_women, x = "avg_dg", y = "loop_de_avg_degree", color 
           xlab = "Averaged DG Volume", ylab = "Averaged \nDegrees Traveled") +
     facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #Present
 c1
@@ -12847,7 +12959,8 @@ c1 <- ggscatter(data_loop, x = "left_dg", y = "loop_de_avg_degree", color = "rep
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged DG Volume", ylab = "Averaged \nDegrees Traveled", ) +
-    theme(legend.position = "top", legend.title=element_blank()) 
+    theme(legend.position = "top", legend.title=element_blank())  +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #sex
 c1a <- ggscatter(data_loop_women, x = "left_dg", y = "loop_de_avg_degree", color = "red", alpha = 0.6, title = "Women",
@@ -12859,7 +12972,8 @@ c1a <- ggscatter(data_loop_women, x = "left_dg", y = "loop_de_avg_degree", color
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged DG Volume", ylab = "Averaged \nDegrees Traveled") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 c1b <- ggscatter(data_loop_men, x = "left_dg", y = "loop_de_avg_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
@@ -12869,7 +12983,8 @@ c1b <- ggscatter(data_loop_men, x = "left_dg", y = "loop_de_avg_degree", color =
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged DG Volume", ylab = "Averaged \nDegrees Traveled") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #By repo
 c1c <- ggscatter(data_loop_women, x = "left_dg", y = "loop_de_avg_degree", color = "repo_status",
@@ -12882,7 +12997,8 @@ c1c <- ggscatter(data_loop_women, x = "left_dg", y = "loop_de_avg_degree", color
           xlab = "Averaged DG Volume", ylab = "Averaged \nDegrees Traveled") +
     facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #Present
 c1
@@ -12904,7 +13020,8 @@ c1 <- ggscatter(data_loop, x = "right_dg", y = "loop_de_avg_degree", color = "re
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged DG Volume", ylab = "Averaged \nDegrees Traveled", ) +
-    theme(legend.position = "top", legend.title=element_blank()) 
+    theme(legend.position = "top", legend.title=element_blank())  +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #sex
 c1a <- ggscatter(data_loop_women, x = "right_dg", y = "loop_de_avg_degree", color = "red", alpha = 0.6, title = "Women",
@@ -12916,7 +13033,8 @@ c1a <- ggscatter(data_loop_women, x = "right_dg", y = "loop_de_avg_degree", colo
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged DG Volume", ylab = "Averaged \nDegrees Traveled") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 c1b <- ggscatter(data_loop_men, x = "right_dg", y = "loop_de_avg_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
@@ -12926,7 +13044,8 @@ c1b <- ggscatter(data_loop_men, x = "right_dg", y = "loop_de_avg_degree", color 
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged DG Volume", ylab = "Averaged \nDegrees Traveled") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #By repo
 c1c <- ggscatter(data_loop_women, x = "right_dg", y = "loop_de_avg_degree", color = "repo_status",
@@ -12939,7 +13058,8 @@ c1c <- ggscatter(data_loop_women, x = "right_dg", y = "loop_de_avg_degree", colo
           xlab = "Averaged DG Volume", ylab = "Averaged \nDegrees Traveled") +
     facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #Present
 c1
@@ -14813,7 +14933,8 @@ c1 <- ggscatter(data_loop, x = "avg_erc", y = "loop_de_rad3_degree", color = "re
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged ERC Volume", ylab = "Degrees Traveled at 3.0m", ) +
-    theme(legend.position = "top", legend.title=element_blank()) 
+    theme(legend.position = "top", legend.title=element_blank())  +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #sex
 c1a <- ggscatter(data_loop_women, x = "avg_erc", y = "loop_de_rad3_degree", color = "red", alpha = 0.6, title = "Women",
@@ -14825,7 +14946,8 @@ c1a <- ggscatter(data_loop_women, x = "avg_erc", y = "loop_de_rad3_degree", colo
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged ERC Volume", ylab = "Degrees Traveled at 3.0m") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 c1b <- ggscatter(data_loop_men, x = "avg_erc", y = "loop_de_rad3_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
@@ -14835,7 +14957,8 @@ c1b <- ggscatter(data_loop_men, x = "avg_erc", y = "loop_de_rad3_degree", color 
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged ERC Volume", ylab = "Degrees Traveled at 3.0m") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #By repo
 c1c <- ggscatter(data_loop_women, x = "avg_erc", y = "loop_de_rad3_degree", color = "repo_status",
@@ -14848,7 +14971,8 @@ c1c <- ggscatter(data_loop_women, x = "avg_erc", y = "loop_de_rad3_degree", colo
           xlab = "Averaged ERC Volume", ylab = "Degrees Traveled at 3.0m") +
     facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #Present
 c1
@@ -14869,7 +14993,8 @@ c1 <- ggscatter(data_loop, x = "left_erc", y = "loop_de_rad3_degree", color = "r
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged ERC Volume", ylab = "Degrees Traveled at 3.0m", ) +
-    theme(legend.position = "top", legend.title=element_blank()) 
+    theme(legend.position = "top", legend.title=element_blank())  +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #sex
 c1a <- ggscatter(data_loop_women, x = "left_erc", y = "loop_de_rad3_degree", color = "red", alpha = 0.6, title = "Women",
@@ -14881,7 +15006,8 @@ c1a <- ggscatter(data_loop_women, x = "left_erc", y = "loop_de_rad3_degree", col
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged ERC Volume", ylab = "Degrees Traveled at 3.0m") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 c1b <- ggscatter(data_loop_men, x = "left_erc", y = "loop_de_rad3_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
@@ -14891,7 +15017,8 @@ c1b <- ggscatter(data_loop_men, x = "left_erc", y = "loop_de_rad3_degree", color
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged ERC Volume", ylab = "Degrees Traveled at 3.0m") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #By repo
 c1c <- ggscatter(data_loop_women, x = "left_erc", y = "loop_de_rad3_degree", color = "repo_status",
@@ -14904,7 +15031,8 @@ c1c <- ggscatter(data_loop_women, x = "left_erc", y = "loop_de_rad3_degree", col
           xlab = "Averaged ERC Volume", ylab = "Degrees Traveled at 3.0m") +
     facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #Present
 c1
@@ -14925,7 +15053,8 @@ c1 <- ggscatter(data_loop, x = "right_erc", y = "loop_de_rad3_degree", color = "
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged ERC Volume", ylab = "Degrees Traveled at 3.0m", ) +
-    theme(legend.position = "top", legend.title=element_blank()) 
+    theme(legend.position = "top", legend.title=element_blank())  +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #sex
 c1a <- ggscatter(data_loop_women, x = "right_erc", y = "loop_de_rad3_degree", color = "red", alpha = 0.6, title = "Women",
@@ -14937,7 +15066,8 @@ c1a <- ggscatter(data_loop_women, x = "right_erc", y = "loop_de_rad3_degree", co
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged ERC Volume", ylab = "Degrees Traveled at 3.0m") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 c1b <- ggscatter(data_loop_men, x = "right_erc", y = "loop_de_rad3_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
@@ -14947,7 +15077,8 @@ c1b <- ggscatter(data_loop_men, x = "right_erc", y = "loop_de_rad3_degree", colo
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged ERC Volume", ylab = "Degrees Traveled at 3.0m") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #By repo
 c1c <- ggscatter(data_loop_women, x = "right_erc", y = "loop_de_rad3_degree", color = "repo_status",
@@ -14960,7 +15091,8 @@ c1c <- ggscatter(data_loop_women, x = "right_erc", y = "loop_de_rad3_degree", co
           xlab = "Averaged ERC Volume", ylab = "Degrees Traveled at 3.0m") +
     facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #Present
 c1
@@ -14981,7 +15113,8 @@ c1 <- ggscatter(data_loop, x = "avg_erc", y = "loop_de_avg_degree", color = "rep
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged ERC Volume", ylab = "Averaged \nDegrees Traveled", ) +
-    theme(legend.position = "top", legend.title=element_blank()) 
+    theme(legend.position = "top", legend.title=element_blank())  +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #sex
 c1a <- ggscatter(data_loop_women, x = "avg_erc", y = "loop_de_avg_degree", color = "red", alpha = 0.6, title = "Women",
@@ -14993,7 +15126,8 @@ c1a <- ggscatter(data_loop_women, x = "avg_erc", y = "loop_de_avg_degree", color
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged ERC Volume", ylab = "Averaged \nDegrees Traveled") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 c1b <- ggscatter(data_loop_men, x = "avg_erc", y = "loop_de_avg_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
@@ -15003,7 +15137,8 @@ c1b <- ggscatter(data_loop_men, x = "avg_erc", y = "loop_de_avg_degree", color =
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged ERC Volume", ylab = "Averaged \nDegrees Traveled") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #By repo
 c1c <- ggscatter(data_loop_women, x = "avg_erc", y = "loop_de_avg_degree", color = "repo_status",
@@ -15016,7 +15151,8 @@ c1c <- ggscatter(data_loop_women, x = "avg_erc", y = "loop_de_avg_degree", color
           xlab = "Averaged ERC Volume", ylab = "Averaged \nDegrees Traveled") +
     facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #Present
 c1
@@ -15037,7 +15173,8 @@ c1 <- ggscatter(data_loop, x = "left_erc", y = "loop_de_avg_degree", color = "re
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged ERC Volume", ylab = "Averaged \nDegrees Traveled", ) +
-    theme(legend.position = "top", legend.title=element_blank()) 
+    theme(legend.position = "top", legend.title=element_blank())  +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #sex
 c1a <- ggscatter(data_loop_women, x = "left_erc", y = "loop_de_avg_degree", color = "red", alpha = 0.6, title = "Women",
@@ -15049,7 +15186,8 @@ c1a <- ggscatter(data_loop_women, x = "left_erc", y = "loop_de_avg_degree", colo
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged ERC Volume", ylab = "Averaged \nDegrees Traveled") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 c1b <- ggscatter(data_loop_men, x = "left_erc", y = "loop_de_avg_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
@@ -15059,7 +15197,8 @@ c1b <- ggscatter(data_loop_men, x = "left_erc", y = "loop_de_avg_degree", color 
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged ERC Volume", ylab = "Averaged \nDegrees Traveled") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #By repo
 c1c <- ggscatter(data_loop_women, x = "left_erc", y = "loop_de_avg_degree", color = "repo_status",
@@ -15072,7 +15211,8 @@ c1c <- ggscatter(data_loop_women, x = "left_erc", y = "loop_de_avg_degree", colo
           xlab = "Averaged ERC Volume", ylab = "Averaged \nDegrees Traveled") +
     facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #Present
 c1
@@ -15093,7 +15233,8 @@ c1 <- ggscatter(data_loop, x = "right_erc", y = "loop_de_avg_degree", color = "r
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged ERC Volume", ylab = "Averaged \nDegrees Traveled", ) +
-    theme(legend.position = "top", legend.title=element_blank()) 
+    theme(legend.position = "top", legend.title=element_blank())  +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #sex
 c1a <- ggscatter(data_loop_women, x = "right_erc", y = "loop_de_avg_degree", color = "red", alpha = 0.6, title = "Women",
@@ -15105,7 +15246,8 @@ c1a <- ggscatter(data_loop_women, x = "right_erc", y = "loop_de_avg_degree", col
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged ERC Volume", ylab = "Averaged \nDegrees Traveled") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 c1b <- ggscatter(data_loop_men, x = "right_erc", y = "loop_de_avg_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
@@ -15115,7 +15257,8 @@ c1b <- ggscatter(data_loop_men, x = "right_erc", y = "loop_de_avg_degree", color
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged ERC Volume", ylab = "Averaged \nDegrees Traveled") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #By repo
 c1c <- ggscatter(data_loop_women, x = "right_erc", y = "loop_de_avg_degree", color = "repo_status",
@@ -15128,7 +15271,8 @@ c1c <- ggscatter(data_loop_women, x = "right_erc", y = "loop_de_avg_degree", col
           xlab = "Averaged ERC Volume", ylab = "Averaged \nDegrees Traveled") +
     facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #Present
 c1
@@ -17013,7 +17157,8 @@ c1 <- ggscatter(data_loop, x = "avg_phc", y = "loop_de_rad3_degree", color = "re
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged PHC Volume", ylab = "Degrees Traveled at 3.0m", ) +
-    theme(legend.position = "top", legend.title=element_blank()) 
+    theme(legend.position = "top", legend.title=element_blank())  +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #sex
 c1a <- ggscatter(data_loop_women, x = "avg_phc", y = "loop_de_rad3_degree", color = "red", alpha = 0.6, title = "Women",
@@ -17025,7 +17170,8 @@ c1a <- ggscatter(data_loop_women, x = "avg_phc", y = "loop_de_rad3_degree", colo
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged PHC Volume", ylab = "Degrees Traveled at 3.0m") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 c1b <- ggscatter(data_loop_men, x = "avg_phc", y = "loop_de_rad3_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
@@ -17035,7 +17181,8 @@ c1b <- ggscatter(data_loop_men, x = "avg_phc", y = "loop_de_rad3_degree", color 
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged PHC Volume", ylab = "Degrees Traveled at 3.0m") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #By repo
 c1c <- ggscatter(data_loop_women, x = "avg_phc", y = "loop_de_rad3_degree", color = "repo_status",
@@ -17048,7 +17195,8 @@ c1c <- ggscatter(data_loop_women, x = "avg_phc", y = "loop_de_rad3_degree", colo
           xlab = "Averaged PHC Volume", ylab = "Degrees Traveled at 3.0m") +
     facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #Present
 c1
@@ -17070,7 +17218,8 @@ c1 <- ggscatter(data_loop, x = "left_phc", y = "loop_de_rad3_degree", color = "r
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged PHC Volume", ylab = "Degrees Traveled at 3.0m", ) +
-    theme(legend.position = "top", legend.title=element_blank()) 
+    theme(legend.position = "top", legend.title=element_blank())  +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #sex
 c1a <- ggscatter(data_loop_women, x = "left_phc", y = "loop_de_rad3_degree", color = "red", alpha = 0.6, title = "Women",
@@ -17082,7 +17231,8 @@ c1a <- ggscatter(data_loop_women, x = "left_phc", y = "loop_de_rad3_degree", col
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged PHC Volume", ylab = "Degrees Traveled at 3.0m") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 c1b <- ggscatter(data_loop_men, x = "left_phc", y = "loop_de_rad3_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
@@ -17092,7 +17242,8 @@ c1b <- ggscatter(data_loop_men, x = "left_phc", y = "loop_de_rad3_degree", color
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged PHC Volume", ylab = "Degrees Traveled at 3.0m") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #By repo
 c1c <- ggscatter(data_loop_women, x = "left_phc", y = "loop_de_rad3_degree", color = "repo_status",
@@ -17105,7 +17256,8 @@ c1c <- ggscatter(data_loop_women, x = "left_phc", y = "loop_de_rad3_degree", col
           xlab = "Averaged PHC Volume", ylab = "Degrees Traveled at 3.0m") +
     facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #Present
 c1
@@ -17127,7 +17279,8 @@ c1 <- ggscatter(data_loop, x = "right_phc", y = "loop_de_rad3_degree", color = "
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged PHC Volume", ylab = "Degrees Traveled at 3.0m", ) +
-    theme(legend.position = "top", legend.title=element_blank()) 
+    theme(legend.position = "top", legend.title=element_blank())  +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #sex
 c1a <- ggscatter(data_loop_women, x = "right_phc", y = "loop_de_rad3_degree", color = "red", alpha = 0.6, title = "Women",
@@ -17139,7 +17292,8 @@ c1a <- ggscatter(data_loop_women, x = "right_phc", y = "loop_de_rad3_degree", co
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged PHC Volume", ylab = "Degrees Traveled at 3.0m") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 c1b <- ggscatter(data_loop_men, x = "right_phc", y = "loop_de_rad3_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
@@ -17149,7 +17303,8 @@ c1b <- ggscatter(data_loop_men, x = "right_phc", y = "loop_de_rad3_degree", colo
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged PHC Volume", ylab = "Degrees Traveled at 3.0m") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #By repo
 c1c <- ggscatter(data_loop_women, x = "right_phc", y = "loop_de_rad3_degree", color = "repo_status",
@@ -17162,7 +17317,8 @@ c1c <- ggscatter(data_loop_women, x = "right_phc", y = "loop_de_rad3_degree", co
           xlab = "Averaged PHC Volume", ylab = "Degrees Traveled at 3.0m") +
     facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #Present
 c1
@@ -17184,7 +17340,8 @@ c1 <- ggscatter(data_loop, x = "avg_phc", y = "loop_de_avg_degree", color = "rep
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged PHC Volume", ylab = "Averaged \nDegrees Traveled", ) +
-    theme(legend.position = "top", legend.title=element_blank()) 
+    theme(legend.position = "top", legend.title=element_blank())  +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #sex
 c1a <- ggscatter(data_loop_women, x = "avg_phc", y = "loop_de_avg_degree", color = "red", alpha = 0.6, title = "Women",
@@ -17196,7 +17353,8 @@ c1a <- ggscatter(data_loop_women, x = "avg_phc", y = "loop_de_avg_degree", color
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged PHC Volume", ylab = "Averaged \nDegrees Traveled") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 c1b <- ggscatter(data_loop_men, x = "avg_phc", y = "loop_de_avg_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
@@ -17206,7 +17364,8 @@ c1b <- ggscatter(data_loop_men, x = "avg_phc", y = "loop_de_avg_degree", color =
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged PHC Volume", ylab = "Averaged \nDegrees Traveled") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #By repo
 c1c <- ggscatter(data_loop_women, x = "avg_phc", y = "loop_de_avg_degree", color = "repo_status",
@@ -17219,7 +17378,8 @@ c1c <- ggscatter(data_loop_women, x = "avg_phc", y = "loop_de_avg_degree", color
           xlab = "Averaged PHC Volume", ylab = "Averaged \nDegrees Traveled") +
     facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #Present
 c1
@@ -17242,7 +17402,8 @@ c1 <- ggscatter(data_loop, x = "left_phc", y = "loop_de_avg_degree", color = "re
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged PHC Volume", ylab = "Averaged \nDegrees Traveled", ) +
-    theme(legend.position = "top", legend.title=element_blank()) 
+    theme(legend.position = "top", legend.title=element_blank())  +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #sex
 c1a <- ggscatter(data_loop_women, x = "left_phc", y = "loop_de_avg_degree", color = "red", alpha = 0.6, title = "Women",
@@ -17254,7 +17415,8 @@ c1a <- ggscatter(data_loop_women, x = "left_phc", y = "loop_de_avg_degree", colo
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged PHC Volume", ylab = "Averaged \nDegrees Traveled") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 c1b <- ggscatter(data_loop_men, x = "left_phc", y = "loop_de_avg_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
@@ -17264,7 +17426,8 @@ c1b <- ggscatter(data_loop_men, x = "left_phc", y = "loop_de_avg_degree", color 
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged PHC Volume", ylab = "Averaged \nDegrees Traveled") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #By repo
 c1c <- ggscatter(data_loop_women, x = "left_phc", y = "loop_de_avg_degree", color = "repo_status",
@@ -17277,7 +17440,8 @@ c1c <- ggscatter(data_loop_women, x = "left_phc", y = "loop_de_avg_degree", colo
           xlab = "Averaged PHC Volume", ylab = "Averaged \nDegrees Traveled") +
     facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #Present
 c1
@@ -17300,7 +17464,8 @@ c1 <- ggscatter(data_loop, x = "right_phc", y = "loop_de_avg_degree", color = "r
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged PHC Volume", ylab = "Averaged \nDegrees Traveled", ) +
-    theme(legend.position = "top", legend.title=element_blank()) 
+    theme(legend.position = "top", legend.title=element_blank())  +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #sex
 c1a <- ggscatter(data_loop_women, x = "right_phc", y = "loop_de_avg_degree", color = "red", alpha = 0.6, title = "Women",
@@ -17312,7 +17477,8 @@ c1a <- ggscatter(data_loop_women, x = "right_phc", y = "loop_de_avg_degree", col
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged PHC Volume", ylab = "Averaged \nDegrees Traveled") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 c1b <- ggscatter(data_loop_men, x = "right_phc", y = "loop_de_avg_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
@@ -17322,7 +17488,8 @@ c1b <- ggscatter(data_loop_men, x = "right_phc", y = "loop_de_avg_degree", color
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged PHC Volume", ylab = "Averaged \nDegrees Traveled") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #By repo
 c1c <- ggscatter(data_loop_women, x = "right_phc", y = "loop_de_avg_degree", color = "repo_status",
@@ -17335,7 +17502,8 @@ c1c <- ggscatter(data_loop_women, x = "right_phc", y = "loop_de_avg_degree", col
           xlab = "Averaged PHC Volume", ylab = "Averaged \nDegrees Traveled") +
     facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #Present
 c1
@@ -19038,7 +19206,8 @@ c1 <- ggscatter(data_loop, x = "avg_prc", y = "loop_de_rad3_degree", color = "re
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged PRC Volume", ylab = "Degrees Traveled at 3.0m", ) +
-    theme(legend.position = "top", legend.title=element_blank()) 
+    theme(legend.position = "top", legend.title=element_blank())  +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #sex
 c1a <- ggscatter(data_loop_women, x = "avg_prc", y = "loop_de_rad3_degree", color = "red", alpha = 0.6, title = "Women",
@@ -19050,7 +19219,8 @@ c1a <- ggscatter(data_loop_women, x = "avg_prc", y = "loop_de_rad3_degree", colo
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged PRC Volume", ylab = "Degrees Traveled at 3.0m") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 c1b <- ggscatter(data_loop_men, x = "avg_prc", y = "loop_de_rad3_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
@@ -19060,7 +19230,8 @@ c1b <- ggscatter(data_loop_men, x = "avg_prc", y = "loop_de_rad3_degree", color 
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged PRC Volume", ylab = "Degrees Traveled at 3.0m") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #By repo
 c1c <- ggscatter(data_loop_women, x = "avg_prc", y = "loop_de_rad3_degree", color = "repo_status",
@@ -19073,7 +19244,8 @@ c1c <- ggscatter(data_loop_women, x = "avg_prc", y = "loop_de_rad3_degree", colo
           xlab = "Averaged PRC Volume", ylab = "Degrees Traveled at 3.0m") +
     facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #Present
 c1
@@ -19094,7 +19266,8 @@ c1 <- ggscatter(data_loop, x = "left_prc", y = "loop_de_rad3_degree", color = "r
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged PRC Volume", ylab = "Degrees Traveled at 3.0m", ) +
-    theme(legend.position = "top", legend.title=element_blank()) 
+    theme(legend.position = "top", legend.title=element_blank())  +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #sex
 c1a <- ggscatter(data_loop_women, x = "left_prc", y = "loop_de_rad3_degree", color = "red", alpha = 0.6, title = "Women",
@@ -19106,7 +19279,8 @@ c1a <- ggscatter(data_loop_women, x = "left_prc", y = "loop_de_rad3_degree", col
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged PRC Volume", ylab = "Degrees Traveled at 3.0m") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 c1b <- ggscatter(data_loop_men, x = "left_prc", y = "loop_de_rad3_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
@@ -19116,7 +19290,8 @@ c1b <- ggscatter(data_loop_men, x = "left_prc", y = "loop_de_rad3_degree", color
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged PRC Volume", ylab = "Degrees Traveled at 3.0m") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #By repo
 c1c <- ggscatter(data_loop_women, x = "left_prc", y = "loop_de_rad3_degree", color = "repo_status",
@@ -19129,7 +19304,8 @@ c1c <- ggscatter(data_loop_women, x = "left_prc", y = "loop_de_rad3_degree", col
           xlab = "Averaged PRC Volume", ylab = "Degrees Traveled at 3.0m") +
     facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #Present
 c1
@@ -19150,7 +19326,8 @@ c1 <- ggscatter(data_loop, x = "right_prc", y = "loop_de_rad3_degree", color = "
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged PRC Volume", ylab = "Degrees Traveled at 3.0m", ) +
-    theme(legend.position = "top", legend.title=element_blank()) 
+    theme(legend.position = "top", legend.title=element_blank())  +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #sex
 c1a <- ggscatter(data_loop_women, x = "right_prc", y = "loop_de_rad3_degree", color = "red", alpha = 0.6, title = "Women",
@@ -19162,7 +19339,8 @@ c1a <- ggscatter(data_loop_women, x = "right_prc", y = "loop_de_rad3_degree", co
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged PRC Volume", ylab = "Degrees Traveled at 3.0m") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 c1b <- ggscatter(data_loop_men, x = "right_prc", y = "loop_de_rad3_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
@@ -19172,7 +19350,8 @@ c1b <- ggscatter(data_loop_men, x = "right_prc", y = "loop_de_rad3_degree", colo
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged PRC Volume", ylab = "Degrees Traveled at 3.0m") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #By repo
 c1c <- ggscatter(data_loop_women, x = "right_prc", y = "loop_de_rad3_degree", color = "repo_status",
@@ -19185,7 +19364,8 @@ c1c <- ggscatter(data_loop_women, x = "right_prc", y = "loop_de_rad3_degree", co
           xlab = "Averaged PRC Volume", ylab = "Degrees Traveled at 3.0m") +
     facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #Present
 c1
@@ -19207,7 +19387,8 @@ c1 <- ggscatter(data_loop, x = "avg_prc", y = "loop_de_avg_degree", color = "rep
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged PRC Volume", ylab = "Averaged \nDegrees Traveled", ) +
-    theme(legend.position = "top", legend.title=element_blank()) 
+    theme(legend.position = "top", legend.title=element_blank())  +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #sex
 c1a <- ggscatter(data_loop_women, x = "avg_prc", y = "loop_de_avg_degree", color = "red", alpha = 0.6, title = "Women",
@@ -19219,7 +19400,8 @@ c1a <- ggscatter(data_loop_women, x = "avg_prc", y = "loop_de_avg_degree", color
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged PRC Volume", ylab = "Averaged \nDegrees Traveled") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 c1b <- ggscatter(data_loop_men, x = "avg_prc", y = "loop_de_avg_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
@@ -19229,7 +19411,8 @@ c1b <- ggscatter(data_loop_men, x = "avg_prc", y = "loop_de_avg_degree", color =
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged PRC Volume", ylab = "Averaged \nDegrees Traveled") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #By repo
 c1c <- ggscatter(data_loop_women, x = "avg_prc", y = "loop_de_avg_degree", color = "repo_status",
@@ -19242,7 +19425,8 @@ c1c <- ggscatter(data_loop_women, x = "avg_prc", y = "loop_de_avg_degree", color
           xlab = "Averaged PRC Volume", ylab = "Averaged \nDegrees Traveled") +
     facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #Present
 c1
@@ -19264,7 +19448,8 @@ c1 <- ggscatter(data_loop, x = "left_prc", y = "loop_de_avg_degree", color = "re
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged PRC Volume", ylab = "Averaged \nDegrees Traveled", ) +
-    theme(legend.position = "top", legend.title=element_blank()) 
+    theme(legend.position = "top", legend.title=element_blank())  +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #sex
 c1a <- ggscatter(data_loop_women, x = "left_prc", y = "loop_de_avg_degree", color = "red", alpha = 0.6, title = "Women",
@@ -19276,7 +19461,8 @@ c1a <- ggscatter(data_loop_women, x = "left_prc", y = "loop_de_avg_degree", colo
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged PRC Volume", ylab = "Averaged \nDegrees Traveled") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 c1b <- ggscatter(data_loop_men, x = "left_prc", y = "loop_de_avg_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
@@ -19286,7 +19472,8 @@ c1b <- ggscatter(data_loop_men, x = "left_prc", y = "loop_de_avg_degree", color 
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged PRC Volume", ylab = "Averaged \nDegrees Traveled") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #By repo
 c1c <- ggscatter(data_loop_women, x = "left_prc", y = "loop_de_avg_degree", color = "repo_status",
@@ -19299,7 +19486,8 @@ c1c <- ggscatter(data_loop_women, x = "left_prc", y = "loop_de_avg_degree", colo
           xlab = "Averaged PRC Volume", ylab = "Averaged \nDegrees Traveled") +
     facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #Present
 c1
@@ -19320,7 +19508,8 @@ c1 <- ggscatter(data_loop, x = "right_prc", y = "loop_de_avg_degree", color = "r
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged PRC Volume", ylab = "Averaged \nDegrees Traveled", ) +
-    theme(legend.position = "top", legend.title=element_blank()) 
+    theme(legend.position = "top", legend.title=element_blank())  +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #sex
 c1a <- ggscatter(data_loop_women, x = "right_prc", y = "loop_de_avg_degree", color = "red", alpha = 0.6, title = "Women",
@@ -19332,7 +19521,8 @@ c1a <- ggscatter(data_loop_women, x = "right_prc", y = "loop_de_avg_degree", col
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged PRC Volume", ylab = "Averaged \nDegrees Traveled") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 c1b <- ggscatter(data_loop_men, x = "right_prc", y = "loop_de_avg_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
@@ -19342,7 +19532,8 @@ c1b <- ggscatter(data_loop_men, x = "right_prc", y = "loop_de_avg_degree", color
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged PRC Volume", ylab = "Averaged \nDegrees Traveled") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #By repo
 c1c <- ggscatter(data_loop_women, x = "right_prc", y = "loop_de_avg_degree", color = "repo_status",
@@ -19355,7 +19546,8 @@ c1c <- ggscatter(data_loop_women, x = "right_prc", y = "loop_de_avg_degree", col
           xlab = "Averaged PRC Volume", ylab = "Averaged \nDegrees Traveled") +
     facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #Present
 c1
@@ -19365,7 +19557,7 @@ c1
 All correlations were Pearson
 
 
-##### Angualr Error - 3.0m
+##### Angular Error - 3.0m
 
 ```{r include=TRUE, echo=FALSE}
 #all
@@ -21238,7 +21430,8 @@ c1 <- ggscatter(data_loop, x = "avg_sub", y = "loop_de_rad3_degree", color = "re
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged SUB Volume", ylab = "Degrees Traveled at 3.0m", ) +
-    theme(legend.position = "top", legend.title=element_blank()) 
+    theme(legend.position = "top", legend.title=element_blank())  +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #sex
 c1a <- ggscatter(data_loop_women, x = "avg_sub", y = "loop_de_rad3_degree", color = "red", alpha = 0.6, title = "Women",
@@ -21250,7 +21443,8 @@ c1a <- ggscatter(data_loop_women, x = "avg_sub", y = "loop_de_rad3_degree", colo
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged SUB Volume", ylab = "Degrees Traveled at 3.0m") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 c1b <- ggscatter(data_loop_men, x = "avg_sub", y = "loop_de_rad3_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
@@ -21260,7 +21454,8 @@ c1b <- ggscatter(data_loop_men, x = "avg_sub", y = "loop_de_rad3_degree", color 
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged SUB Volume", ylab = "Degrees Traveled at 3.0m") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #By repo
 c1c <- ggscatter(data_loop_women, x = "avg_sub", y = "loop_de_rad3_degree", color = "repo_status",
@@ -21273,7 +21468,8 @@ c1c <- ggscatter(data_loop_women, x = "avg_sub", y = "loop_de_rad3_degree", colo
           xlab = "Averaged SUB Volume", ylab = "Degrees Traveled at 3.0m") +
     facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #Present
 c1
@@ -21295,7 +21491,8 @@ c1 <- ggscatter(data_loop, x = "left_sub", y = "loop_de_rad3_degree", color = "r
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged SUB Volume", ylab = "Degrees Traveled at 3.0m", ) +
-    theme(legend.position = "top", legend.title=element_blank()) 
+    theme(legend.position = "top", legend.title=element_blank())  +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #sex
 c1a <- ggscatter(data_loop_women, x = "left_sub", y = "loop_de_rad3_degree", color = "red", alpha = 0.6, title = "Women",
@@ -21307,7 +21504,8 @@ c1a <- ggscatter(data_loop_women, x = "left_sub", y = "loop_de_rad3_degree", col
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged SUB Volume", ylab = "Degrees Traveled at 3.0m") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 c1b <- ggscatter(data_loop_men, x = "left_sub", y = "loop_de_rad3_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
@@ -21317,7 +21515,8 @@ c1b <- ggscatter(data_loop_men, x = "left_sub", y = "loop_de_rad3_degree", color
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged SUB Volume", ylab = "Degrees Traveled at 3.0m") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #By repo
 c1c <- ggscatter(data_loop_women, x = "left_sub", y = "loop_de_rad3_degree", color = "repo_status",
@@ -21330,7 +21529,8 @@ c1c <- ggscatter(data_loop_women, x = "left_sub", y = "loop_de_rad3_degree", col
           xlab = "Averaged SUB Volume", ylab = "Degrees Traveled at 3.0m") +
     facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #Present
 c1
@@ -21351,7 +21551,8 @@ c1 <- ggscatter(data_loop, x = "right_sub", y = "loop_de_rad3_degree", color = "
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged SUB Volume", ylab = "Degrees Traveled at 3.0m", ) +
-    theme(legend.position = "top", legend.title=element_blank()) 
+    theme(legend.position = "top", legend.title=element_blank())  +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #sex
 c1a <- ggscatter(data_loop_women, x = "right_sub", y = "loop_de_rad3_degree", color = "red", alpha = 0.6, title = "Women",
@@ -21363,7 +21564,8 @@ c1a <- ggscatter(data_loop_women, x = "right_sub", y = "loop_de_rad3_degree", co
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged SUB Volume", ylab = "Degrees Traveled at 3.0m") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 c1b <- ggscatter(data_loop_men, x = "right_sub", y = "loop_de_rad3_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
@@ -21373,7 +21575,8 @@ c1b <- ggscatter(data_loop_men, x = "right_sub", y = "loop_de_rad3_degree", colo
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged SUB Volume", ylab = "Degrees Traveled at 3.0m") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #By repo
 c1c <- ggscatter(data_loop_women, x = "right_sub", y = "loop_de_rad3_degree", color = "repo_status",
@@ -21386,7 +21589,8 @@ c1c <- ggscatter(data_loop_women, x = "right_sub", y = "loop_de_rad3_degree", co
           xlab = "Averaged SUB Volume", ylab = "Degrees Traveled at 3.0m") +
     facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #Present
 c1
@@ -21408,7 +21612,8 @@ c1 <- ggscatter(data_loop, x = "avg_sub", y = "loop_de_avg_degree", color = "rep
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged SUB Volume", ylab = "Averaged \nDegrees Traveled", ) +
-    theme(legend.position = "top", legend.title=element_blank()) 
+    theme(legend.position = "top", legend.title=element_blank())  +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #sex
 c1a <- ggscatter(data_loop_women, x = "avg_sub", y = "loop_de_avg_degree", color = "red", alpha = 0.6, title = "Women",
@@ -21420,7 +21625,8 @@ c1a <- ggscatter(data_loop_women, x = "avg_sub", y = "loop_de_avg_degree", color
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged SUB Volume", ylab = "Averaged \nDegrees Traveled") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 c1b <- ggscatter(data_loop_men, x = "avg_sub", y = "loop_de_avg_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
@@ -21430,7 +21636,8 @@ c1b <- ggscatter(data_loop_men, x = "avg_sub", y = "loop_de_avg_degree", color =
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged SUB Volume", ylab = "Averaged \nDegrees Traveled") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #By repo
 c1c <- ggscatter(data_loop_women, x = "avg_sub", y = "loop_de_avg_degree", color = "repo_status",
@@ -21443,7 +21650,8 @@ c1c <- ggscatter(data_loop_women, x = "avg_sub", y = "loop_de_avg_degree", color
           xlab = "Averaged SUB Volume", ylab = "Averaged \nDegrees Traveled") +
     facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #Present
 c1
@@ -21463,7 +21671,8 @@ c1 <- ggscatter(data_loop, x = "left_sub", y = "loop_de_avg_degree", color = "re
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged SUB Volume", ylab = "Averaged \nDegrees Traveled", ) +
-    theme(legend.position = "top", legend.title=element_blank()) 
+    theme(legend.position = "top", legend.title=element_blank())  +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #sex
 c1a <- ggscatter(data_loop_women, x = "left_sub", y = "loop_de_avg_degree", color = "red", alpha = 0.6, title = "Women",
@@ -21475,7 +21684,8 @@ c1a <- ggscatter(data_loop_women, x = "left_sub", y = "loop_de_avg_degree", colo
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged SUB Volume", ylab = "Averaged \nDegrees Traveled") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 c1b <- ggscatter(data_loop_men, x = "left_sub", y = "loop_de_avg_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
@@ -21485,7 +21695,8 @@ c1b <- ggscatter(data_loop_men, x = "left_sub", y = "loop_de_avg_degree", color 
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged SUB Volume", ylab = "Averaged \nDegrees Traveled") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #By repo
 c1c <- ggscatter(data_loop_women, x = "left_sub", y = "loop_de_avg_degree", color = "repo_status",
@@ -21498,7 +21709,8 @@ c1c <- ggscatter(data_loop_women, x = "left_sub", y = "loop_de_avg_degree", colo
           xlab = "Averaged SUB Volume", ylab = "Averaged \nDegrees Traveled") +
     facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #Present
 c1
@@ -21518,7 +21730,8 @@ c1 <- ggscatter(data_loop, x = "right_sub", y = "loop_de_avg_degree", color = "r
           cor.method = "pearson",
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged SUB Volume", ylab = "Averaged \nDegrees Traveled", ) +
-    theme(legend.position = "top", legend.title=element_blank()) 
+    theme(legend.position = "top", legend.title=element_blank())  +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #sex
 c1a <- ggscatter(data_loop_women, x = "right_sub", y = "loop_de_avg_degree", color = "red", alpha = 0.6, title = "Women",
@@ -21530,7 +21743,8 @@ c1a <- ggscatter(data_loop_women, x = "right_sub", y = "loop_de_avg_degree", col
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged SUB Volume", ylab = "Averaged \nDegrees Traveled") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 c1b <- ggscatter(data_loop_men, x = "right_sub", y = "loop_de_avg_degree", color = "#00AFBB", alpha = 0.6, title = "Men",
           add = "reg.line",
           add.params = list(color = "black", fill = "lightgray"), # Customize reg. line
@@ -21540,7 +21754,8 @@ c1b <- ggscatter(data_loop_men, x = "right_sub", y = "loop_de_avg_degree", color
           cor.coeff.args = list(label.sep = "\n"),
           xlab = "Averaged SUB Volume", ylab = "Averaged \nDegrees Traveled") +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #By repo
 c1c <- ggscatter(data_loop_women, x = "right_sub", y = "loop_de_avg_degree", color = "repo_status",
@@ -21553,7 +21768,8 @@ c1c <- ggscatter(data_loop_women, x = "right_sub", y = "loop_de_avg_degree", col
           xlab = "Averaged SUB Volume", ylab = "Averaged \nDegrees Traveled") +
     facet_wrap(. ~ repo_status, scale = "free", ncol = 3) +
      theme_bw() +
-     theme(legend.position = "none")
+     theme(legend.position = "none") +
+  geom_hline(yintercept=360, linetype="dashed", color = "green", size=1)
 
 #Present
 c1
