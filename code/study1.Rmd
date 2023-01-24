@@ -28,7 +28,7 @@ library(readr)
 ```
 
 
-*Modified on:* December 22nd, 2022
+*Modified on:* January 19th, 2022
 
 # Introduction
 
@@ -207,6 +207,8 @@ t.test(aim1_women$dsp_path_efficiency_grid, aim1_women$dsp_path_efficiency_grid_
 
 
 Difference between DSP path efficiency using grid distance and grid distance weighted are not statistically different, so use the weighted version.
+
+For now, MAZE path efficiency scores have been updated but are not yet finalized (January 17th, 2022).
 
 
 # Results
