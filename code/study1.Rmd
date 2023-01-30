@@ -548,7 +548,7 @@ ggplot(data = aim1_women, aes(x = repo_status,
   theme(axis.title = element_text(size = 11, face = "bold"), 
         axis.text = element_text(size= 10))
 
-
+#ggsave("progesterone_bar.png")
 
 
 #FSH plot
@@ -567,7 +567,7 @@ ggplot(data = aim1_women, aes(x = repo_status,
   
   #Change labels
   labs(x = "Reproductive Status",
-       y = "FSH (mIU/mL)\n",
+       y = "Follicle Stimulating Hormone (mIU/mL)\n",
        tag = "C") +
   
   #Change colors of bars
@@ -591,16 +591,20 @@ ggplot(data = aim1_women, aes(x = repo_status,
 #ANOVA of hormones
 hormone_mod <- aov(estradiol_spatial_pg_ml ~ repo_status,
       data = aim1_women)
+summary(hormone_mod)
 TukeyHSD(hormone_mod)
 
 hormone_mod <- aov(progesterone_spatial_ng_ml ~ repo_status,
       data = aim1_women)
+summary(hormone_mod)
 TukeyHSD(hormone_mod)
 
 hormone_mod2 <- aov(fsh_spatial_miu_ml ~ repo_status,
       data = aim1_women)
+summary(hormone_mod2)
 TukeyHSD(hormone_mod2)
 ```
+
 Estradiol is statistically significant between all pairs of reproductive groups (at least *p* < 0.05), as well as FSH (at least *p* < 0.001). Progesterone was only different between pre and post (*p* < 0.01).
 
 
