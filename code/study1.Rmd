@@ -25,6 +25,7 @@ library(foreign)
 library(RColorBrewer)
 library(plotly)
 library(readr)
+library(DescTools)
 ```
 
 
@@ -293,7 +294,17 @@ cor.test(aim1_men_loop$testosterone_spatial_ng_dl,
          method = "pearson")
 ```
 
-Degrees traveled at 3.0m was negatively correlated with testosterone ($\rho$ = -0.484, *p* < 0.05). No other significant correlations for position error or angular error.
+```{r loop-men-de}
+#Get CI for rho
+DescTools::SpearmanRho(aim1_men_loop$testosterone_spatial_ng_dl,
+                       aim1_men_loop$loop_de_rad3_degree,
+                       use = "complete.obs",
+                       conf.level	= 0.95)
+```
+
+
+Degrees traveled at 3.0m was negatively correlated with testosterone ($\rho$ = -0.484, 95% CI = [-0.776, -0.022], *p* < 0.05). No other significant correlations for position error or angular error.
+
 
 ```{r loop-plot, include=TRUE, echo=FALSE}
 ggplot(data = aim1_men_loop, aes(x = testosterone_spatial_ng_dl,
@@ -305,17 +316,18 @@ ggplot(data = aim1_men_loop, aes(x = testosterone_spatial_ng_dl,
   
   #Add LM line
   geom_smooth(
-              # method = 'loess',
-              # formula = 'y ~ x',
+              #method = 'loess',
+              #formula = 'y ~ x',
               method = lm,
-              formula = y ~ splines::bs(x, 0.5), 
+              #formula = y ~ splines::bs(x, 0.5),
+              formula = y ~ poly(x, 2),
               se = FALSE,
               color = "grey50") +
   
   #Change labels
   labs(x = "\nTestosterone (ng/dL)",
-       y = "Degrees Traveled (3.0m)",
-       caption = "Smoothing applied using `method = lm` and `formula = y ~ splines::bs(x, 0.5)`") +
+       y = "Degrees Traveled at 3.0m\n",
+       caption = "Smoothing applied using `method = lm` and `formula = y ~ poly(x, 2)`") +
   
   #Change theme
   theme_minimal() +
@@ -323,10 +335,13 @@ ggplot(data = aim1_men_loop, aes(x = testosterone_spatial_ng_dl,
   #Customize theme
   theme(axis.title = element_text(size = 11, face = "bold"),
         axis.title.x = element_text(vjust = 2),
-        axis.text = element_text(size= 10))
+        axis.text = element_text(size= 10)) +
+  
+  #Add dashed grey line
+  geom_hline(yintercept=360, linetype="dashed", color = "grey", size=1)
 
 #save
-#ggsave("study1_loop_t_spatial_gam.png")
+#ggsave("study1_loop_de_testosterone.png")
 ```
 
 
@@ -411,6 +426,15 @@ cor.test(aim1_men$testosterone_spatial_ng_dl,
          conf.level = 0.95,
          method = "pearson")
 ```
+
+```{r}
+#Get CI for rho testosterone
+DescTools::SpearmanRho(aim1_men$testosterone_spatial_ng_dl,
+                       aim1_men$dsp_si_true_pct,
+                       use = "complete.obs",
+                       conf.level	= 0.95)
+```
+
 
 No significant correlations for wayfinding success, solution index, or path efficiency
 
@@ -886,6 +910,26 @@ cor.test(aim1_women_dsp$fsh_spatial_miu_ml,
 
 No correlation for wayfinding success or path efficiency, but significant positive correlation for solution index for estradiol ($\rho$ = 0.421, *p* < 0.01) and negative marginal correlation for FSH ($\rho$ = -0.281, *p* = 0.058).
 
+```{r dsp-women-si}
+#Get CI for rho estradiol
+DescTools::SpearmanRho(aim1_women_dsp$estradiol_spatial_pg_ml,
+                       aim1_women_dsp$dsp_si_true_pct,
+                       use = "complete.obs",
+                       conf.level	= 0.95)
+
+#Get CI for rho FSH
+DescTools::SpearmanRho(aim1_women_dsp$fsh_spatial_miu_ml,
+                       aim1_women_dsp$dsp_si_true_pct,
+                       use = "complete.obs",
+                       conf.level	= 0.95)
+
+#Get CI for rho progesterone
+DescTools::SpearmanRho(aim1_women_dsp$progesterone_spatial_ng_ml,
+                       aim1_women_dsp$dsp_si_true_pct,
+                       use = "complete.obs",
+                       conf.level	= 0.95)
+```
+
 
 ```{r dsp-anova}
 si_mod <- aov(dsp_si_true_pct ~ repo_status,
@@ -915,7 +959,9 @@ a <- ggplot(data = aim1_women_dsp, aes(x = estradiol_spatial_pg_ml,
              size = 3, alpha = 0.6, show.legend = FALSE) +
   
   #Add LM line
-  geom_smooth(method = "gam", formula = y ~ s(x, bs = "cs"),
+  geom_smooth(
+    method = lm, formula = y ~ poly(x, 2),
+    #method = "gam", formula = y ~ s(x, bs = "cs"),
               se = FALSE,
               color = "grey50") +
   
@@ -948,14 +994,17 @@ b <- ggplot(data = aim1_women_dsp, aes(x = fsh_spatial_miu_ml,
              size = 3, alpha = 0.6) +
   
   #Add LM line
-  geom_smooth(method = "gam", formula = y ~ s(x, bs = "cs"),
+  geom_smooth(
+    method = lm, formula = y ~ poly(x, 2),
+    #method = "gam", formula = y ~ s(x, bs = "cs"),
               se = FALSE,
               color = "grey50") +
   
   #Change labels
   labs(x = "\nFollicle Stimulating Hormone (mIU/mL)",
        y = " ",
-       color = "Reproductive Status") +
+       color = "Reproductive Status",
+       caption = "Smoothing applied using `method = lm` and `formula = y ~ poly(x, 2)`") +
   
   #Change color of points
   scale_color_manual(values = c("cadetblue4", "mediumvioletred", "darkorange")) +
@@ -979,7 +1028,7 @@ combined <- a + b & theme(legend.position = "top")
 combined + plot_layout(guides = "collect")
 
 #save
-#ggsave("study1_dsp_e_fsh_spatial_gam.png")
+#ggsave("study1_dsp_si_estradiol_fsh.png")
 ```
 
 
@@ -1280,13 +1329,13 @@ a1+a2
 
 - Men were tested separately for the relationship between testosterone and spatial navigation behaviors, while women were tested for the relationships between estradiol, progesterone, FSH and spatial navigation behaviors.
 
-- No significant correlations observed among men.
+- LOOP degrees traveled at 3.0m was negatively correlation with testosterone for men ($\rho$ = -0.484, 95% CI = [-0.776, -0.022], *p* < 0.05).
 
 - Estradiol, progesterone, and FSH were skewed, so associations with these hormones were using Spearman rank correlations.
 
 - No significant correlations for LOOP or MAZE among women.
 
-- While there were no significant correlations for DSP wayfinding success or path efficiency, there was a positive correlation between estradiol and solution index ($\rho$ = 0.421, *p* < 0.01, Spearman), and a marginal negative association between FSH and solution index ($\rho$ = -0.281, *p* = 0.058, Spearman). There was also no significant correlation with progesterone and solution index ($\rho$ = 0.16, *p* = 0.29, Spearman). This was true when using hormone measurements from spatial timepoints.
+- While there were no significant correlations for DSP wayfinding success or path efficiency, there was a positive correlation between estradiol and solution index ($\rho$ = 0.421, 95% CI = [0.153, 0.632], *p* < 0.01, Spearman), and a marginal negative association between FSH and solution index ($\rho$ = -0.281, 95% CI = [-0.529, 0.010], *p* = 0.058, Spearman). There was also no significant correlation with progesterone and solution index ($\rho$ = 0.16, 95% CI = [-0.136, 0.431], *p* = 0.29, Spearman). This was true when using hormone measurements from spatial timepoints.
 
 - ANOVA results reveal that difference in DSP solution index by reproductive status was not significant. 
 
