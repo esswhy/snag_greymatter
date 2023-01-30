@@ -1361,6 +1361,6 @@ a1+a2
 
 - ANOVA results reveal that difference in DSP solution index by reproductive status was not significant. 
 
-- When using estradiol to FSH ratio (or FSH to estradiol ratio) as a single measure for hormone concentration, the relationship with DSP solution index remained significant ($\rho$ = 0.420, *p* < 0.01, Spearman).
+- When using estradiol to FSH ratio (or FSH to estradiol ratio) as a single measure for hormone concentration, the relationship with DSP solution index remained significant ($\rho$ = 0.420, 95% CI = [0.148, 0.633], *p* < 0.01, Spearman).
 
 
