@@ -326,7 +326,11 @@ ggplot(data = aim1_men_loop, aes(x = testosterone_spatial_ng_dl,
   
   #Change labels
   labs(x = "\nTestosterone (ng/dL)",
-       y = "Degrees Traveled at 3.0m\n",
+       y = expression(atop(paste(bold('Degree ('),
+                                 bold(degree),
+                                 bold(')')
+                                 ))), 
+       title = "Degrees Traveled at Radius 3.0m\n",
        caption = "Smoothing applied using `method = lm` and `formula = y ~ poly(x, 2)`") +
   
   #Change theme
@@ -334,6 +338,7 @@ ggplot(data = aim1_men_loop, aes(x = testosterone_spatial_ng_dl,
   
   #Customize theme
   theme(axis.title = element_text(size = 11, face = "bold"),
+        plot.title = element_text(hjust = 0.5),
         axis.title.x = element_text(vjust = 2),
         axis.text = element_text(size= 10)) +
   
@@ -1205,6 +1210,19 @@ cor.test(aim1_women$fsh_e_ratio,
 #Solution index is still significant with the ratios 
 ```
 
+
+```{r loop-ratio-ci}
+#Count sample size for ratio
+aim1_women %>%
+  select(e_fsh_ratio) %>% 
+  summarize(count = sum(!is.na(e_fsh_ratio)))
+
+#Get CI for rho
+DescTools::SpearmanRho(aim1_women$e_fsh_ratio,
+                       aim1_women$dsp_si_true_pct,
+                       use = "complete.obs",
+                       conf.level	= 0.95)
+```
 
 
 ```{r, results='hide'}
