@@ -1015,9 +1015,9 @@ a <- ggplot(data = aim1_women_dsp, aes(x = estradiol_spatial_pg_ml,
   
   #Change labels
   labs(x = expression(paste(bold("17"),
-                                 bold(beta),
-                                 bold("-Estradiol (pg/mL)")),
-                           ),
+                            bold(beta),
+                            bold("-Estradiol (pg/mL)"))
+                      ),
        y = "Solution Index (%)\n",
        color = "Reproductive Status") +
   
@@ -1049,7 +1049,7 @@ b <- ggplot(data = aim1_women_dsp, aes(x = fsh_spatial_miu_ml,
               color = "grey50") +
   
   #Change labels
-  labs(x = "\nFollicle Stimulating Hormone (mIU/mL)",
+  labs(x = "\nFSH (mIU/mL)",
        y = " ",
        color = "Reproductive Status",
        caption = "Smoothing applied using `method = lm` and `formula = y ~ poly(x, 2)`") +
