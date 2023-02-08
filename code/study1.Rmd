@@ -29,7 +29,7 @@ library(DescTools)
 ```
 
 
-*Modified on:* January 19th, 2022
+*Modified on:* February 8th, 2022
 
 # Introduction
 
@@ -587,7 +587,7 @@ ggplot(data = aim1_women, aes(x = repo_status,
 
 
 
-```{r}
+```{r hormones-anova}
 #ANOVA of hormones
 hormone_mod <- aov(estradiol_spatial_pg_ml ~ repo_status,
       data = aim1_women)
@@ -605,8 +605,41 @@ summary(hormone_mod2)
 TukeyHSD(hormone_mod2)
 ```
 
-Estradiol is statistically significant between all pairs of reproductive groups (at least *p* < 0.05), as well as FSH (at least *p* < 0.001). Progesterone was only different between pre and post (*p* < 0.01).
 
+
+```{r hormones-nonnormal}
+#Kruskal-Wallis rank sum test for non-normal DV of one-way ANOVA
+
+### Estradiol
+kruskal.test(estradiol_spatial_pg_ml ~ repo_status,
+      data = aim1_women) #p < 0.001
+#Check pairwise comparisons using Wilcoxon rank sum test
+
+# Benjamini, Hochberg, and Yekutieli control the false discovery rate, the expected proportion of false discoveries amongst the rejected hypotheses. The false discovery rate is a less stringent condition than the family-wise error rate, so these methods are more powerful than the others.
+pairwise.wilcox.test(aim1_women$estradiol_spatial_pg_ml, 
+                     aim1_women$repo_status,
+                 p.adjust.method = "BH") #pre-peri < 0.01, rest < 0.001
+
+### Progesterone
+kruskal.test(progesterone_spatial_ng_ml ~ repo_status,
+      data = aim1_women) #p = 0.0039
+pairwise.wilcox.test(aim1_women$progesterone_spatial_ng_ml, 
+                     aim1_women$repo_status,
+                 p.adjust.method = "BH") #pre-peri not sig
+#pre-post is 0.0055, peri-post is 0.035
+
+
+### FSH
+kruskal.test(fsh_spatial_miu_ml ~ repo_status,
+      data = aim1_women) #p < 0.001
+pairwise.wilcox.test(aim1_women$fsh_spatial_miu_ml, 
+                     aim1_women$repo_status,
+                 p.adjust.method = "BH") # all p < 0.001
+```
+
+Kruskal-Wallis rank sum test was used for non-normal comparison between reproductive groups for estradiol, progesterone, and FSH dependent variables. If significant, pairwise comparisons were made using Wilcoxon rank sum test with Benjamini, Hochberg, and Yekutieli *p*-adjustments to control the false discovery rate.
+
+Estradiol is statistically significant between all pairs of reproductive groups (at least *p* < 0.01), as well as FSH (at least *p* < 0.001). Progesterone was different between pre-post (*p* < 0.01) and peri-post (*p* < 0.05).
 
 
 ```{r normality-check-women}
@@ -940,13 +973,19 @@ DescTools::SpearmanRho(aim1_women_dsp$progesterone_spatial_ng_ml,
 ```
 
 
-```{r dsp-anova}
+```{r dsp-anova-kruskal}
+#ANOVA
 si_mod <- aov(dsp_si_true_pct ~ repo_status,
               data = aim1_women_dsp)
 summary(si_mod)
+
+
+#Kruskal-Wallis test
+kruskal.test(dsp_si_true_pct ~ repo_status,
+              data = aim1_women_dsp) #not significant 
 ```
 
-ANOVA of DSP solution index by reproductive status for women was not significant.
+Kruskal-Wallis test of DSP solution index by reproductive status for women was not significant.
 
 
 ```{r dsp-plot, include = TRUE, echo=FALSE}
@@ -1359,7 +1398,7 @@ a1+a2
 
 - While there were no significant correlations for DSP wayfinding success or path efficiency, there was a positive correlation between estradiol and solution index ($\rho$ = 0.421, 95% CI = [0.153, 0.632], *p* < 0.01, Spearman), and a marginal negative association between FSH and solution index ($\rho$ = -0.281, 95% CI = [-0.529, 0.010], *p* = 0.058, Spearman). There was also no significant correlation with progesterone and solution index ($\rho$ = 0.16, 95% CI = [-0.136, 0.431], *p* = 0.29, Spearman). This was true when using hormone measurements from spatial timepoints.
 
-- ANOVA results reveal that difference in DSP solution index by reproductive status was not significant. 
+- Kruskla-Wallis test reveals that DSP solution index by reproductive status was not significant. 
 
 - When using estradiol to FSH ratio (or FSH to estradiol ratio) as a single measure for hormone concentration, the relationship with DSP solution index remained significant ($\rho$ = 0.420, 95% CI = [0.148, 0.633], *p* < 0.01, Spearman).
 
