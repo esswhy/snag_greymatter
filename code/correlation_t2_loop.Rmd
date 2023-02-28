@@ -60,7 +60,7 @@ For left and right subfields, they have already been corrected with TIV
 - Left and right volumes are by adding respective left and right subfields
 
 
-```{r sample-check}
+```{r sample-check, include=TRUE, echo=FALSE}
 #Read in the data
 data <- read_csv(here("data", "HAS_SNAG_mastersheet_tidy.csv"))
 
@@ -268,15 +268,6 @@ test <- test %>%
 test <- test %>% 
   filter(t2hipp_useable == "Yes") #n=22
 ```
-
-
-For women, 60 had T2 hipp scan completed and completed an aspect of spatial navigation task but 5 were removed due to poor quality scans. For men, 25 had T2 hipp scan completed and completed an aspect of spatial navigation task but 3 were removed for poor quality scans. Thus *n* = 55 for women and *n* = 22 for men.
-
-All sample size for T2hipp x hormone correlations for women are listed in the table above. For men, because some participants did not have all hormones evaluated (e.g, only testosterone available), the sample size for the correlations for that hormone and with T1 hipp volume will be different.
-
-For men, the accurate sample sizes would be:
-
-- LOOP: *n* = 10 DHEAS, *n* = 11 for SHBG and T
 
 
 
