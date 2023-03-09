@@ -11,7 +11,7 @@ output:
 ---
 
 ```{r setup, include=FALSE, warning = FALSE, message = FALSE}
-knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE,
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE,
                       include = FALSE, fig.align = "center")
 
 #Attach libraries
@@ -1079,6 +1079,100 @@ combined + plot_layout(guides = "collect")
 #ggsave("study1_dsp_si_estradiol_fsh.png")
 ```
 
+```{r dsp-plot-emily, include=FALSE}
+#E and FSH plot with SI
+#n=46
+
+a <- ggplot(data = aim1_women_dsp, aes(x = estradiol_spatial_pg_ml,
+                                        y = dsp_si_true_pct)) +
+  
+  #Define scatter, change size and alpha
+  geom_point(size = 3, alpha = 0.6, color = "black",
+             show.legend = FALSE) +
+  
+  #Add LM line
+  geom_smooth(method = lm, se = TRUE,
+              color = "blue") +
+  
+  #Change labels
+  labs(x = expression(paste(bold("17"),
+                            bold(beta),
+                            bold("-Estradiol (pg/mL)"))
+                      ),
+       y = "Solution Index\n") +
+  
+  theme_minimal() +
+  
+  #Customize theme
+  theme(axis.title = element_text(size = 11, face = "bold"), 
+        axis.title.x = element_text(vjust = -0.5),
+        axis.text = element_text(size= 10))
+
+
+
+b <- ggplot(data = aim1_women_dsp, aes(x = fsh_spatial_miu_ml,
+                            y = dsp_si_true_pct)) +
+  
+  #Define scatter, change size and alpha
+  geom_point(size = 3, alpha = 0.6, color = "black") +
+  
+  #Add LM line
+  geom_smooth(method = lm, se = TRUE,
+              color = "blue") +
+  
+  #Change labels
+  labs(x = "\nFSH (mIU/mL)",
+       y = " ") +
+  
+  
+  theme_minimal() +
+  
+  #Customize theme
+  theme(axis.title = element_text(size = 11, face = "bold"),
+        axis.title.x = element_text(vjust = 2),
+        axis.text = element_text(size= 10),
+        
+        #Legend
+        #legend.title = element_text(face = "bold"),
+        legend.position = "top"
+        
+        )
+
+
+#Combine
+combined <- a + b & theme(legend.position = "top")
+combined + plot_layout(guides = "collect")
+
+
+#save
+#ggsave("study1_dsp_si_estradiol_fsh.png")
+```
+
+```{r include=FALSE}
+a <- ggscatter(aim1_women_dsp, 
+          x = "fsh_spatial_miu_ml", y = "dsp_si_true_pct",
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "FSH (mIU/mL)", ylab = "Solution Index") 
+
+b <- ggscatter(aim1_women_dsp, 
+          x = "estradiol_spatial_pg_ml", y = "dsp_si_true_pct",
+          add = "reg.line",
+          add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+          cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+          conf.int = TRUE, 
+          cor.method = "spearman",
+          cor.coeff.args = list(label.sep = "\n"),
+          xlab = "Estradiol (pg/mL)", ylab = "Solution Index") 
+
+a+b
+
+#ggsave("dsp_si_for_emily.png")
+```
 
 
 
