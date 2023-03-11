@@ -478,7 +478,7 @@ fhormones_fig <- aim1_women %>%
 
 ```{r hormone-plot, include = TRUE, echo=FALSE}
 #Estradiol plot
-ggplot(data = aim1_women, aes(x = repo_status, 
+a <- ggplot(data = aim1_women, aes(x = repo_status, 
                             y = estradiol_spatial_pg_ml, 
                             fill = repo_status))+
   
@@ -492,24 +492,30 @@ ggplot(data = aim1_women, aes(x = repo_status,
                width = 0.15, size = 0.7)+
   
   #Change labels
-  labs(x = "Reproductive Status",
-       y = expression(atop(paste(bold("17"),
+  labs(
+       x = "",
+       # y = expression(atop(paste(bold("17"),
+       #                           bold(beta),
+       #                           bold("-Estradiol (pg/mL)")),
+       #                     )),
+       y = expression(paste(bold("17"),
                                  bold(beta),
-                                 bold("-Estradiol (pg/mL)")),
-                           )),
+                                 bold("-Estradiol (pg/mL)"))),
        tag = "A") +
   
   #Change colors of bars
   #Reverse color scale
-  scale_fill_brewer(palette = "RdPu",
-                    direction = -1)+
+  #scale_fill_brewer(palette = "RdPu",direction = -1)+
+  
+  #Change color of points
+  scale_fill_manual(values = c("cadetblue4", "mediumvioletred", "darkorange")) +
   
   #Change theme
   theme_classic() +
   
   #Customize theme
-  theme(axis.title = element_text(size = 11, face = "bold"), 
-        axis.text = element_text(size= 10))
+  theme(axis.title = element_text(size = 13.5, face = "bold"), 
+        axis.text = element_text(size= 13))
 
 #ggsave("estradiol_bar.png")
 
@@ -518,7 +524,7 @@ ggplot(data = aim1_women, aes(x = repo_status,
 
 
 #Progesterone plot
-ggplot(data = aim1_women, aes(x = repo_status,
+b <- ggplot(data = aim1_women, aes(x = repo_status,
                               y = progesterone_spatial_ng_ml,
                               fill = repo_status)) +
   
@@ -532,27 +538,28 @@ ggplot(data = aim1_women, aes(x = repo_status,
                width = 0.15, size = 0.7)+
   
   #Change labels
-  labs(x = "Reproductive Status",
+  labs(
+       x = "",
        y = "Progesterone (ng/mL)\n",
        tag = "B") +
   
   #Change colors of bars
   #Reverse color scale
-  scale_fill_brewer(palette = "RdPu",
-                    direction = -1)+
+  #scale_fill_brewer(palette = "RdPu",direction = -1)+
+  scale_fill_manual(values = c("cadetblue4", "mediumvioletred", "darkorange")) +
   
   #Change theme
   theme_classic() +
   
   #Customize theme
-  theme(axis.title = element_text(size = 11, face = "bold"), 
-        axis.text = element_text(size= 10))
+  theme(axis.title = element_text(size = 13.5, face = "bold"), 
+        axis.text = element_text(size= 13))
 
 #ggsave("progesterone_bar.png")
 
 
 #FSH plot
-ggplot(data = aim1_women, aes(x = repo_status, 
+c <- ggplot(data = aim1_women, aes(x = repo_status, 
                             y = fsh_spatial_miu_ml, 
                             fill = repo_status))+
   
@@ -566,23 +573,29 @@ ggplot(data = aim1_women, aes(x = repo_status,
                width = 0.15, size = 0.7)+
   
   #Change labels
-  labs(x = "Reproductive Status",
-       y = "Follicle Stimulating Hormone (mIU/mL)\n",
+  labs(
+       x = "",
+       y = "FSH (mIU/mL)\n",
        tag = "C") +
   
   #Change colors of bars
   #Reverse color scale
-  scale_fill_brewer(palette = "RdPu",
-                    direction = -1)+
+  #scale_fill_brewer(palette = "RdPu",direction = -1)+
+  scale_fill_manual(values = c("cadetblue4", "mediumvioletred", "darkorange")) +
   
   #Change theme
   theme_classic() +
   
   #Customize theme
-  theme(axis.title = element_text(size = 11, face = "bold"), 
-        axis.text = element_text(size= 10))
+  theme(axis.title = element_text(size = 13.5, face = "bold"), 
+        axis.text = element_text(size= 13))
 
 #ggsave("fsh_bar.png")
+
+
+#Show all 3 figs together
+a+b+c + theme(axis.title.x=element_blank())
+#ggsave("hormones_bar.png")
 ```
 
 
