@@ -26,6 +26,7 @@ library(RColorBrewer)
 library(plotly)
 library(readr)
 library(DescTools)
+library(outliers)
 ```
 
 
@@ -263,6 +264,22 @@ shapiro.test(aim1_men_loop$loop_ae_avg_degree) #no
 shapiro.test(aim1_men_loop$testosterone_spatial_ng_dl) #no
 
 
+######## Outlier test for degrees 3.0m ########
+test <- grubbs.test(aim1_men_loop$loop_de_rad3_degree)
+test #highest value is an outlier (p-value = 0.001135)
+
+#What if we remove subject 354
+men_loop_no354 <- aim1_men_loop %>% filter(!subject_id %in% c(354))
+shapiro.test(men_loop_no354$loop_de_rad3_degree) #no
+#Corr
+cor.test(men_loop_no354$testosterone_spatial_ng_dl,
+         men_loop_no354$loop_de_rad3_degree,
+         conf.level = 0.95,
+         method = "pearson") #NOT SIG, p =0.13
+
+
+
+
 ########## Pearson for position error 3.0m
 cor.test(aim1_men_loop$testosterone_spatial_ng_dl,
          aim1_men_loop$loop_pe_rad3_m,
@@ -448,31 +465,53 @@ No significant correlations for wayfinding success, solution index, or path effi
 
 Hormones bar plot using spatial hormones
 
-```{r}
+```{r include=FALSE}
 #Summary of hormones
 ehormones_fig <- aim1_women %>% 
   group_by(repo_status) %>% 
-  summarize(mean_estradiol = mean(estradiol_spatial_pg_ml),
-            sd_estradiol = sd(estradiol_spatial_pg_ml),
+  summarize(mean_estradiol = mean(estradiol_spatial_pg_ml, na.rm=T),
+            sd_estradiol = sd(estradiol_spatial_pg_ml, na.rm=T),
             n_estradiol = n(),
             se_estradiol = sd(estradiol_spatial_pg_ml)/sqrt(n()), 
             .groups = "keep")
+#Number of n for estradiol
+ehormones_n <- aim1_women %>% 
+  select(repo_status, estradiol_spatial_pg_ml) %>% 
+  drop_na(estradiol_spatial_pg_ml) %>% 
+  group_by(repo_status) %>% 
+  dplyr::summarize(n_estradiol = n())
+ehormones_n
 
 phormones_fig <- aim1_women %>% 
   group_by(repo_status) %>% 
-  summarize(mean_progesterone = mean(progesterone_spatial_ng_ml),
-            sd_progesterone = sd(progesterone_spatial_ng_ml),
+  summarize(mean_progesterone = mean(progesterone_spatial_ng_ml, na.rm=T),
+            sd_progesterone = sd(progesterone_spatial_ng_ml, na.rm=T),
             n_progesterone = n(),
             se_progesterone = sd(progesterone_spatial_ng_ml)/sqrt(n()), 
             .groups = "keep")
+phormones_n <- aim1_women %>% 
+  select(repo_status, progesterone_spatial_ng_ml) %>% 
+  drop_na(progesterone_spatial_ng_ml) %>% 
+  group_by(repo_status) %>% 
+  dplyr::summarize(n_progesterone = n())
+phormones_n
+
 
 fhormones_fig <- aim1_women %>% 
   group_by(repo_status) %>% 
-  summarize(mean_estradiol = mean(fsh_spatial_miu_ml),
-            sd_estradiol = sd(fsh_spatial_miu_ml),
+  summarize(mean_estradiol = mean(fsh_spatial_miu_ml, na.rm=T),
+            sd_estradiol = sd(fsh_spatial_miu_ml, na.rm=T),
             n_estradiol = n(),
             se_estradiol = sd(fsh_spatial_miu_ml)/sqrt(n()), 
             .groups = "keep")
+fhormones_n <- aim1_women %>% 
+  select(repo_status, fsh_spatial_miu_ml) %>% 
+  drop_na(fsh_spatial_miu_ml) %>% 
+  group_by(repo_status) %>% 
+  dplyr::summarize(n_fsh = n())
+fhormones_n
+
+
 ```
 
 
@@ -890,6 +929,7 @@ aim1_women_dsp <- aim1_women %>%
                 fsh_spatial_miu_ml) %>% 
   filter(dsp_useable == "Yes")
 #n=47
+
 
 
 #Filter by available hormone
