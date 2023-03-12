@@ -251,9 +251,23 @@ aim1_men_loop <- aim1_men %>%
                 loop_de_rad3_degree, loop_de_avg_degree,
                 loop_ae_rad3_degree, loop_ae_avg_degree,
                 testosterone_spatial_ng_dl) %>% 
-  filter(loop_useable == "Yes",
-         is.na(testosterone_spatial_ng_dl) != TRUE)
-#n=21
+  filter(loop_useable == "Yes")
+         #is.na(testosterone_spatial_ng_dl) != TRUE)
+#n=22, otherwise n=21 for no T
+
+aim1_men_loop %>% #group_by(repo_status) %>% 
+  summarize(count = n(),
+            mean_pe3 = mean(loop_pe_rad3_m, na.rm=T),
+            sd_pe3 = sd(loop_pe_rad3_m, na.rm=T),
+            mean_de3 = mean(loop_de_rad3_degree, na.rm=T),
+            sd_de3 = sd(loop_de_rad3_degree, na.rm=T),
+            mean_de_avg = mean(loop_de_avg_degree),
+            sd_de_avg = sd(loop_de_avg_degree),
+            mean_ae3 = mean(loop_ae_rad3_degree, na.rm=T),
+            sd_ae3 = sd(loop_ae_rad3_degree, na.rm=T),
+            mean_ae_avg = mean(loop_ae_avg_degree),
+            sd_ae_avg = sd(loop_ae_avg_degree))
+
 
 #Normality test
 shapiro.test(aim1_men_loop$loop_pe_rad3_m) #no
@@ -337,7 +351,7 @@ ggplot(data = aim1_men_loop, aes(x = testosterone_spatial_ng_dl,
               #formula = 'y ~ x',
               method = lm,
               #formula = y ~ splines::bs(x, 0.5),
-              formula = y ~ poly(x, 2),
+              #formula = y ~ poly(x, 2),
               se = FALSE,
               color = "grey50") +
   
@@ -348,7 +362,8 @@ ggplot(data = aim1_men_loop, aes(x = testosterone_spatial_ng_dl,
                                  bold(')')
                                  ))), 
        title = "Degrees Traveled at Radius 3.0m\n",
-       caption = "Smoothing applied using `method = lm` and `formula = y ~ poly(x, 2)`") +
+       #caption = "Smoothing applied using `method = lm` and `formula = y ~ poly(x, 2)`"
+       ) +
   
   #Change theme
   theme_minimal() +
@@ -363,10 +378,54 @@ ggplot(data = aim1_men_loop, aes(x = testosterone_spatial_ng_dl,
   geom_hline(yintercept=360, linetype="dashed", color = "grey", size=1)
 
 #save
-#ggsave("study1_loop_de_testosterone.png")
+#ggsave("study1_loop_de_testosterone_lm.png")
 ```
 
 
+
+```{r loop-plot-outlier-rm, include=FALSE, echo=FALSE}
+ggplot(data = men_loop_no354, aes(x = testosterone_spatial_ng_dl,
+                                 y = loop_de_rad3_degree)) +
+  
+  #Define scatter, change size and alpha
+  geom_point(color = "#00AFBB", size = 3, 
+             alpha = 0.6, show.legend = FALSE) +
+  
+  #Add LM line
+  geom_smooth(
+              #method = 'loess',
+              #formula = 'y ~ x',
+              method = lm,
+              #formula = y ~ splines::bs(x, 0.5),
+              #formula = y ~ poly(x, 2),
+              se = FALSE,
+              color = "grey50") +
+  
+  #Change labels
+  labs(x = "\nTestosterone (ng/dL)",
+       y = expression(atop(paste(bold('Degree ('),
+                                 bold(degree),
+                                 bold(')')
+                                 ))), 
+       title = "Degrees Traveled at Radius 3.0m\n",
+       #caption = "Smoothing applied using `method = lm` and `formula = y ~ poly(x, 2)`"
+       ) +
+  
+  #Change theme
+  theme_minimal() +
+  
+  #Customize theme
+  theme(axis.title = element_text(size = 11, face = "bold"),
+        plot.title = element_text(hjust = 0.5),
+        axis.title.x = element_text(vjust = 2),
+        axis.text = element_text(size= 10)) +
+  
+  #Add dashed grey line
+  geom_hline(yintercept=360, linetype="dashed", color = "grey", size=1)
+
+#save
+#ggsave("study1_loop_de_testosterone_rm_lm.png")
+```
 
 
 ### MAZE
@@ -377,9 +436,17 @@ aim1_men_maze <- aim1_men %>%
   dplyr::select(subject_id, maze_useable, 
                 maze_accuracy_pct, maze_moves, maze_path_efficiency,
                 testosterone_spatial_ng_dl) %>% 
-  filter(maze_useable == "Yes",
-         is.na(testosterone_spatial_ng_dl) != TRUE)
+  filter(maze_useable == "Yes")
+         #is.na(testosterone_spatial_ng_dl) != TRUE)
 #n=23
+aim1_men_maze %>% #group_by(repo_status) %>% 
+  summarize(count = n(),
+            mean_succ = mean(maze_accuracy_pct),
+            sd_succ = sd(maze_accuracy_pct),
+            mean_moves = mean(maze_moves),
+            sd_moves = sd(maze_moves),
+            mean_pe = mean(maze_path_efficiency),
+            sd_pe = sd(maze_path_efficiency))
 
 #Normality test
 shapiro.test(aim1_men_maze$maze_accuracy_pct) #yes
@@ -419,9 +486,18 @@ aim1_men_dsp <- aim1_men %>%
                 dsp_success_pct, dsp_si_true_pct, 
                 dsp_path_efficiency_grid_weighted,
                 testosterone_spatial_ng_dl) %>% 
-    filter(dsp_useable == "Yes",
-         is.na(testosterone_spatial_ng_dl) != TRUE)
-#n=28
+    filter(dsp_useable == "Yes")
+         #is.na(testosterone_spatial_ng_dl) != TRUE)
+#n=29
+
+aim1_men_dsp %>%  #group_by(repo_status) %>% 
+  summarize(count = n(),
+            avg_succ = mean(dsp_success_pct),
+            sd_succ = sd(dsp_success_pct),
+            avg_si = mean(dsp_si_true_pct),
+            sd_si = sd(dsp_si_true_pct),
+            avg_pe = mean(dsp_path_efficiency_grid_weighted),
+            sd_pe = sd(dsp_path_efficiency_grid_weighted))
 
 #Normality test
 shapiro.test(aim1_men_dsp$dsp_success_pct) #no
@@ -735,11 +811,25 @@ aim1_women_loop <- aim1_women %>%
   filter(loop_useable == "Yes")
 #n=32
 
+#N by repo status
+aim1_women_loop %>% #group_by(repo_status) %>% 
+  summarize(count = n(),
+            mean_pe3 = mean(loop_pe_rad3_m, na.rm=T),
+            sd_pe3 = sd(loop_pe_rad3_m, na.rm=T),
+            mean_de3 = mean(loop_de_rad3_degree, na.rm=T),
+            sd_de3 = sd(loop_de_rad3_degree, na.rm=T),
+            mean_de_avg = mean(loop_de_avg_degree),
+            sd_de_avg = sd(loop_de_avg_degree),
+            mean_ae3 = mean(loop_ae_rad3_degree, na.rm=T),
+            sd_ae3 = sd(loop_ae_rad3_degree, na.rm=T),
+            mean_ae_avg = mean(loop_ae_avg_degree),
+            sd_ae_avg = sd(loop_ae_avg_degree))
+
 
 #Filter by available hormone
-aim1_women_loop %>% filter(is.na(estradiol_spatial_pg_ml) != TRUE) %>% count() #32
-aim1_women_loop %>% filter(is.na(progesterone_spatial_ng_ml) != TRUE) %>% count() #26
-aim1_women_loop %>% filter(is.na(fsh_spatial_miu_ml) != TRUE) %>% count() #26
+aim1_women_loop %>% filter(is.na(estradiol_spatial_pg_ml) != TRUE) %>% group_by(repo_status) %>% count() #32
+aim1_women_loop %>% filter(is.na(progesterone_spatial_ng_ml) != TRUE) %>% group_by(repo_status) %>%  count() #26
+aim1_women_loop %>% filter(is.na(fsh_spatial_miu_ml) != TRUE) %>% group_by(repo_status) %>% count() #26
 
 #Normality test
 shapiro.test(aim1_women_loop$loop_pe_rad3_m) #no
@@ -842,6 +932,16 @@ aim1_women_maze <- aim1_women %>%
   filter(maze_useable == "Yes")
 #n=64
 
+#Group by repo status
+aim1_women_maze %>% #group_by(repo_status) %>% 
+  summarize(count = n(),
+            mean_succ = mean(maze_accuracy_pct),
+            sd_succ = sd(maze_accuracy_pct),
+            mean_moves = mean(maze_moves),
+            sd_moves = sd(maze_moves),
+            mean_pe = mean(maze_path_efficiency),
+            sd_pe = sd(maze_path_efficiency))
+
 
 #Filter by available hormone
 aim1_women_maze %>% filter(is.na(estradiol_spatial_pg_ml) != TRUE) %>% count() #64
@@ -930,6 +1030,15 @@ aim1_women_dsp <- aim1_women %>%
   filter(dsp_useable == "Yes")
 #n=47
 
+#Group by repo status
+aim1_women_dsp %>%  #group_by(repo_status) %>% 
+  summarize(count = n(),
+            avg_succ = mean(dsp_success_pct),
+            sd_succ = sd(dsp_success_pct),
+            avg_si = mean(dsp_si_true_pct),
+            sd_si = sd(dsp_si_true_pct),
+            avg_pe = mean(dsp_path_efficiency_grid_weighted),
+            sd_pe = sd(dsp_path_efficiency_grid_weighted))
 
 
 #Filter by available hormone
@@ -1041,9 +1150,37 @@ kruskal.test(dsp_si_true_pct ~ repo_status,
 Kruskal-Wallis test of DSP solution index by reproductive status for women was not significant.
 
 
+```{r ttest-dsp-si, include=FALSE}
+#After checking differences in table for men vs women
+t.test(aim1_men_dsp$dsp_si_true_pct,
+       aim1_women_dsp$dsp_si_true_pct) #p=0.176
+
+
+#Number of place strategies overall?
+dsp_df <- read_csv(here("data", "dsp_midlife_behavior_variables.csv")) %>% 
+  clean_names() %>% 
+  rename(subject_id = subject_number)
+
+#Merge aim1 and dsp
+dsp_merge_m <- merge(aim1_men_dsp, dsp_df, by.x = "subject_id")
+dsp_merge_f <- merge(aim1_women_dsp, dsp_df, by.x = "subject_id")
+
+
+#Men number of place strategies
+dsp_merge_m %>% 
+  dplyr::summarize(n_place = mean(shortcuts_total/success),
+                  n_response = mean(learned_total/success))
+
+#Women number of place strategies
+dsp_merge_f %>% group_by(repo_status) %>% 
+  dplyr::summarize(n_place = mean(shortcuts_total/success),
+                  n_response = mean(learned_total/success))
+```
+
+
 ```{r dsp-plot, include = TRUE, echo=FALSE}
 #E and FSH plot with SI
-#n=46
+#n=46 FSH, n=47 estradiol
 aim1_women_dsp <- aim1_women %>% 
   dplyr::select(dsp_useable, dsp_success_pct, dsp_si_true_pct,
                 repo_status,
@@ -1061,7 +1198,8 @@ a <- ggplot(data = aim1_women_dsp, aes(x = estradiol_spatial_pg_ml,
   
   #Add LM line
   geom_smooth(
-    method = lm, formula = y ~ poly(x, 2),
+    method = lm, 
+    #formula = y ~ poly(x, 2),
     #method = "gam", formula = y ~ s(x, bs = "cs"),
               se = FALSE,
               color = "grey50") +
@@ -1096,7 +1234,8 @@ b <- ggplot(data = aim1_women_dsp, aes(x = fsh_spatial_miu_ml,
   
   #Add LM line
   geom_smooth(
-    method = lm, formula = y ~ poly(x, 2),
+    method = lm, 
+    #formula = y ~ poly(x, 2),
     #method = "gam", formula = y ~ s(x, bs = "cs"),
               se = FALSE,
               color = "grey50") +
@@ -1104,8 +1243,9 @@ b <- ggplot(data = aim1_women_dsp, aes(x = fsh_spatial_miu_ml,
   #Change labels
   labs(x = "\nFSH (mIU/mL)",
        y = " ",
-       color = "Reproductive Status",
-       caption = "Smoothing applied using `method = lm` and `formula = y ~ poly(x, 2)`") +
+       color = "Reproductive Status"
+       #caption = "Smoothing applied using `method = lm` and `formula = y ~ poly(x, 2)`"
+       ) +
   
   #Change color of points
   scale_color_manual(values = c("cadetblue4", "mediumvioletred", "darkorange")) +
@@ -1129,7 +1269,7 @@ combined <- a + b & theme(legend.position = "top")
 combined + plot_layout(guides = "collect")
 
 #save
-#ggsave("study1_dsp_si_estradiol_fsh.png")
+#ggsave("study1_dsp_si_estradiol_fsh_lm.png")
 ```
 
 ```{r dsp-plot-emily, include=FALSE}
