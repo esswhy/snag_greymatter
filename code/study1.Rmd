@@ -282,15 +282,22 @@ shapiro.test(aim1_men_loop$testosterone_spatial_ng_dl) #no
 test <- grubbs.test(aim1_men_loop$loop_de_rad3_degree)
 test #highest value is an outlier (p-value = 0.001135)
 
+test <- grubbs.test(men_loop_no354$loop_de_rad3_degree)
+test #next highest is also outlier p-value = 0.006373
+
 #What if we remove subject 354
 men_loop_no354 <- aim1_men_loop %>% filter(!subject_id %in% c(354))
+men_loop_both <- aim1_men_loop %>% filter(!subject_id %in% c(354, 320))
 shapiro.test(men_loop_no354$loop_de_rad3_degree) #no
 #Corr
 cor.test(men_loop_no354$testosterone_spatial_ng_dl,
          men_loop_no354$loop_de_rad3_degree,
          conf.level = 0.95,
          method = "pearson") #NOT SIG, p =0.13
-
+cor.test(men_loop_both$testosterone_spatial_ng_dl,
+         men_loop_both$loop_de_rad3_degree,
+         conf.level = 0.95,
+         method = "pearson") #NOT SIG, p =0.156
 
 
 
@@ -957,6 +964,15 @@ shapiro.test(aim1_women_maze$progesterone_spatial_ng_ml) #yes
 shapiro.test(aim1_women_maze$fsh_spatial_miu_ml) #yes
 
 
+##### Men vs women MOVES
+#p=0.09
+wilcox.test(aim1_men_maze$maze_moves, 
+            aim1_women_maze$maze_moves,
+            paired=FALSE, exact=FALSE, conf.int=TRUE)
+median(aim1_men_maze$maze_moves) #275
+median(aim1_women_maze$maze_moves) #268
+
+
 ########## Spearman for wayfinding success
 #Estradiol
 cor.test(aim1_women_maze$estradiol_spatial_pg_ml,
@@ -1151,11 +1167,6 @@ Kruskal-Wallis test of DSP solution index by reproductive status for women was n
 
 
 ```{r ttest-dsp-si, include=FALSE}
-#After checking differences in table for men vs women
-t.test(aim1_men_dsp$dsp_si_true_pct,
-       aim1_women_dsp$dsp_si_true_pct) #p=0.176
-
-
 #Number of place strategies overall?
 dsp_df <- read_csv(here("data", "dsp_midlife_behavior_variables.csv")) %>% 
   clean_names() %>% 
@@ -1167,14 +1178,61 @@ dsp_merge_f <- merge(aim1_women_dsp, dsp_df, by.x = "subject_id")
 
 
 #Men number of place strategies
+dsp_merge_m <- dsp_merge_m %>% 
+  mutate(place_prop = shortcuts_total/success,
+         response_prop = learned_total/success)
+#Show
 dsp_merge_m %>% 
-  dplyr::summarize(n_place = mean(shortcuts_total/success),
-                  n_response = mean(learned_total/success))
+  mutate(place_prop = shortcuts_total/success,
+         response_prop = learned_total/success) %>% 
+  dplyr::summarize(mean_place = mean(place_prop),
+                   sd_place = sd(place_prop),
+                   mean_response = mean(response_prop),
+                   sd_response = sd(response_prop),
+                   mean_ratio = mean_place/mean_response)
 
 #Women number of place strategies
+dsp_merge_f <- dsp_merge_f %>% 
+  mutate(place_prop = shortcuts_total/success,
+         response_prop = learned_total/success)
+#Show
 dsp_merge_f %>% group_by(repo_status) %>% 
-  dplyr::summarize(n_place = mean(shortcuts_total/success),
-                  n_response = mean(learned_total/success))
+    mutate(place_prop = shortcuts_total/success,
+         response_prop = learned_total/success) %>% 
+  dplyr::summarize(mean_place = mean(place_prop),
+                   sd_place = sd(place_prop),
+                   mean_response = mean(response_prop),
+                   sd_response = sd(response_prop),
+                   mean_ratio = mean_place/mean_response)
+
+#Normality check for proportion place in men vs women
+shapiro.test(dsp_merge_m$place_prop) #no
+shapiro.test(dsp_merge_f$place_prop) #yes
+
+#Not sig, p=0.7, W=718
+#Mann Whitney U
+wilcox.test(dsp_merge_m$place_prop, 
+            dsp_merge_f$place_prop,
+            paired=FALSE, exact=FALSE, conf.int=TRUE)
+median(dsp_merge_m$place_prop) #0.273
+median(dsp_merge_f$place_prop) #0.267
+
+
+#########
+#After checking differences in table for men vs women
+#both non-normal so use Wilcoxon rank sum
+wilcox.test(aim1_men_dsp$dsp_si_true_pct,
+       aim1_women_dsp$dsp_si_true_pct) #p=0.135
+median(aim1_men_dsp$dsp_si_true_pct) #0.1818182
+median(aim1_women_dsp$dsp_si_true_pct) #0.25
+```
+
+
+```{r test-wayfinding}
+t.test(aim1_men_dsp$dsp_success_pct,
+       aim1_women_dsp$dsp_si_true_pct,conf.level = 0.95)
+# aov_succ <- aov(dsp_si_true_pct ~ repo_status, data=aim1_women_dsp)
+# summary(aov_succ)
 ```
 
 
