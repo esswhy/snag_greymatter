@@ -729,13 +729,6 @@ a <- ggplot(data = aim1_women, aes(x = repo_status,
   #Add ends to whisker
   #stat_boxplot(geom = "errorbar", width = 0.5) + 
   
-  #Define boxplot
-  #Remove fill color and outlier points
-  #Remove legend for redundancy
-  geom_boxplot(aes(fill = repo_status), alpha = 0.6,
-               outlier.color = NA,
-               show.legend = FALSE) +
-  
   #Add scatter points
   #Color by sex, add jitter width, change size and transparency
   #Remove legend for redundancy
@@ -743,6 +736,13 @@ a <- ggplot(data = aim1_women, aes(x = repo_status,
               position = position_jitter(width = .1),
               size = 3, alpha = 0.5,
               show.legend = FALSE) +
+  
+  #Define boxplot
+  #Remove fill color and outlier points
+  #Remove legend for redundancy
+  geom_boxplot(aes(fill = repo_status), alpha = 0.6,
+               outlier.color = NA,
+               show.legend = FALSE) +
 
   #Add mean value for each sex for each site
   #Use point, change size and shape, change color and fill
@@ -789,13 +789,7 @@ b <- ggplot(data = aim1_women, aes(x = repo_status,
   
    #Add ends to whisker
   #stat_boxplot(geom = "errorbar", width = 0.5) + 
-  
-  #Define boxplot
-  #Remove fill color and outlier points
-  #Remove legend for redundancy
-  geom_boxplot(aes(fill = repo_status), alpha = 0.6,
-               outlier.color = NA,
-               show.legend = FALSE) +
+
   
   #Add scatter points
   #Color by sex, add jitter width, change size and transparency
@@ -804,6 +798,13 @@ b <- ggplot(data = aim1_women, aes(x = repo_status,
               position = position_jitter(width = .1),
               size = 3, alpha = 0.5,
               show.legend = FALSE) +
+  
+  #Define boxplot
+  #Remove fill color and outlier points
+  #Remove legend for redundancy
+  geom_boxplot(aes(fill = repo_status), alpha = 0.6,
+               outlier.color = NA,
+               show.legend = FALSE) +
   
   #Add mean value for each sex for each site
   #Use point, change size and shape, change color and fill
@@ -844,13 +845,6 @@ c <- ggplot(data = aim1_women, aes(x = repo_status,
   #Add ends to whisker
   #stat_boxplot(geom = "errorbar", width = 0.5) + 
   
-  #Define boxplot
-  #Remove fill color and outlier points
-  #Remove legend for redundancy
-  geom_boxplot(aes(fill = repo_status), alpha = 0.6,
-               outlier.color = NA,
-               show.legend = FALSE) +
-  
   #Add scatter points
   #Color by sex, add jitter width, change size and transparency
   #Remove legend for redundancy
@@ -858,6 +852,13 @@ c <- ggplot(data = aim1_women, aes(x = repo_status,
               position = position_jitter(width = .1),
               size = 3, alpha = 0.5,
               show.legend = FALSE) +
+  
+  #Define boxplot
+  #Remove fill color and outlier points
+  #Remove legend for redundancy
+  geom_boxplot(aes(fill = repo_status), alpha = 0.6,
+               outlier.color = NA,
+               show.legend = FALSE) +
   
   #Add mean value for each sex for each site
   #Use point, change size and shape, change color and fill
@@ -1530,6 +1531,7 @@ combined + plot_layout(guides = "collect")
 #ggsave("study1_dsp_si_estradiol_fsh_lm.png")
 ```
 
+
 ```{r dsp-plot-emily, include=FALSE}
 #E and FSH plot with SI
 #n=46
@@ -1627,7 +1629,7 @@ a+b
 
 
 
-```{r results='hide'}
+```{r dsp-plot-ratio, results='hide'}
 ### Estradiol to FSH ratio (spatial) in Midlife Women
 #Midlife women
 
@@ -1643,9 +1645,10 @@ aim1_women_dsp <- aim1_women %>%
   
 
 #Plot E:FSH ratio and solution index
-ggplot(data = aim1_women_dsp, aes(x = e_fsh_ratio,
+ggplot(data = aim1_women_dsp, aes(x = as.numeric(e_fsh_ratio),
                             y = dsp_si_true_pct,
-                            text = subject_id)) +
+                            #text = subject_id
+                            )) +
   
   #Define scatter, change size and alpha
   geom_point(aes(color = repo_status),
@@ -1657,7 +1660,7 @@ ggplot(data = aim1_women_dsp, aes(x = e_fsh_ratio,
   
   #Change labels
   labs(x = "\nEstradiol to FSH Ratio",
-       y = "Solution Index",
+       y = "Solution Index (%)",
        color = "Reproductive Status") +
   
   #Change color of points
@@ -1678,21 +1681,21 @@ ggplot(data = aim1_women_dsp, aes(x = e_fsh_ratio,
 
 
 #Plot FSH:E ratio and solution index
-ggplot(data = aim1_women_dsp, aes(x = fsh_e_ratio,
+ggplot(data = aim1_women_dsp, aes(x = as.numeric(fsh_e_ratio),
                             y = dsp_si_true_pct,
-                            text = subject_id)) +
+                            #text = subject_id
+                            )) +
   
   #Define scatter, change size and alpha
   geom_point(aes(color = repo_status),
              size = 3, alpha = 0.6) +
   
   #Add LM line
-  geom_smooth(method = "lm", se = FALSE,
-              color = "grey50") +
+  geom_smooth(method = "lm", se = FALSE, color = "grey50") +
   
   #Change labels
-  labs(x = "\nFSH to Estradiol Ratio",
-       y = "Solution Index",
+  labs(x = "\nFSH:E Ratio",
+       y = "Solution Index (%)\n",
        color = "Reproductive Status") +
   
   #Change color of points
@@ -1709,6 +1712,7 @@ ggplot(data = aim1_women_dsp, aes(x = fsh_e_ratio,
         #legend.title = element_text(face = "bold"),
         legend.position = "top")
 
+#ggsave("f_e_ratio.png")
 ```
 
 
@@ -1822,7 +1826,6 @@ DescTools::SpearmanRho(aim1_women$fsh_e_ratio,
                        use = "complete.obs",
                        conf.level	= 0.95)
 ```
-
 
 ```{r, results='hide'}
 
