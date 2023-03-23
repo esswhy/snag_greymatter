@@ -1628,109 +1628,40 @@ a+b
 ```
 
 
-
-```{r dsp-plot-ratio, results='hide'}
-### Estradiol to FSH ratio (spatial) in Midlife Women
-#Midlife women
-
-#Create new column with ratio
-aim1_women <- aim1_women %>% 
-  mutate(e_fsh_ratio = estradiol_spatial_pg_ml/fsh_spatial_miu_ml,
-         fsh_e_ratio = fsh_spatial_miu_ml/estradiol_spatial_pg_ml)
-
-
-#Filter for DSP
-aim1_women_dsp <- aim1_women %>% 
-  filter(dsp_useable == "Yes")
-  
-
-#Plot E:FSH ratio and solution index
-ggplot(data = aim1_women_dsp, aes(x = as.numeric(e_fsh_ratio),
-                            y = dsp_si_true_pct,
-                            #text = subject_id
-                            )) +
-  
-  #Define scatter, change size and alpha
-  geom_point(aes(color = repo_status),
-             size = 3, alpha = 0.6) +
-  
-  #Add LM line
-  geom_smooth(method = "lm", se = FALSE,
-              color = "grey50") +
-  
-  #Change labels
-  labs(x = "\nEstradiol to FSH Ratio",
-       y = "Solution Index (%)",
-       color = "Reproductive Status") +
-  
-  #Change color of points
-  scale_color_manual(values = c("cadetblue4", "mediumvioletred", "darkorange")) +
-  
-  theme_minimal() +
-  
-  #Customize theme
-  theme(axis.title = element_text(size = 11, face = "bold"),
-        axis.title.x = element_text(vjust = 2),
-        axis.text = element_text(size= 10),
-        
-        #Legend
-        #legend.title = element_text(face = "bold"),
-        legend.position = "top")
-
-
-
-
-#Plot FSH:E ratio and solution index
-ggplot(data = aim1_women_dsp, aes(x = as.numeric(fsh_e_ratio),
-                            y = dsp_si_true_pct,
-                            #text = subject_id
-                            )) +
-  
-  #Define scatter, change size and alpha
-  geom_point(aes(color = repo_status),
-             size = 3, alpha = 0.6) +
-  
-  #Add LM line
-  geom_smooth(method = "lm", se = FALSE, color = "grey50") +
-  
-  #Change labels
-  labs(x = "\nFSH:E Ratio",
-       y = "Solution Index (%)\n",
-       color = "Reproductive Status") +
-  
-  #Change color of points
-  scale_color_manual(values = c("cadetblue4", "mediumvioletred", "darkorange")) +
-  
-  theme_minimal() +
-  
-  #Customize theme
-  theme(axis.title = element_text(size = 11, face = "bold"),
-        axis.title.x = element_text(vjust = 2),
-        axis.text = element_text(size= 10),
-        
-        #Legend
-        #legend.title = element_text(face = "bold"),
-        legend.position = "top")
-
-#ggsave("f_e_ratio.png")
-```
-
-
 ```{r results='hide'}
+
+aim1_women_dsp_ratio <- aim1_women_dsp %>% 
+  select(subject_id, repo_status, fsh_e_ratio, 
+         estradiol_spatial_pg_ml, fsh_spatial_miu_ml,
+         dsp_success_pct, dsp_si_true_pct)
+
 #Check distribution of E:FSH ratio (probably not normal)
-shapiro.test(aim1_women$e_fsh_ratio) #yes
+shapiro.test(aim1_women_dsp_ratio$e_fsh_ratio) #yes
 shapiro.test(log(aim1_women$e_fsh_ratio)) #yes
 
-shapiro.test(aim1_women$fsh_e_ratio) #yes
+shapiro.test(aim1_women_dsp_ratio$fsh_e_ratio) #yes
 shapiro.test(log(aim1_women$fsh_e_ratio)) #yes
 
 #All correlations need to be Spearman rank
+
+
+###### Check remove outlier for FSH:E in SI
+aim1_dsp_ratio_rm <- aim1_women_dsp_ratio %>% 
+  filter(subject_id != "327") #n=46
+shapiro.test(aim1_dsp_ratio_rm$fsh_e_ratio)
+cor.test(aim1_dsp_ratio_rm$fsh_e_ratio,
+         aim1_dsp_ratio_rm$dsp_si_true_pct,
+         conf.level = 0.95,
+         method = "spearman") #still significant, p=0.00972
+#Get CI for rho
+DescTools::SpearmanRho(aim1_dsp_ratio_rm$fsh_e_ratio,
+                       aim1_dsp_ratio_rm$dsp_si_true_pct,
+                       use = "complete.obs",
+                       conf.level	= 0.95)
 ```
 
 
-
-
-```{r}
+```{r ratio-correlations}
 ### LOOP
 #Correlation with E:FSH and FSH:E ratio
 ########## Spearman for position error
@@ -1826,6 +1757,97 @@ DescTools::SpearmanRho(aim1_women$fsh_e_ratio,
                        use = "complete.obs",
                        conf.level	= 0.95)
 ```
+
+
+
+```{r dsp-plot-ratio, results='hide'}
+### Estradiol to FSH ratio (spatial) in Midlife Women
+#Midlife women
+
+#Create new column with ratio
+aim1_women <- aim1_women %>% 
+  mutate(e_fsh_ratio = estradiol_spatial_pg_ml/fsh_spatial_miu_ml,
+         fsh_e_ratio = fsh_spatial_miu_ml/estradiol_spatial_pg_ml)
+
+
+#Filter for DSP
+aim1_women_dsp <- aim1_women %>% 
+  filter(dsp_useable == "Yes")
+  
+
+#Plot E:FSH ratio and solution index
+ggplot(data = aim1_women_dsp, aes(x = as.numeric(e_fsh_ratio),
+                            y = dsp_si_true_pct,
+                            #text = subject_id
+                            )) +
+  
+  #Define scatter, change size and alpha
+  geom_point(aes(color = repo_status),
+             size = 3, alpha = 0.6) +
+  
+  #Add LM line
+  geom_smooth(method = "lm", se = FALSE,
+              color = "grey50") +
+  
+  #Change labels
+  labs(x = "\nEstradiol to FSH Ratio",
+       y = "Solution Index (%)",
+       color = "Reproductive Status") +
+  
+  #Change color of points
+  scale_color_manual(values = c("cadetblue4", "mediumvioletred", "darkorange")) +
+  
+  theme_minimal() +
+  
+  #Customize theme
+  theme(axis.title = element_text(size = 11, face = "bold"),
+        axis.title.x = element_text(vjust = 2),
+        axis.text = element_text(size= 10),
+        
+        #Legend
+        #legend.title = element_text(face = "bold"),
+        legend.position = "top")
+
+
+
+
+#Plot FSH:E ratio and solution index
+ggplot(data = aim1_dsp_ratio_rm, aes(x = as.numeric(fsh_e_ratio),
+                            y = dsp_si_true_pct,
+                            #text = subject_id
+                            )) +
+  
+  #Define scatter, change size and alpha
+  geom_point(aes(color = repo_status),
+             size = 3, alpha = 0.6) +
+  
+  #Add LM line
+  geom_smooth(method = "lm", se = FALSE, color = "grey50") +
+  
+  #Change labels
+  labs(x = "\nFSH:E Ratio",
+       y = "Solution Index (%)\n",
+       color = "Reproductive Status") +
+  
+  #Change color of points
+  scale_color_manual(values = c("cadetblue4", "mediumvioletred", "darkorange")) +
+  
+  theme_minimal() +
+  
+  #Customize theme
+  theme(axis.title = element_text(size = 11, face = "bold"),
+        axis.title.x = element_text(vjust = 2),
+        axis.text = element_text(size= 10),
+        
+        #Legend
+        #legend.title = element_text(face = "bold"),
+        legend.position = "top")
+
+ggsave("f_e_ratio.png")
+```
+
+
+
 
 ```{r, results='hide'}
 
