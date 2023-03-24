@@ -189,6 +189,13 @@ Thus for women, sample sizes in the following correlation analyses are
 
 Thus for men, sample sizes in the following correlation analyses are *n* = 21 for LOOP, *n* = 23 for MAZE, and *n* = 28 for DSP.
 
+```{r repo-women-n}
+aim1_women %>% 
+  group_by(repo_status) %>% 
+  summarize(count = n())
+```
+
+
 
 ## Task Paradigms
 
@@ -777,7 +784,7 @@ a <- ggplot(data = aim1_women, aes(x = repo_status,
   
   #Customize theme
   theme(axis.title = element_text(size = 13.5, face = "bold"), 
-        axis.text = element_text(size= 13))
+        axis.text = element_text(size= 13)) 
 
 #ggsave("estradiol_box.png")
 
@@ -1841,7 +1848,10 @@ ggplot(data = aim1_dsp_ratio_rm, aes(x = as.numeric(fsh_e_ratio),
         
         #Legend
         #legend.title = element_text(face = "bold"),
-        legend.position = "top")
+        legend.position = "top",
+        
+        #Square shaped
+        aspect.ratio=1)
 
 ggsave("f_e_ratio.png")
 ```
@@ -2015,6 +2025,32 @@ median(aim1_men_dsp$dsp_si_true_pct) #0.1818182
 median(aim1_women_dsp$dsp_si_true_pct) #0.25
 ```
 
+
+
+```{r post-analysis-dsp}
+#One-tailed t-test for E and FSH for solution index
+cor_e <- cor.test(aim1_women_dsp$estradiol_spatial_pg_ml,
+         aim1_women_dsp$dsp_si_true_pct,
+         conf.level = 0.95, alternative = "greater",
+         method = "spearman") #p=0.001601
+
+cor.test(aim1_women_dsp$fsh_spatial_miu_ml,
+         aim1_women_dsp$dsp_si_true_pct,
+         conf.level = 0.95, alternative = "less",
+         method = "spearman") #p=0.02903
+
+
+#Confidence intervals
+DescTools::SpearmanRho(aim1_women$estradiol_spatial_pg_ml,
+                       aim1_women$dsp_si_true_pct,
+                       use = "complete.obs"
+                       conf.level	= 0.95)
+
+DescTools::SpearmanRho(aim1_women$fsh_spatial_miu_ml,
+                       aim1_women$dsp_si_true_pct,
+                       use = "complete.obs",
+                       conf.level	= 0.95)
+```
 
 
 # Summary
