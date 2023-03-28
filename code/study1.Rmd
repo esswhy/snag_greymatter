@@ -27,7 +27,8 @@ library(plotly)
 library(readr)
 library(DescTools)
 library(outliers)
-library(ggbeeswarm)
+library(rstatix)
+library(coin) #for eff size of wilcoxon rank tests
 ```
 
 
@@ -62,6 +63,8 @@ df_all <- read_csv(here("data", "HAS_SNAG_mastersheet_tidy.csv"))
 #Filter for those with SNAG data
 aim1 <- df_all %>% filter(completed_spatial == "Yes",
                           age_group == "Midlife") %>% 
+  #Change subject_id to double
+  mutate(subject_id = as.double(subject_id)) %>% 
    #Further exclude these subjects:
   filter(!subject_id %in% c(
     #"309", #bad participant
@@ -194,7 +197,7 @@ What are the sample sizes for women by reproductive group?
 aim1_women %>% 
   group_by(repo_status) %>% 
   summarize(count = n()) %>% 
-  kable(col.names = c("Reproductive Status", "n"))
+  kable(col.names = c("Reproductive Status", "Count"))
 ```
 
 
@@ -225,6 +228,13 @@ t.test(aim1_men$dsp_path_efficiency_grid, aim1_men$dsp_path_efficiency_grid_weig
 #women
 t.test(aim1_women$dsp_path_efficiency_grid, aim1_women$dsp_path_efficiency_grid_weighted) #no
 ```
+
+
+## Analysis
+
+Pearson and Spearman correlations were used. Initially, we did a two-tailed correlation analysis for all hormones, but because we do predict that estradiol and FSH would influence behaviors differently, correlations for women for estradiol (alternative = "greater"), progesterone (alternative = "less"), and FSH (alternative = "less") with one-tailed correlations were also tested.
+
+If the initial correlation was significant, then we would test whether the navigation measure would differ as a function of reproductive status. And we also would use the a FSH to estradiol (FSH:E) ratio to assess whether the relationship holds, using it as an indicator of capturing individual differences in endocrine status.
 
 
 # Results
@@ -447,6 +457,12 @@ DescTools::SpearmanRho(aim1_men_loop$testosterone_spatial_ng_dl,
 
 
 ```{r loop-men-outlier}
+#What if we remove subject 354
+men_loop_no354 <- aim1_men_loop %>% filter(!subject_id %in% c(354))
+#And subject 320?
+men_loop_both <- aim1_men_loop %>% filter(!subject_id %in% c(354, 320))
+shapiro.test(men_loop_no354$loop_de_rad3_degree) #no
+
 ######## Outlier test for degrees 3.0m ########
 test <- grubbs.test(aim1_men_loop$loop_de_rad3_degree)
 test #highest value is an outlier (p-value = 0.001135)
@@ -454,11 +470,7 @@ test #highest value is an outlier (p-value = 0.001135)
 test <- grubbs.test(men_loop_no354$loop_de_rad3_degree)
 test #next highest is also outlier p-value = 0.006373
 
-#What if we remove subject 354
-men_loop_no354 <- aim1_men_loop %>% filter(!subject_id %in% c(354))
-#And subject 320?
-men_loop_both <- aim1_men_loop %>% filter(!subject_id %in% c(354, 320))
-shapiro.test(men_loop_no354$loop_de_rad3_degree) #no
+
 #Corr
 cor.test(men_loop_no354$testosterone_spatial_ng_dl,
          men_loop_no354$loop_de_rad3_degree,
@@ -972,6 +984,140 @@ Kruskal-Wallis rank sum test was used for non-normal comparison between reproduc
 
 Estradiol is statistically significant between all pairs of reproductive groups (at least *p* < 0.01), as well as FSH (at least *p* < 0.001). Progesterone was different between pre-post (*p* < 0.01) and peri-post (*p* < 0.05).
 
+```{r hormones-eff-size, eval=FALSE}
+########## Eta squared for kruskal wallis tests ##########
+
+##### Estradiol #####
+
+#Check test from above
+rstatix::kruskal_test(
+  data = aim1_women,
+  formula = estradiol_spatial_pg_ml ~ repo_status
+)
+
+#Effect size
+kruskal_effsize(
+  data = aim1_women,
+  formula = estradiol_spatial_pg_ml ~ repo_status,
+  ci = TRUE, #by bootsrap
+  conf.level = 0.95,
+  ci.type = "perc",
+  nboot = 1000
+)
+#n=81, eff_size = 0.4943322, ci = [0.34,0.63], magnitude = large
+
+#Check pairwise comparison
+aim1_women %>% 
+  rstatix::wilcox_test(estradiol_spatial_pg_ml ~ repo_status, 
+              p.adjust.method = "BH")
+
+#Pairwise Wilcoxon effect size
+wilcox_effsize(
+  data = aim1_women,
+  formula = estradiol_spatial_pg_ml ~ repo_status,
+  comparisons = NULL,
+  paired = FALSE,
+  alternative = "two.sided",
+  mu = 0,
+  ci = TRUE,
+  conf.level = 0.95,
+  ci.type = "perc",
+  nboot = 1000
+)
+
+
+
+##### Progesterone #####
+
+#Check test from above
+rstatix::kruskal_test(
+  data = aim1_women,
+  formula = progesterone_spatial_ng_ml ~ repo_status
+)
+
+#Effect size
+kruskal_effsize(
+  data = aim1_women,
+  formula = progesterone_spatial_ng_ml ~ repo_status,
+  ci = TRUE, #by bootsrap
+  conf.level = 0.95,
+  ci.type = "perc",
+  nboot = 1000
+)
+#n=81, eff_size = 0.1159669, ci = [0.0064,0.31], magnitude = moderate
+
+#Check pairwise comparison
+aim1_women %>% 
+  wilcox_test(progesterone_spatial_ng_ml ~ repo_status, 
+              p.adjust.method = "BH")
+
+#Pairwise Wilcoxon effect size
+wilcox_effsize(
+  data = aim1_women,
+  formula = progesterone_spatial_ng_ml ~ repo_status,
+  comparisons = NULL,
+  paired = FALSE,
+  alternative = "two.sided",
+  mu = 0,
+  ci = TRUE,
+  conf.level = 0.95,
+  ci.type = "perc",
+  nboot = 1000
+)
+
+
+
+
+##### FSH #####
+#Check test from above
+rstatix::kruskal_test(
+  data = aim1_women,
+  formula = fsh_spatial_miu_ml ~ repo_status
+)
+
+#Effect size
+kruskal_effsize(
+  data = aim1_women,
+  formula = fsh_spatial_miu_ml ~ repo_status,
+  ci = TRUE, #by bootsrap
+  conf.level = 0.95,
+  ci.type = "perc",
+  nboot = 1000
+)
+#n=81, eff_size = 0.6008231, ci = [0.48,0.71], magnitude = large
+
+#Check pairwise comparison
+aim1_women %>% 
+  wilcox_test(fsh_spatial_miu_ml ~ repo_status, 
+              p.adjust.method = "BH")
+
+#Pairwise Wilcoxon effect size
+wilcox_effsize(
+  data = aim1_women,
+  formula = fsh_spatial_miu_ml ~ repo_status,
+  comparisons = NULL,
+  paired = FALSE,
+  alternative = "two.sided",
+  mu = 0,
+  ci = TRUE,
+  conf.level = 0.95,
+  ci.type = "perc",
+  nboot = 1000
+)
+
+
+
+
+##### Medians #####
+aim1_women %>% 
+  group_by(repo_status) %>% 
+  summarize(med_e = median(estradiol_spatial_pg_ml),
+            med_p = median(progesterone_spatial_ng_ml, na.rm=T),
+            med_fsh = median(fsh_spatial_miu_ml, na.rm=T))
+
+```
+
+
 
 ```{r all-normality-check-women}
 shapiro.test(aim1_women$loop_pe_rad3_m) #no
@@ -1153,6 +1299,30 @@ summary(si_mod)
 #Kruskal-Wallis test
 kruskal.test(dsp_si_true_pct ~ repo_status,
               data = aim1_women_dsp) #not significant, p=0.078
+
+
+#Check test from above
+rstatix::kruskal_test(
+  data = aim1_women_dsp,
+  formula = dsp_si_true_pct ~ repo_status
+)
+
+#Effect size
+kruskal_effsize(
+  data = aim1_women_dsp,
+  formula = dsp_si_true_pct ~ repo_status,
+  ci = TRUE, #by bootsrap
+  conf.level = 0.95,
+  ci.type = "perc",
+  nboot = 1000
+)
+#n=47, eff_size = 0.07042751	, ci = [-0.04,0.3], magnitude = moderate
+
+
+#Median values of DSP solution index by repo groups
+aim1_women_dsp %>% 
+  group_by(repo_status) %>% 
+  summarize(med_si = median(dsp_si_true_pct))
 ```
 
 
@@ -1160,7 +1330,7 @@ Estradiol sample size: Women: *n* = 47 (Pre: *n* = 19; Peri: *n* = 15; Post: *n*
 
 Progesterone and FSH sample size: *n* = 46 (Pre: *n* = 19; Peri: *n* = 14; Post: *n* = 13)
 
-No correlation for wayfinding success, but significant positive correlation for solution index for estradiol ($\rho$ = 0.421, *p* < 0.01) and negative marginal correlation for FSH ($\rho$ = -0.281, *p* = 0.058).
+With two-tailed test, there was no significant correlation for wayfinding success, but significant positive correlation for solution index for estradiol ($\rho$ = 0.421, *p* < 0.01) and negative marginal correlation for FSH ($\rho$ = -0.281, *p* = 0.058).
 
 Kruskal-Wallis test of DSP solution index by reproductive status for women was not significant.
 
@@ -1195,6 +1365,7 @@ cor.test(aim1_women_dsp$estradiol_spatial_pg_ml,
          conf.level = 0.95,
          alternative = "greater",
          method = "spearman") #p=0.001601
+
 #Progesterone
 cor.test(aim1_women_dsp$progesterone_spatial_ng_ml,
          aim1_women_dsp$dsp_si_true_pct,
@@ -1210,86 +1381,7 @@ cor.test(aim1_women_dsp$fsh_spatial_miu_ml,
 
 ```
 
-With the one-tailed test, there was also no relationship for wayfinding success, but solution index remained positively correlated with estradiol ($\rho$ = 0.421, *p* < 0.01) and was significantly negatively correlated with FSH
-
-wayfinding success, but significant positive correlation for solution index for estradiol  and negative marginal correlation for FSH ($\rho$ = -0.281, *p* < 0.05).
-
-
-#### DSP Solution Index Sex Difference
-
-Since we see a relationship between solution index and hormones in women but not in men, we want to know what are the proportion of place vs response stratgies between women and men.
-
-```{r ttest-dsp-si, include=FALSE}
-
-##### Is there a difference in solution index? #####
-
-#After checking differences in table for men vs women
-#both non-normal so use Wilcoxon rank sum
-wilcox.test(aim1_men_dsp$dsp_si_true_pct,
-            aim1_women_dsp$dsp_si_true_pct) #p=0.135
-median(aim1_men_dsp$dsp_si_true_pct) #0.1818182
-median(aim1_women_dsp$dsp_si_true_pct) #0.25
-
-
-
-##### Proportion of place strategies overall #####
-
-dsp_df <- read_csv(here("data", "dsp_midlife_behavior_variables.csv")) %>% 
-  clean_names() %>% 
-  rename(subject_id = subject_number)
-
-#Merge aim1 and dsp dataframes by the subject_id
-dsp_merge_m <- merge(aim1_men_dsp, dsp_df, by.x = "subject_id")
-dsp_merge_f <- merge(aim1_women_dsp, dsp_df, by.x = "subject_id")
-
-
-#Get men's proportion of response and place strategies
-dsp_merge_m <- dsp_merge_m %>% 
-  mutate(place_prop = shortcuts_total/success,
-         response_prop = learned_total/success)
-#Show the table for men
-dsp_merge_m %>% 
-  mutate(place_prop = shortcuts_total/success,
-         response_prop = learned_total/success) %>% 
-  dplyr::summarize(mean_place = mean(place_prop),
-                   sd_place = sd(place_prop),
-                   mean_response = mean(response_prop),
-                   sd_response = sd(response_prop),
-                   mean_ratio = mean_place/mean_response)
-
-
-#Get women's proportion of response and place strategies
-dsp_merge_f <- dsp_merge_f %>% 
-  mutate(place_prop = shortcuts_total/success,
-         response_prop = learned_total/success)
-#Show the table for women
-dsp_merge_f %>% group_by(repo_status) %>% 
-    mutate(place_prop = shortcuts_total/success,
-         response_prop = learned_total/success) %>% 
-  dplyr::summarize(mean_place = mean(place_prop),
-                   sd_place = sd(place_prop),
-                   mean_response = mean(response_prop),
-                   sd_response = sd(response_prop),
-                   mean_ratio = mean_place/mean_response)
-
-
-
-##### Is there a sex difference in place strategy proportion used? #####
-
-#Normality check for proportion place in men vs women
-shapiro.test(dsp_merge_m$place_prop) #no
-shapiro.test(dsp_merge_f$place_prop) #yes
-
-#Mann Whitney U results = Not sig, p=0.7, W=718
-wilcox.test(dsp_merge_m$place_prop, 
-            dsp_merge_f$place_prop,
-            paired=FALSE, exact=FALSE, conf.int=TRUE)
-median(dsp_merge_m$place_prop) #0.273
-median(dsp_merge_f$place_prop) #0.267
-```
-
-
-There were no differences between proportion of place strategies used between women and men, but if we break it down to look at it by reproductive status, the pres actually have higher place strategy use than men.
+With the one-tailed test, there was also no relationship for wayfinding success, but solution index remained positively correlated with estradiol ($\rho$ = 0.421, *p* < 0.01) and was significantly negatively correlated with FSH ($\rho$ = -0.281, *p* < 0.05).
 
 
 
@@ -1384,7 +1476,7 @@ combined <- a + b & theme(legend.position = "top")
 combined + plot_layout(guides = "collect")
 
 #save
-#ggsave("study1_dsp_si_estradiol_fsh_lm.png")
+#ggsave("study1_dsp_si_estradiol_fsh_lm.jpg", dpi = 1200)
 ```
 
 
@@ -1415,10 +1507,271 @@ a+b
 ```
 
 
-```{r results='hide'}
+#### DSP Solution Index Sex Difference
 
-aim1_women_dsp_ratio <- aim1_women_dsp %>% 
-  select(subject_id, repo_status, fsh_e_ratio, 
+Since we see a relationship between solution index and hormones in women but not in men, we want to know what are the proportion of place vs response stratgies between women and men.
+
+```{r ttest-dsp-si, include=FALSE}
+##### Is there a difference in solution index? #####
+
+#After checking differences in table for men vs women
+#both non-normal so use Wilcoxon rank sum
+wilcox.test(aim1_men_dsp$dsp_si_true_pct,
+            aim1_women_dsp$dsp_si_true_pct) #p=0.135
+median(aim1_men_dsp$dsp_si_true_pct) #0.1818182
+median(aim1_women_dsp$dsp_si_true_pct) #0.25
+
+
+
+##### Proportion of place strategies overall #####
+
+dsp_df <- read_csv(here("data", "dsp_midlife_behavior_variables.csv")) %>% 
+  clean_names() %>% 
+  mutate(subject_number = as.double(subject_number))
+  #rename(subject_id = subject_number) 
+
+#Merge aim1 and dsp dataframes by the subject_id
+dsp_merge_m <- full_join(aim1_men_dsp, dsp_df, by = ("subject_id" = "subject_number")) %>% 
+  filter(dsp_useable == "Yes")
+#dsp_merge_m <- left_join(aim1_men_dsp, dsp_df, by = c("subject_id" = "subject_id"))
+dsp_merge_f <- full_join(aim1_women_dsp, dsp_df, by = ("subject_id" = "subject_number")) %>%  
+  filter (dsp_useable == "Yes")
+#dsp_merge_f <- left_join(aim1_women_dsp, dsp_df, by = c("subject_id" = "subject_id"))
+
+
+#Get men's proportion of response and place strategies
+dsp_merge_m <- dsp_merge_m %>% 
+  mutate(place_prop = shortcuts_total/success,
+         response_prop = learned_total/success)
+#Show the table for men
+tab_m <- dsp_merge_m %>% group_by(sex) %>% 
+  mutate(place_prop = shortcuts_total/success,
+         response_prop = learned_total/success) %>% 
+  dplyr::summarize(mean_place = mean(place_prop),
+                   sd_place = sd(place_prop),
+                   mean_response = mean(response_prop),
+                   sd_response = sd(response_prop),
+                   mean_ratio = mean_place/mean_response)
+
+
+#Get women's proportion of response and place strategies
+dsp_merge_f <- dsp_merge_f %>% 
+  mutate(place_prop = shortcuts_total/success,
+         response_prop = learned_total/success)
+#Show the table for women
+tab_f <- dsp_merge_f %>% group_by(sex) %>% 
+    mutate(place_prop = shortcuts_total/success,
+         response_prop = learned_total/success) %>% 
+  dplyr::summarize(mean_place = mean(place_prop),
+                   sd_place = sd(place_prop),
+                   mean_response = mean(response_prop),
+                   sd_response = sd(response_prop),
+                   mean_ratio = mean_place/mean_response)
+
+#Show the table for reproductive groups
+tab_repo <- dsp_merge_f %>% group_by(repo_status) %>% 
+    mutate(place_prop = shortcuts_total/success,
+         response_prop = learned_total/success) %>% 
+  dplyr::summarize(mean_place = mean(place_prop),
+                   sd_place = sd(place_prop),
+                   mean_response = mean(response_prop),
+                   sd_response = sd(response_prop),
+                   mean_ratio = mean_place/mean_response)
+
+#Stack and change column names
+tab_all <- rbind(tab_m, tab_f)
+colnames(tab_repo)[1] <- "sex"
+tab_all_final <- rbind(tab_all, tab_repo)
+
+colnames(tab_all_final)[1] <- "Group"
+tab_all_final[1, "sex"] <- "Men"
+tab_all_final[2, "sex"] <- "Women"
+
+#Show final table
+tab_all_final %>% 
+  kable(col.names = c("Group", "Mean", "SD", "Mean", "SD", "Mean Ratio"),
+        caption = "Mean and SD for proportion of place and response strategies used in the DSP task. Mean ratio is average proportion of place to average response stratgies used.",
+        align = rep("c", 6),
+        digits = 3) %>% 
+  kable_styling("striped", full_width = FALSE,
+                position = "center", 
+                font_size = 12) %>%
+  add_header_above(c(" " = 1, "Place" = 2, 
+                     "Response" = 2, " " = 1))
+
+
+
+##### Is there a sex difference in proportion of place strategy used? #####
+
+#Normality check for proportion place in men vs women
+shapiro.test(dsp_merge_m$place_prop) #no
+shapiro.test(dsp_merge_f$place_prop) #yes
+
+#Mann Whitney U results = Not sig, p=0.7, W=718
+wilcox.test(dsp_merge_m$place_prop, 
+            dsp_merge_f$place_prop,
+            paired=FALSE, exact=FALSE, conf.int=TRUE)
+median(dsp_merge_m$place_prop) #0.273
+median(dsp_merge_f$place_prop) #0.267
+
+
+##### Is there a sex difference in proportion of response strategy used? #####
+
+#Normality check for proportion place in men vs women
+shapiro.test(dsp_merge_m$response_prop) #no
+shapiro.test(dsp_merge_f$response_prop) #no
+
+#T-test results = Not significant, p=0.7672, t= -0.29735
+t.test(dsp_merge_m$response_prop, 
+      dsp_merge_f$response_prop, paired = FALSE, conf.level = 0.95)
+```
+
+
+We can also plot the data to see what the table looks like visually:
+
+```{r dsp-plot-table}
+#Plot proportion place strategies used by groups
+dsp_merge_m2 <- dsp_merge_m %>% 
+  select(subject_id, place_prop, response_prop) %>% 
+  mutate(group = "Men")
+
+dsp_merge_f2 <- dsp_merge_f %>% 
+  select(subject_id, place_prop, response_prop) %>% 
+  mutate(group = "Women")
+
+dsp_merge_repo <- dsp_merge_f %>% 
+  select(subject_id, place_prop, response_prop, repo_status) %>% 
+  rename(group = repo_status)
+
+#Stack dataframes
+dsp_merge_all <- rbind(dsp_merge_m2, dsp_merge_f2, dsp_merge_repo) %>% 
+  #Reorder group
+  mutate(group = fct_relevel(group, 
+                             c("Men", "Women", 
+                               "Pre", "Peri", "Post")))
+
+
+##############  Plot
+a <- ggplot(data = dsp_merge_all, aes(x = group,
+                                 y = place_prop,
+                                 fill = group, color = group)) +
+  #Add scatter points
+  #Color by group, add jitter width, change size and transparency
+  #Remove legend for redundancy
+  geom_jitter(aes(color = group),
+              position = position_jitter(width = .1),
+              size = 3, alpha = 0.5,
+              show.legend = FALSE) +
+  
+  #Define boxplot
+  #Remove fill color and outlier points
+  #Remove legend for redundancy
+  geom_boxplot(aes(fill = group), alpha = 0.6,
+               outlier.color = NA,
+               show.legend = FALSE) +
+
+  #Add mean value for each sex for each site
+  #Use point, change size and shape, change color and fill
+  stat_summary(fun = mean, 
+               geom = "point", 
+               shape = 20, 
+               size = 4, 
+               color ="black", 
+               fill="black") +
+  
+  #Change labels
+  labs(x = "Group",
+       y = "Place Strategies (%)\n",
+       tag = "A") +
+  
+  #Change color of boxplot
+  scale_fill_manual(values = c("steelblue3", "mediumpurple1", 
+                               "cadetblue4", "mediumvioletred", "darkorange")) +
+  
+  #Change color of jitter points
+  scale_color_manual(values = c("steelblue3", "mediumpurple1",
+                                "cadetblue4", "mediumvioletred", "darkorange")) +
+  
+  #Change theme
+  theme_classic() +
+  
+  #Customize theme
+  theme(axis.title = element_text(size = 13.5, face = "bold"), 
+        axis.text.y = element_text(size = 11),
+        axis.text.x = element_text(size= 9)) 
+
+
+
+
+b <- ggplot(data = dsp_merge_all, aes(x = group,
+                                 y = response_prop,
+                                 fill = group, color = group)) +
+  #Add scatter points
+  #Color by group, add jitter width, change size and transparency
+  #Remove legend for redundancy
+  geom_jitter(aes(color = group),
+              position = position_jitter(width = .1),
+              size = 3, alpha = 0.5,
+              show.legend = FALSE) +
+  
+  #Define boxplot
+  #Remove fill color and outlier points
+  #Remove legend for redundancy
+  geom_boxplot(aes(fill = group), alpha = 0.6,
+               outlier.color = NA,
+               show.legend = FALSE) +
+
+  #Add mean value for each sex for each site
+  #Use point, change size and shape, change color and fill
+  stat_summary(fun = mean, 
+               geom = "point", 
+               shape = 20, 
+               size = 4, 
+               color ="black", 
+               fill="black") +
+  
+  #Change labels
+  labs(x = "Group",
+       y = "Response Strategies (%)\n",
+       tag = "B") +
+  
+  #Change color of boxplot
+  scale_fill_manual(values = c("steelblue3", "mediumpurple1", 
+                               "cadetblue4", "mediumvioletred", "darkorange")) +
+  
+  #Change color of jitter points
+  scale_color_manual(values = c("steelblue3", "mediumpurple1",
+                                "cadetblue4", "mediumvioletred", "darkorange")) +
+  
+  #Change theme
+  theme_classic() +
+  
+  #Customize theme
+  theme(axis.title = element_text(size = 13.5, face = "bold"), 
+        axis.text.y = element_text(size = 11),
+        axis.text.x = element_text(size= 9)) 
+
+#Combine and show
+a+b
+```
+
+There were no differences between proportion of place strategies used between women and men (*p* = 0.7), and there was also no sex difference in proportion of response strategies used (*p* = 0.77).
+
+If we look at the data by reproductive status, the pres actually have highest mean proportion of place strategies used (more than men), and they also have the lowest proportion of response strategies used.
+
+
+#### FSH:E Ratio
+
+```{r dsp-ratio, results='hide'}
+#Create new column with ratio
+aim1_women <- aim1_women %>% 
+  mutate(e_fsh_ratio = estradiol_spatial_pg_ml/fsh_spatial_miu_ml,
+         fsh_e_ratio = fsh_spatial_miu_ml/estradiol_spatial_pg_ml)
+
+#Filter for DSP
+aim1_women_dsp_ratio <- aim1_women %>% 
+  filter(dsp_useable == "Yes") %>% 
+  select(subject_id, repo_status, e_fsh_ratio, fsh_e_ratio, 
          estradiol_spatial_pg_ml, fsh_spatial_miu_ml,
          dsp_success_pct, dsp_si_true_pct)
 
@@ -1435,11 +1788,13 @@ shapiro.test(log(aim1_women$fsh_e_ratio)) #yes
 ###### Check remove outlier for FSH:E in SI
 aim1_dsp_ratio_rm <- aim1_women_dsp_ratio %>% 
   filter(subject_id != "327") #n=46
-shapiro.test(aim1_dsp_ratio_rm$fsh_e_ratio)
+shapiro.test(aim1_dsp_ratio_rm$fsh_e_ratio) #yes
+
 cor.test(aim1_dsp_ratio_rm$fsh_e_ratio,
          aim1_dsp_ratio_rm$dsp_si_true_pct,
          conf.level = 0.95,
          method = "spearman") #still significant, p=0.00972
+
 #Get CI for rho
 DescTools::SpearmanRho(aim1_dsp_ratio_rm$fsh_e_ratio,
                        aim1_dsp_ratio_rm$dsp_si_true_pct,
@@ -1447,6 +1802,115 @@ DescTools::SpearmanRho(aim1_dsp_ratio_rm$fsh_e_ratio,
                        conf.level	= 0.95)
 ```
 
+
+When we use a FSH:E ratio for DSP solution index, the correlation was significant. The hormone ratio was negatively correlated with DSP solution index ($\rho$ = -0.381, *p* < 0.01).
+
+
+```{r dsp-plot-ratio, include=TRUE}
+#Plot E:FSH ratio and solution index
+# ggplot(data = aim1_dsp_ratio_rm, aes(x = as.numeric(e_fsh_ratio),
+#                             y = dsp_si_true_pct,
+#                             #text = subject_id
+#                             )) +
+#   
+#   #Define scatter, change size and alpha
+#   geom_point(aes(color = repo_status),
+#              size = 3, alpha = 0.6) +
+#   
+#   #Add LM line
+#   geom_smooth(method = "lm", se = FALSE,
+#               color = "grey50") +
+#   
+#   #Change labels
+#   labs(x = "\nEstradiol to FSH Ratio",
+#        y = "Solution Index (%)",
+#        color = "Reproductive Status") +
+#   
+#   #Change color of points
+#   scale_color_manual(values = c("cadetblue4", "mediumvioletred", "darkorange")) +
+#   
+#   theme_minimal() +
+#   
+#   #Customize theme
+#   theme(axis.title = element_text(size = 11, face = "bold"),
+#         axis.title.x = element_text(vjust = 2),
+#         axis.text = element_text(size= 10),
+#         
+#         #Legend
+#         #legend.title = element_text(face = "bold"),
+#         legend.position = "top")
+
+
+
+
+#Plot FSH:E ratio and solution index
+ggplot(data = aim1_dsp_ratio_rm, aes(x = as.numeric(fsh_e_ratio),
+                            y = dsp_si_true_pct,
+                            #text = subject_id
+                            )) +
+  
+  #Define scatter, change size and alpha
+  geom_point(aes(color = repo_status),
+             size = 3, alpha = 0.6) +
+  
+  #Add LM line
+  geom_smooth(method = "lm", se = FALSE, color = "grey50") +
+  
+  #Change labels
+  labs(x = "\nFSH:E Ratio",
+       y = "Solution Index (%)\n",
+       color = "Reproductive Status") +
+  
+  #Change color of points
+  scale_color_manual(values = c("cadetblue4", "mediumvioletred", "darkorange")) +
+  
+  theme_minimal() +
+  
+  #Customize theme
+  theme(axis.title = element_text(size = 11, face = "bold"),
+        axis.title.x = element_text(vjust = 2),
+        axis.text = element_text(size= 10),
+        
+        #Legend
+        #legend.title = element_text(face = "bold"),
+        legend.position = "top",
+        
+        #Square shaped
+        aspect.ratio=1)
+
+ggsave("f_e_ratio.png")
+```
+
+
+The FSH:E ratio and DSP solution index plot has already been removed for one outlier (post-menopause), so *n* = 45 for this correlation analysis and plot.
+
+
+```{r dsp-ratio-correlations-one-tail}
+#One-tailed t-test for E and FSH for solution index
+# cor.test(aim1_dsp_ratio_rm$e_fsh_ratio,
+#          aim1_dsp_ratio_rm$dsp_si_true_pct,
+#          conf.level = 0.95, alternative = "greater",
+#          method = "spearman") #p=0.00486, rho=0.3814803 
+
+cor.test(aim1_dsp_ratio_rm$fsh_e_ratio,
+         aim1_dsp_ratio_rm$dsp_si_true_pct,
+         conf.level = 0.95, alternative = "less",
+         method = "spearman") #p=0.00486, rho = -0.3814803 
+
+
+#Confidence intervals
+# DescTools::SpearmanRho(aim1_dsp_ratio_rm$e_fsh_ratio,
+#                        aim1_dsp_ratio_rm$dsp_si_true_pct,
+#                        use = "complete.obs"
+#                        conf.level	= 0.95)
+
+DescTools::SpearmanRho(aim1_dsp_ratio_rm$fsh_e_ratio,
+                       aim1_dsp_ratio_rm$dsp_si_true_pct,
+                       use = "complete.obs",
+                       conf.level	= 0.95)
+```
+
+Even if we restrict the analysis to a one-tailed test, the correlation between FSH:E ratio and DSP solution index remained significant (*p* < 0.01).
 
 
 ### MAZE
@@ -1779,344 +2243,11 @@ Progesterone and FSH sample size: *n* = 26 (Pre: *n* = 12; Peri: *n* = 7; Post: 
 No significant correlations for position error or degrees traveled using two-tailed or one-tailed tests (estradiol = "greater"; progesterone and FSH = "less).
 
 
-### Hormone Ratios
+## Other Analyses
 
-This was calculated to remove any variability from estradiol
+### Table 1 Sex Differences
 
-```{r ratio-correlations}
-### LOOP
-#Correlation with E:FSH and FSH:E ratio
-########## Spearman for position error
-cor.test(aim1_women$e_fsh_ratio,
-         aim1_women$loop_pe_avg_m,
-         conf.level = 0.95,
-         method = "spearman")
-cor.test(aim1_women$fsh_e_ratio,
-         aim1_women$loop_pe_avg_m,
-         conf.level = 0.95,
-         method = "spearman")
-
-########## Spearman for degrees traveled
-cor.test(aim1_women$e_fsh_ratio,
-         aim1_women$loop_de_avg_degree,
-         conf.level = 0.95,
-         method = "spearman")
-cor.test(aim1_women$fsh_e_ratio,
-         aim1_women$loop_de_avg_degree,
-         conf.level = 0.95,
-         method = "spearman")
-
-
-
-### MAZE
-#Correlation with E:FSH ratio
-########## Spearman for wayfinding success
-cor.test(aim1_women$e_fsh_ratio,
-         aim1_women$maze_accuracy_pct,
-         conf.level = 0.95,
-         method = "spearman")
-cor.test(aim1_women$fsh_e_ratio,
-         aim1_women$maze_accuracy_pct,
-         conf.level = 0.95,
-         method = "spearman")
-
-########## Spearman for moves
-cor.test(aim1_women$e_fsh_ratio,
-         aim1_women$maze_moves,
-         conf.level = 0.95,
-         method = "spearman")
-cor.test(aim1_women$fsh_e_ratio,
-         aim1_women$maze_moves,
-         conf.level = 0.95,
-         method = "spearman")
-
-
-### DSP
-#Correlation with E:FSH ratio
-########## Spearman for wayfinding success
-cor.test(aim1_women$e_fsh_ratio,
-         aim1_women$dsp_success_pct,
-         conf.level = 0.95,
-         method = "spearman")
-cor.test(aim1_women$fsh_e_ratio,
-         aim1_women$dsp_success_pct,
-         conf.level = 0.95,
-         method = "spearman")
-
-########## Spearman for solution index
-cor.test(aim1_women$e_fsh_ratio,
-         aim1_women$dsp_si_true_pct,
-         conf.level = 0.95,
-         method = "spearman")
-cor.test(aim1_women$fsh_e_ratio,
-         aim1_women$dsp_si_true_pct,
-         conf.level = 0.95,
-         method = "spearman")
-#Solution index is still significant with the ratios 
-```
-
-
-
-```{r raio-correlations-one-tail}
-#One-tailed t-test for E and FSH for solution index
-cor_e <- cor.test(aim1_women_dsp$estradiol_spatial_pg_ml,
-         aim1_women_dsp$dsp_si_true_pct,
-         conf.level = 0.95, alternative = "greater",
-         method = "spearman") #p=0.001601
-
-cor.test(aim1_women_dsp$fsh_spatial_miu_ml,
-         aim1_women_dsp$dsp_si_true_pct,
-         conf.level = 0.95, alternative = "less",
-         method = "spearman") #p=0.02903
-
-
-#Confidence intervals
-DescTools::SpearmanRho(aim1_women$estradiol_spatial_pg_ml,
-                       aim1_women$dsp_si_true_pct,
-                       use = "complete.obs"
-                       conf.level	= 0.95)
-
-DescTools::SpearmanRho(aim1_women$fsh_spatial_miu_ml,
-                       aim1_women$dsp_si_true_pct,
-                       use = "complete.obs",
-                       conf.level	= 0.95)
-```
-
-
-
-
-
-```{r dsp-ratio-ci}
-#Count sample size for ratio
-aim1_women %>%
-  select(e_fsh_ratio) %>% 
-  summarize(count = sum(!is.na(e_fsh_ratio))) #74-6 = 
-#Get CI for rho
-DescTools::SpearmanRho(aim1_women$e_fsh_ratio,
-                       aim1_women$dsp_si_true_pct,
-                       use = "complete.obs",
-                       conf.level	= 0.95)
-
-
-test <- aim1_women %>%
-  select(dsp_useable, estradiol_spatial_pg_ml,
-         fsh_spatial_miu_ml, fsh_e_ratio) 
-test %>% filter(dsp_useable == "Yes") %>% 
-  summarize(count = sum(!is.na(fsh_e_ratio)))
-#Get CI for rho
-DescTools::SpearmanRho(aim1_women$fsh_e_ratio,
-                       aim1_women$dsp_si_true_pct,
-                       use = "complete.obs",
-                       conf.level	= 0.95)
-```
-
-
-
-```{r dsp-plot-ratio, results='hide'}
-### Estradiol to FSH ratio (spatial) in Midlife Women
-#Midlife women
-
-#Create new column with ratio
-aim1_women <- aim1_women %>% 
-  mutate(e_fsh_ratio = estradiol_spatial_pg_ml/fsh_spatial_miu_ml,
-         fsh_e_ratio = fsh_spatial_miu_ml/estradiol_spatial_pg_ml)
-
-
-#Filter for DSP
-aim1_women_dsp <- aim1_women %>% 
-  filter(dsp_useable == "Yes")
-  
-
-#Plot E:FSH ratio and solution index
-ggplot(data = aim1_women_dsp, aes(x = as.numeric(e_fsh_ratio),
-                            y = dsp_si_true_pct,
-                            #text = subject_id
-                            )) +
-  
-  #Define scatter, change size and alpha
-  geom_point(aes(color = repo_status),
-             size = 3, alpha = 0.6) +
-  
-  #Add LM line
-  geom_smooth(method = "lm", se = FALSE,
-              color = "grey50") +
-  
-  #Change labels
-  labs(x = "\nEstradiol to FSH Ratio",
-       y = "Solution Index (%)",
-       color = "Reproductive Status") +
-  
-  #Change color of points
-  scale_color_manual(values = c("cadetblue4", "mediumvioletred", "darkorange")) +
-  
-  theme_minimal() +
-  
-  #Customize theme
-  theme(axis.title = element_text(size = 11, face = "bold"),
-        axis.title.x = element_text(vjust = 2),
-        axis.text = element_text(size= 10),
-        
-        #Legend
-        #legend.title = element_text(face = "bold"),
-        legend.position = "top")
-
-
-
-
-#Plot FSH:E ratio and solution index
-ggplot(data = aim1_dsp_ratio_rm, aes(x = as.numeric(fsh_e_ratio),
-                            y = dsp_si_true_pct,
-                            #text = subject_id
-                            )) +
-  
-  #Define scatter, change size and alpha
-  geom_point(aes(color = repo_status),
-             size = 3, alpha = 0.6) +
-  
-  #Add LM line
-  geom_smooth(method = "lm", se = FALSE, color = "grey50") +
-  
-  #Change labels
-  labs(x = "\nFSH:E Ratio",
-       y = "Solution Index (%)\n",
-       color = "Reproductive Status") +
-  
-  #Change color of points
-  scale_color_manual(values = c("cadetblue4", "mediumvioletred", "darkorange")) +
-  
-  theme_minimal() +
-  
-  #Customize theme
-  theme(axis.title = element_text(size = 11, face = "bold"),
-        axis.title.x = element_text(vjust = 2),
-        axis.text = element_text(size= 10),
-        
-        #Legend
-        #legend.title = element_text(face = "bold"),
-        legend.position = "top",
-        
-        #Square shaped
-        aspect.ratio=1)
-
-ggsave("f_e_ratio.png")
-```
-
-
-The FSH:E ratio and DSP solution index plot has already been removed for one outlier (post-menopause).
-
-```{r misc, results='hide'}
-
-## Behavior for Young and Midlife (HAS, SNAG, OHS)
-
-#Visualizations
-
-
-#Combine dataframes
-long_viz <- df_all %>% 
-  select(subject_id, completed_spatial, sex, age_group,
-         age_spatial_years, repo_status, straw_status,
-         loop_useable:dsp_si_true_pct)
-
-
-#LOOP
-long_viz_loop <- long_viz %>% 
-  filter(loop_useable == "Yes")
-
-#Scatterpot 
-a1 <- ggplot(data = long_viz_loop, aes(x = age_spatial_years,
-                                 y = loop_pe_avg_m)) +
-  geom_point(aes(color = sex), size = 2, alpha = 0.6) +
-  geom_smooth(aes(group = sex, color = sex), method = "lm", 
-              formula = y ~ poly(x, 2),
-              position = "identity") +
-  labs(x = "Age (years)",
-       y = "Mean position error (m)",
-       color = "Sex") +
-  theme_minimal()+
-  theme(legend.position = c(0.3, 0.9))
-
-
-a2 <- ggplot(data = long_viz_loop, aes(x = age_spatial_years,
-                                 y = loop_de_avg_degree)) +
-  geom_point(aes(color = sex), size = 2, alpha = 0.6,
-             show.legend = FALSE) +
-  geom_smooth(aes(group = sex, color = sex), method = "lm", 
-              position = "identity", show.legend = FALSE) +
-  labs(x = "Age (years)",
-       y = "Mean degrees traveled",
-       color = "Sex") +
-  theme_minimal()
-
-#Display combination
-a1+a2
-
-
-
-#MAZE
-long_viz_maze <- long_viz %>% 
-  filter(maze_useable == "Yes")
-
-#Scatterpot 
-a1 <- ggplot(data = long_viz_maze, aes(x = age_spatial_years,
-                                 y = maze_accuracy_pct)) +
-  geom_point(aes(color = sex), size = 2, alpha = 0.6,
-             show.legend = FALSE) +
-  geom_smooth(aes(group = sex, color = sex), method = "lm", 
-              position = "identity", show.legend = FALSE) +
-  labs(x = "Age (years)",
-       y = "Accuracy (%)",
-       color = "Sex") +
-  theme_minimal()
-
-a2 <- ggplot(data = long_viz_maze, aes(x = age_spatial_years,
-                                      y = maze_moves)) +
-  geom_point(aes(color = sex), size = 2, alpha = 0.6) +
-  geom_smooth(aes(group = sex, color = sex), method = "lm", position = "identity") +
-  labs(x = "Age (years)",
-       y = "Number of Moves",
-       color = "Sex") +
-  theme_minimal() +
-  theme(legend.position = c(0.3, 0.1))
-
-#Display
-a1+a2
-
-
-
-#DSP
-long_viz_dsp <- long_viz %>% 
-  filter(dsp_useable == "Yes")
-
-#Scatterpot with curve
-a1 <- ggplot(data = long_viz_dsp, aes(x = age_spatial_years,
-                                 y = dsp_success_pct)) +
-  geom_point(aes(color = sex), size = 2, alpha = 0.6) +
-  geom_smooth(aes(group = sex, color = sex), method = "lm", position = "identity") +
-  labs(x = "Age (years)",
-       y = "Wayfinding Success (%)",
-       color = "Sex") +
-  theme_minimal()+
-  theme(legend.position = c(0.2, 0.1))
-
-a2 <- ggplot(data = long_viz_dsp, aes(x = age_spatial_years,
-                                 y = dsp_si_true_pct)) +
-  geom_point(aes(color = sex), size = 2, alpha = 0.6,
-             show.legend = FALSE) +
-  geom_smooth(aes(group = sex, color = sex), method = "lm", 
-              position = "identity", show.legend = FALSE) +
-  labs(x = "Age (years)",
-       y = "Solution Index (%)",
-       color = "Sex") +
-  theme_minimal() 
-
-#Display
-a1+a2
-```
-
-
-## Post-Analyses / Extra
-
-For Table 1, we want to check if there are any sex differences between men and women for the different navigation variables.
+For Table 1 in the Google Doc, I want to check if there are any sex differences between men and women for the different navigation variables.
 
 ```{r post-analyses, include=FALSE}
 ######### Sex differences
@@ -2169,7 +2300,8 @@ median(aim1_women_dsp$dsp_si_true_pct) #0.25
 ```
 
 
-For Table, calculating t-test or Wilcoxon rank sum test to test sex differences for spatial navigation measures reveal that there is a sex difference for DSP wayfinding success (men were more successful at reaching target) and LOOP degrees traveled (men travel fewer degrees on circular path).
+For Table 1 in the Google doc, calculating t-test or Wilcoxon rank sum test to test sex differences for spatial navigation measures reveal that there is a sex difference for DSP wayfinding success (men were more successful at reaching target) and LOOP degrees traveled (men travel fewer degrees on circular path).
+
 
 
 # Summary
@@ -2181,10 +2313,12 @@ For Table, calculating t-test or Wilcoxon rank sum test to test sex differences 
 
 - No significant correlations for LOOP or MAZE variables among women or men.
 
-- While there were no significant correlations for DSP wayfinding success or path efficiency, there was a positive correlation between estradiol and solution index ($\rho$ = 0.421, 95% CI = [0.153, 0.632], *p* < 0.01, Spearman), and a marginal negative association between FSH and solution index ($\rho$ = -0.281, 95% CI = [-0.529, 0.010], *p* = 0.058, Spearman). There was also no significant correlation with progesterone and solution index ($\rho$ = 0.16, 95% CI = [-0.136, 0.431], *p* = 0.29, Spearman). This was true when using hormone measurements from spatial timepoints.
+- While there were no significant correlations for DSP wayfinding success, there was a positive correlation between estradiol and solution index ($\rho$ = 0.421, *p* < 0.01, Spearman, one-tailed test), and a negative correlation between FSH and solution index ($\rho$ = -0.281, *p* < 0.05, Spearman, one-tailed test). There was no significant correlation with progesterone and solution index ($\rho$ = 0.161, *p* = 0.86, Spearman, one-tailed test). 
 
 - Kruskla-Wallis test reveals that DSP solution index by reproductive status was not significant. 
 
-- When using estradiol to FSH ratio (or FSH to estradiol ratio) as a single measure for hormone concentration, the relationship with DSP solution index remained significant ($\rho$ = 0.420, 95% CI = [0.148, 0.633], *p* < 0.01, Spearman).
+- When using FSH to estradiol (FSH:E) ratio as a single measure for hormone concentration, the relationship with DSP solution index remained significant ($\rho$ = -0.381, *p* < 0.01, Spearman, one-tailed test).
+
+- Proportion of place and response strategies used in the DSP task were displayed for all groups (men, women, pre, peri, post), revealing that pres on average use more place strategies (more than men) and they also on average use fewer response strategies based on descriptive statistics and plot.
 
 
