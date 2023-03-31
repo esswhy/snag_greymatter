@@ -1417,7 +1417,8 @@ a <- ggplot(data = aim1_women_dsp, aes(x = estradiol_spatial_pg_ml,
                             bold("-Estradiol (pg/mL)"))
                       ),
        y = "Solution Index (%)\n",
-       color = "Reproductive Status") +
+       color = "Reproductive Status",
+       tag = "D") +
   
   #Change color of points
   scale_color_manual(values = c("cadetblue4", "mediumvioletred", "darkorange")) +
@@ -1425,9 +1426,9 @@ a <- ggplot(data = aim1_women_dsp, aes(x = estradiol_spatial_pg_ml,
   theme_minimal() +
   
   #Customize theme
-  theme(axis.title = element_text(size = 11, face = "bold"), 
+  theme(axis.title = element_text(size = 13.5, face = "bold"), 
         axis.title.x = element_text(vjust = -0.5),
-        axis.text = element_text(size= 10))
+        axis.text = element_text(size= 13))
 
 
 
@@ -1460,9 +1461,9 @@ b <- ggplot(data = aim1_women_dsp, aes(x = fsh_spatial_miu_ml,
   theme_minimal() +
   
   #Customize theme
-  theme(axis.title = element_text(size = 11, face = "bold"),
+  theme(axis.title = element_text(size = 13.5, face = "bold"),
         axis.title.x = element_text(vjust = 2),
-        axis.text = element_text(size= 10),
+        axis.text = element_text(size= 13),
         
         #Legend
         #legend.title = element_text(face = "bold"),
@@ -1476,7 +1477,7 @@ combined <- a + b & theme(legend.position = "top")
 combined + plot_layout(guides = "collect")
 
 #save
-#ggsave("study1_dsp_si_estradiol_fsh_lm.jpg", dpi = 1200)
+ggsave("study1_dsp_si_estradiol_fsh_lm.jpg", dpi = 1200)
 ```
 
 
