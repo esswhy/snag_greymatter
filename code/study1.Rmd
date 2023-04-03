@@ -906,7 +906,7 @@ c <- ggplot(data = aim1_women, aes(x = repo_status,
   labs(
        x = "",
        y = "FSH (mIU/mL)",
-       tag = "C") +
+       tag = "B") +
   
     #Change color of boxplot
   scale_fill_manual(values = c("cadetblue4", "mediumvioletred", "darkorange")) +
@@ -925,8 +925,8 @@ c <- ggplot(data = aim1_women, aes(x = repo_status,
 
 
 #Show all 3 figs together
-a+b+c + theme(axis.title.x=element_blank())
-#ggsave("hormones_box.png")
+a+c + theme(axis.title.x=element_blank())
+#ggsave("hormones_box_e_fsh.jpg", dpi = 1200)
 ```
 
 
@@ -1418,7 +1418,7 @@ a <- ggplot(data = aim1_women_dsp, aes(x = estradiol_spatial_pg_ml,
                       ),
        y = "Solution Index (%)\n",
        color = "Reproductive Status",
-       tag = "D") +
+       tag = "C") +
   
   #Change color of points
   scale_color_manual(values = c("cadetblue4", "mediumvioletred", "darkorange")) +
@@ -1477,7 +1477,8 @@ combined <- a + b & theme(legend.position = "top")
 combined + plot_layout(guides = "collect")
 
 #save
-ggsave("study1_dsp_si_estradiol_fsh_lm.jpg", dpi = 1200)
+#ggsave("study1_dsp_si_estradiol_fsh_lm.jpg", dpi = 1200)
+#ggsave("study1_dsp_c.jpg", dpi = 1200)
 ```
 
 
