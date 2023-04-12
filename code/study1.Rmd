@@ -788,7 +788,7 @@ a <- ggplot(data = aim1_women, aes(x = repo_status,
   
   #Change labels
   labs(
-       x = "",
+       x = "\nReproductive Status",
        # y = expression(atop(paste(bold("17"),
        #                           bold(beta),
        #                           bold("-Estradiol (pg/mL)")),
@@ -904,7 +904,7 @@ c <- ggplot(data = aim1_women, aes(x = repo_status,
   
   #Change labels
   labs(
-       x = "",
+       x = "\nReproductive Status",
        y = "FSH (mIU/mL)",
        tag = "B") +
   
@@ -925,7 +925,7 @@ c <- ggplot(data = aim1_women, aes(x = repo_status,
 
 
 #Show all 3 figs together
-a+c + theme(axis.title.x=element_blank())
+a+c
 #ggsave("hormones_box_e_fsh.jpg", dpi = 1200)
 ```
 
@@ -1467,6 +1467,8 @@ b <- ggplot(data = aim1_women_dsp, aes(x = fsh_spatial_miu_ml,
         
         #Legend
         #legend.title = element_text(face = "bold"),
+        legend.title = element_text(size = 12),
+        legend.text = element_text(size = 11),
         legend.position = "top"
         
         )
