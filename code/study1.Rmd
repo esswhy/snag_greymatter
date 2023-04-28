@@ -157,6 +157,41 @@ tab_final %>%
                      "LOOP" = 3, "MAZE" = 3, "DSP" = 3))
 ```
 
+```{r basic-demographics}
+#Education and verbal IQ
+aim1_women %>% 
+  summarize(mean_viq = mean(viq, na.rm = TRUE),
+            sd_viq = sd(viq, na.rm = TRUE),
+            mean_edu = mean(education_years, na.rm = TRUE),
+            sd_edu = sd(education_years, na.rm = TRUE))
+
+aim1_men %>% 
+  summarize(mean_viq = mean(viq, na.rm = TRUE),
+            sd_viq = sd(viq, na.rm = TRUE),
+            mean_edu = mean(education_years, na.rm = TRUE),
+            sd_edu = sd(education_years, na.rm = TRUE))
+
+shapiro.test(aim1_women$viq) #yes
+shapiro.test(aim1_men$viq) #yes
+wilcox.test(aim1_women$viq, aim1_men$viq) #p = 0.39
+
+shapiro.test(aim1_women$education_years) #yes
+shapiro.test(aim1_men$education_years) #yes
+wilcox.test(aim1_women$education_years,
+            aim1_men$education_years) #yes, p < 0.001
+
+#Ethnicity (% white)
+aim1_women %>% 
+  summarize(total_white = sum(ethnicity == "White", na.rm=TRUE),
+            perc_white = total_white/n())
+
+aim1_men %>% 
+  summarize(total_white = sum(ethnicity == "White", na.rm=TRUE),
+            perc_white = total_white/n())
+```
+
+
+
 **WOMEN**
 
 Some women only had a few hormones available for analysis:
@@ -273,9 +308,10 @@ aim1_men_dsp <- aim1_men %>%
                 dsp_success_pct, dsp_si_true_pct, 
                 dsp_path_efficiency_grid_weighted,
                 testosterone_spatial_ng_dl) %>% 
-    filter(dsp_useable == "Yes")
-         #is.na(testosterone_spatial_ng_dl) != TRUE)
-#n=29
+    filter(dsp_useable == "Yes",
+           is.na(testosterone_spatial_ng_dl) != TRUE)
+#n=29 without removing missing T
+#n=28 for all with T
 
 aim1_men_dsp %>%  #group_by(repo_status) %>% 
   summarize(count = n(),
@@ -388,8 +424,10 @@ aim1_men_loop <- aim1_men %>%
                 loop_de_rad3_degree, loop_de_avg_degree,
                 loop_ae_rad3_degree, loop_ae_avg_degree,
                 testosterone_spatial_ng_dl) %>% 
-  filter(loop_useable == "Yes")
-         #is.na(testosterone_spatial_ng_dl) != TRUE)
+  filter(loop_useable == "Yes",
+         is.na(loop_pe_rad3_m) != TRUE,
+         is.na(loop_de_rad3_degree) != TRUE,
+         is.na(testosterone_spatial_ng_dl) != TRUE)
 #n=22, otherwise n=21 for no T
 
 aim1_men_loop %>% #group_by(repo_status) %>% 
@@ -1450,8 +1488,9 @@ b <- ggplot(data = aim1_women_dsp, aes(x = fsh_spatial_miu_ml,
   
   #Change labels
   labs(x = "\nFSH (mIU/mL)",
-       y = " ",
-       color = "Reproductive Status"
+       y = "Solution Index (%)\n",
+       color = "Reproductive Status",
+       tag = "D"
        #caption = "Smoothing applied using `method = lm` and `formula = y ~ poly(x, 2)`"
        ) +
   
@@ -1475,12 +1514,11 @@ b <- ggplot(data = aim1_women_dsp, aes(x = fsh_spatial_miu_ml,
 
 
 #Combine
-combined <- a + b & theme(legend.position = "top")
+combined <- a + b & theme(legend.position = "bottom")
 combined + plot_layout(guides = "collect")
 
 #save
 #ggsave("study1_dsp_si_estradiol_fsh_lm.jpg", dpi = 1200)
-#ggsave("study1_dsp_c.jpg", dpi = 1200)
 ```
 
 
