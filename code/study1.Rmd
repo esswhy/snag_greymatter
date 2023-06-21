@@ -1,5 +1,5 @@
 ---
-title: 'Study 1: Hormones and Behavior'
+title: 'Endocrine aging is tied to navigational strategy in women'
 author: "Shuying Yu"
 date: "7/22/2022"
 output: 
@@ -32,22 +32,21 @@ library(coin) #for eff size of wilcoxon rank tests
 ```
 
 
-*Modified on:* March 26th, 2022
+*Modified on:* June 2023
 
 # Introduction
 
-
-Study 1 aims to investigate the relationship between sex hormones and spatial navigation behavior in midlife women and men.
+This study aims to investigate the relationship between sex hormones and spatial navigation behavior in midlife women and men.
 
 # Research Question
 
-Do sex hormones (estradiol, progesterone, FSH) covary with dependent variables in each spatial navigation task (LOOP, MAZE, DSP) for midlife women and men?
+Do sex hormones (estradiol, progesterone, FSH) covary with measures of spatial navigation (LOOP, MAZE, DSP) for midlife women and men?
 
 **Prediction:** The decline in ovarian estradiol production in midlife women will be associated with a shift in performance characteristics across spatial navigation paradigms, including an increased reliance on response-based strategies in the DSP task, fewer correct targets in the MAZE task, and more position errors in the LOOP task. For men, I hypothesize that lower testosterone concentrations will also be associated with an increased reliance on response-based strategies in the DSP task, fewer correct targets in the MAZE task, and more position errors in the LOOP task. 
 
 Given our predictions for the direction of E and FSH in women, how does the correlation change if we investigate the relationships using one-tailed correlations?
 
-Does the ratio of E/FSH among midlife women covary with position error in LOOP, accuracy in MAZE, or navigation strategy in DSP?
+Does the ratio of E/FSH, or E/P, among midlife women covary with position error in LOOP, accuracy in MAZE, or navigation strategy in DSP?
 
 
 # Methods
@@ -241,7 +240,7 @@ aim1_women %>%
 
 Same as those reported in *Yu et al. (2021)* but in the order of DSP, MAZE, and LOOP. Hormones included are testosterone for men, and estradiol, progesterone, FSH for women. Hormones are taken during time of spatial navigation task, which have been substituted from those data from the time of scan if they were empty.
 
-For measures, we will use the same dependent variables as in  our previous work:
+For measures, we will use the same dependent variables as mentioned in our previous work:
 
 - *DSP*: wayfinding success and solution index
 
@@ -2290,13 +2289,6 @@ No significant correlations for position error or degrees traveled using two-tai
 ### Table 1 Sex Differences
 
 For Table 1 in the Google Doc, I want to check if there are any sex differences between men and women for the different navigation variables.
-
-Generate a separate study for each task
-
-```{r}
-#sample size of only people who attempted SNAG 
-aim1 %>% filter(is.na(dsp_useable) != TRUE) %>% count()
-```
 
 
 ```{r post-dsp}
