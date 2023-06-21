@@ -1,0 +1,959 @@
+---
+title: "t2hipp_figures_dissertation"
+author: "Shuying Yu"
+date: "5/24/2023"
+output: html_document
+---
+
+```{r setup, include = FALSE, warning = FALSE, message = FALSE}
+knitr::opts_chunk$set(echo = TRUE, include = FALSE,
+                      warning = FALSE, message = FALSE, fig.align = "center")
+
+#Attach libraries
+library(tidyverse)
+library(here)
+library(janitor)
+library(kableExtra)
+library(ggpubr)
+library(patchwork)
+library(readxl)
+library(knitr)
+library(broom)
+library(purrr)
+library(ggbeeswarm)
+```
+
+# Overview
+
+Creating this document to make nicer figures for my dissertation :)
+
+This includes the hippocampal grey matter volume and navigation performance correlations
+
+```{r}
+#Check demographic
+#Read in the data
+check <- read_csv(here("data", "HAS_SNAG_mastersheet_tidy.csv"))
+
+#Filter for midlife, has spatial, has t2hipp data that is useable
+check <- check %>% 
+  filter(age_group == "Midlife", 
+         completed_spatial == "Yes") %>% 
+  dplyr::select(subject_id, sex, 
+         age_scan_years:testosterone_spatial_ng_dl,
+         t2hipp_vol_avg_ca1:t2hipp_vol_avg_sub,
+         t2hipp_vol_left_ca1:t2hipp_vol_right_sub,
+         t1_vbm_tiv) %>% 
+  mutate(repo_status = fct_relevel(repo_status, 
+                                    c("Pre", "Peri", "Post", "Men"))) %>% 
+  
+  #Further exclude this subject:
+  filter(!subject_id %in% c(
+    #"309", #bad participant
+    #"316", #vertigo/took Wellbutrin for mood and Lipitor for cholesterol 7 days/week of scan
+     "329", #on prednisone 7 days/week of scan
+    #"352", #current MDD/depression
+     "372" #past neuroschistosomiasis at 24 years old
+  ))
+
+
+check %>% group_by(sex) %>% 
+  summarize(count = n(),
+            mean_age = mean(age_spatial_years),
+            sd_age = sd(age_spatial_years))
+```
+
+
+```{r data-wrangling-t2hipp}
+#Read in the data
+data <- read_csv(here("data", "HAS_SNAG_mastersheet_tidy.csv"))
+
+#Filter for midlife, has spatial, has t2hipp data that is useable
+data <- data %>% 
+  filter(age_group == "Midlife", 
+         t2hipp_useable == "Yes",
+         completed_spatial == "Yes") %>% 
+  dplyr::select(subject_id, sex, 
+         age_scan_years:testosterone_spatial_ng_dl,
+         t2hipp_vol_avg_ca1:t2hipp_vol_avg_sub,
+         t2hipp_vol_left_ca1:t2hipp_vol_right_sub,
+         t1_vbm_tiv) %>% 
+  mutate(repo_status = fct_relevel(repo_status, 
+                                    c("Pre", "Peri", "Post", "Men"))) %>% 
+  
+  #Further exclude this subject:
+  filter(!subject_id %in% c(
+    #"309", #bad participant
+    #"316", #vertigo/took Wellbutrin for mood and Lipitor for cholesterol 7 days/week of scan
+     "329", #on prednisone 7 days/week of scan
+    #"352", #current MDD/depression
+     "372" #past neuroschistosomiasis at 24 years old
+  ))
+
+
+########## Create T2 total hipp and MTL volumes
+data <- data %>% 
+  
+  #Rename columns
+  rename(avg_ca1 = t2hipp_vol_avg_ca1,
+         avg_ca23 = t2hipp_vol_avg_ca23,
+         avg_dg = t2hipp_vol_avg_dg,
+         avg_erc = t2hipp_vol_avg_erc,
+         avg_phc = t2hipp_vol_avg_phc,
+         avg_prc = t2hipp_vol_avg_prc,
+         avg_sub = t2hipp_vol_avg_sub) %>% 
+  
+  #Rename left and right subfields
+  rename(left_ca1 = t2hipp_vol_left_ca1,
+         right_ca1 = t2hipp_vol_right_ca1,
+         left_ca23 = t2hipp_vol_left_ca23,
+         right_ca23 = t2hipp_vol_right_ca23,
+         left_dg = t2hipp_vol_left_dg,
+         right_dg = t2hipp_vol_right_dg,
+         left_erc = t2hipp_vol_left_erc,
+         right_erc = t2hipp_vol_right_erc,
+         left_phc = t2hipp_vol_left_phc,
+         right_phc = t2hipp_vol_right_phc,
+         left_prc = t2hipp_vol_left_prc,
+         right_prc = t2hipp_vol_right_prc,
+         left_sub = t2hipp_vol_left_sub,
+         right_sub = t2hipp_vol_right_sub) %>% 
+  
+  #Create T2 total hipp and MTL, averaged and L/R
+  mutate(avg_total_hipp = avg_ca1 + avg_ca23 + avg_dg + avg_sub,
+         left_total_hipp = left_ca1 + left_ca23 + left_dg + left_sub,
+         right_total_hipp = right_ca1 + right_ca23 + right_dg + right_sub,
+         
+         avg_mtl = avg_ca1 + avg_ca23 + avg_dg + avg_sub + avg_erc + avg_phc + avg_prc,
+         left_mtl = left_ca1 + left_ca23 + left_dg + left_sub + left_erc + left_phc + left_prc + left_sub,
+         right_mtl = right_ca1 + right_ca23 + right_dg + right_sub + right_erc + right_phc + right_prc + right_sub)
+
+
+##### Subset by sex
+
+#Subset for women by repo status
+data_repo <- data %>% 
+  filter(sex == "Female") %>% 
+  mutate(repo_status = fct_relevel(repo_status, 
+                                    c("Pre", "Peri", "Post")))
+
+#Subset for men
+data_men <- data %>% 
+  filter(sex == "Male")
+
+
+##### Subset by task
+
+data_dsp <- data %>%
+  filter(dsp_useable == "Yes")
+data_dsp_women <- data_repo %>% 
+  filter(dsp_useable == "Yes") 
+data_dsp_men <- data_men %>% 
+  filter(dsp_useable == "Yes")
+
+
+data_loop <- data %>%
+  filter(loop_useable == "Yes")
+data_loop_women <- data_repo %>% 
+  filter(loop_useable == "Yes") 
+data_loop_men <- data_men %>% 
+  filter(loop_useable == "Yes")
+```
+
+
+```{r data-wrangling-t1}
+#Read in the data
+data_t1 <- read_csv(here("data", "HAS_SNAG_mastersheet_tidy.csv"))
+
+#Filter
+data_t1 <- data_t1 %>%
+  filter(age_group == "Midlife",
+         t1_status == "Yes",
+         completed_spatial == "Yes") %>% 
+  dplyr::select(subject_id, sex, age_spatial_years, repo_status,
+         loop_useable:testosterone_spatial_ng_dl,
+         t1_vbm_tiv:t1_vol_right_hipp_aal_3d_d1_s) %>% 
+  mutate(repo_status = fct_relevel(repo_status, 
+                                    c("Pre", "Peri", "Post", "Men"))) %>% 
+
+  #Further exclude this subject:
+  filter(!subject_id %in% c(
+    #"309", #bad participant
+    #"316", #vertigo/took Wellbutrin for mood and Lipitor for cholesterol 7 days/week of scan
+     "329", #on prednisone 7 days/week of scan
+    #"352", #current MDD/depression
+     "372" #past neuroschistosomiasis at 24 years old
+  ))
+
+
+#Correct with TIV and average
+#Create function for apply to variables
+dividebyTIV <- function(x, na.rm = FALSE) (x/data_t1$t1_vbm_tiv)
+
+#Apply function to variables
+data_t1 <- data_t1 %>% 
+  
+  #Rename left and right regions
+  rename(left_t1_hipp = t1_vol_left_hipp_aal_2d_d1_r,
+         right_t1_hipp = t1_vol_right_hipp_aal_2d_d1_r) %>% 
+  
+  #Average left and right regions
+  #No need to multiply since values are the same proportion
+  mutate(avg_t1_hipp = (left_t1_hipp + right_t1_hipp)/2) %>% 
+  
+  #Correct using TIV from SPM VBM
+  mutate_at(vars(avg_t1_hipp, left_t1_hipp, right_t1_hipp),
+            dividebyTIV) %>% 
+
+  #Multiply to get proportions
+  mutate(avg_t1_hipp = avg_t1_hipp*1000,
+         left_t1_hipp = left_t1_hipp*1000,
+         right_t1_hipp = right_t1_hipp*1000)
+
+
+#Create subsets
+#Subset for women by repo status
+data_t1_repo <- data_t1 %>% 
+  filter(sex == "Female") %>% 
+  mutate(repo_status = fct_relevel(repo_status, 
+                                    c("Pre", "Peri", "Post")))
+#Subset for men
+data_t1_men <- data_t1 %>% 
+  filter(sex == "Male")
+```
+
+
+#Structure
+
+```{r}
+### Sex difference in structure
+
+#T1 total hipp
+b <- ggplot(data = data_t1, aes(x = sex,
+                           y = avg_t1_hipp)) +
+  
+  #Add beeswarm points
+  #Change size, spacing, and transparency of points
+  #Remove legend for redundancy
+  geom_beeswarm(aes(color = sex),
+                size = 3, cex = 1.3, alpha = 0.5,
+                show.legend = FALSE) +
+  
+  #Define boxplot
+  #Add fill color and change transparency
+  #Change width of box and remove outlier points
+  #Remove legend for redundancy
+  geom_boxplot(fill = NA, alpha = 0.4,
+               width = 0.5, 
+               outlier.color = NA,
+               show.legend = FALSE) +
+
+  #Add mean value for watershed type
+  #Use point, change size and shape, change color and fill
+  stat_summary(fun = mean, 
+               geom = "point", 
+               shape = 20, 
+               size = 4, 
+               color = "black", 
+               fill = "black") +
+  
+  #Change x-axis and y-axis labels
+  labs(x = "Sex",
+       y = expression(paste(bold("Average Volume "),
+                            bold("(mm"^3),
+                            bold(")"))),
+       title = "Total Hippocampus (T1)",
+       tag = "A"
+       ) +
+  
+  #Use RBrewer color palette to fill jitter points
+  #From Set3
+  scale_color_manual(values = c("mediumpurple3","mediumseagreen")) +
+
+  #Change theme
+  theme_classic() +
+  
+  #Rename watershed values
+  scale_x_discrete(labels = c("Female",
+                              "Male")) +
+  
+  #Customize theme of plot
+  #Bold x-axis and y-axis labels
+  theme(axis.title.x = element_text(size = 13, face = "bold"),
+        axis.title.y = element_text(size = 13, face = "bold"),
+        
+        #Increase x-tick and y-tick text
+        axis.text.x = element_text(size = 11),
+        axis.text.y = element_text(size = 11),
+        
+        #title
+        plot.title = element_text(size = 12, face ="bold", hjust = 0.5))
+
+#ERC
+# c <- ggplot(data = data, aes(x = sex,
+#                            y = avg_erc)) +
+#   
+#   #Add beeswarm points
+#   #Change size, spacing, and transparency of points
+#   #Remove legend for redundancy
+#   geom_beeswarm(aes(color = sex),
+#                 size = 3, cex = 1.3, alpha = 0.5,
+#                 show.legend = FALSE) +
+#   
+#   #Define boxplot
+#   #Add fill color and change transparency
+#   #Change width of box and remove outlier points
+#   #Remove legend for redundancy
+#   geom_boxplot(fill = NA, alpha = 0.4,
+#                width = 0.5, 
+#                outlier.color = NA,
+#                show.legend = FALSE) +
+# 
+#   #Add mean value for watershed type
+#   #Use point, change size and shape, change color and fill
+#   stat_summary(fun = mean, 
+#                geom = "point", 
+#                shape = 20, 
+#                size = 4, 
+#                color = "black", 
+#                fill = "black") +
+#   
+#   #Change x-axis and y-axis labels
+#   labs(x = "Sex",
+#        y = expression(paste(bold("Average Volume "),
+#                             bold("(mm"^3),
+#                             bold(")"))),
+#        title = "Entorhinal Cortex",
+#        tag = "C"
+#        ) +
+#   
+#   #Use RBrewer color palette to fill jitter points
+#   #From Set3
+#   scale_color_manual(values = c("mediumpurple3","mediumseagreen")) +
+# 
+#   #Change theme
+#   theme_classic() +
+#   
+#   #Rename watershed values
+#   scale_x_discrete(labels = c("Female",
+#                               "Male")) +
+#   
+#   #Customize theme of plot
+#   #Bold x-axis and y-axis labels
+#   theme(axis.title.x = element_text(size = 13, face = "bold"),
+#         axis.title.y = element_text(size = 13, face = "bold"),
+#         
+#         #Increase x-tick and y-tick text
+#         axis.text.x = element_text(size = 11),
+#         axis.text.y = element_text(size = 11),
+#         
+#         #title
+#         plot.title = element_text(size = 12, face ="bold", hjust = 0.5))
+
+
+#Avg T1 and wayfinding success
+data_t1_dsp <- data_t1 %>% 
+  filter(dsp_useable == "Yes") 
+
+
+#Plot
+c <- ggplot(data = data_t1_dsp, aes(x = avg_t1_hipp,
+                            y = dsp_success_pct)) +
+  
+  #Define scatter, change size and alpha
+  geom_point(#color = "mediumpurple3",
+             aes(color = sex),
+             size = 3, alpha = 0.8, show.legend = FALSE) +
+  
+  #Add LM line
+  geom_smooth(
+    method = lm, se = FALSE,
+    color = "grey50") +
+  
+   #Change colors
+  scale_color_manual(values = c("mediumpurple3", "mediumseagreen")) +
+  
+  #Change labels
+  labs(x = expression(paste(bold("Average Volume "),
+                            bold("(mm"^3),
+                            bold(")"))),
+       y = "Wayfinding Success (%)",
+       title = "Total Hippocampus (T1)",
+       tag = "B") +
+  
+  theme_classic() +
+  
+  #Customize theme
+  theme(axis.title.x = element_text(size = 13, face = "bold"),
+        axis.title.y = element_text(size = 13, face = "bold"),
+        
+        #Increase x-tick and y-tick text
+        axis.text.x = element_text(size = 11),
+        axis.text.y = element_text(size = 11),
+        
+        #title
+        plot.title = element_text(size = 12, face ="bold", hjust = 0.5))
+
+
+#Plot
+b+c
+ggsave("structure_dissertation_final.png", dpi=1200)
+# c
+# ggsave("structure_dissertation2.png", dpi=1200)
+```
+
+
+# Hormones
+
+```{r}
+#Progesterone and MTL
+d <- ggplot(data = data_repo, aes(x = avg_mtl,
+                            y = progesterone_spatial_ng_ml)) +
+  
+  #Define scatter, change size and alpha
+  geom_point(color = "mediumpurple3",
+             size = 3, alpha = 0.8, show.legend = FALSE) +
+  
+  #Add LM line
+  geom_smooth(
+    method = lm, se = FALSE,
+    color = "grey50") +
+  
+   #Change colors
+  #scale_color_manual(values = c("mediumpurple3", "mediumseagreen")) +
+  
+  #Change labels
+  labs(x = expression(paste(bold("Average Volume "),
+                            bold("(mm"^3),
+                            bold(")"))),
+       y = "Progesterone (ng/mL)",
+       title = "Medial Temporal Lobe",
+       tag = "D") +
+  
+  theme_classic() +
+  
+  #Customize theme
+  theme(axis.title = element_text(size = 13.5, face = "bold"), 
+        axis.title.x = element_text(vjust = -0.5),
+        axis.text = element_text(size= 13),
+        plot.title = element_text(size = 14, face ="bold", hjust = 0.5))
+
+
+
+#Progesterone and total hipp
+e <- ggplot(data = data_repo, aes(x = avg_total_hipp,
+                            y = progesterone_spatial_ng_ml)) +
+  
+  #Define scatter, change size and alpha
+  geom_point(color = "mediumpurple3",
+             size = 3, alpha = 0.8, show.legend = FALSE) +
+  
+  #Add LM line
+  geom_smooth(
+    method = lm, se = FALSE,
+    color = "grey50") +
+  
+   #Change colors
+  #scale_color_manual(values = c("mediumpurple3", "mediumseagreen")) +
+  
+  #Change labels
+  labs(x = expression(paste(bold("Average Volume "),
+                            bold("(mm"^3),
+                            bold(")"))),
+       y = "Progesterone (ng/mL)",
+       title = "Total Hippocampus (T2)",
+       tag = "E") +
+  
+  theme_classic() +
+  
+  #Customize theme
+  theme(axis.title = element_text(size = 13.5, face = "bold"), 
+        axis.title.x = element_text(vjust = -0.5),
+        axis.text = element_text(size= 13),
+        plot.title = element_text(size = 14, face ="bold", hjust = 0.5))
+
+
+#Progesterone and DG
+f <- ggplot(data = data_repo, aes(x = avg_dg,
+                            y = progesterone_spatial_ng_ml)) +
+  
+  #Define scatter, change size and alpha
+  geom_point(color = "mediumpurple3",
+             size = 3, alpha = 0.8, show.legend = FALSE) +
+  
+  #Add LM line
+  geom_smooth(
+    method = lm, se = FALSE,
+    color = "grey50") +
+  
+   #Change colors
+  #scale_color_manual(values = c("mediumpurple3", "mediumseagreen")) +
+  
+  #Change labels
+  labs(x = expression(paste(bold("Average Volume "),
+                            bold("(mm"^3),
+                            bold(")"))),
+       y = "Progesterone (ng/mL)",
+       title = "Dentate Gyrus",
+       tag = "F") +
+  
+  theme_classic() +
+  
+  #Customize theme
+  theme(axis.title = element_text(size = 13.5, face = "bold"), 
+        axis.title.x = element_text(vjust = -0.5),
+        axis.text = element_text(size= 13),
+        plot.title = element_text(size = 14, face ="bold", hjust = 0.5))
+
+
+
+
+
+#Plot
+d+e
+ggsave("hormones_t2hipp_dissertation.png", dpi=1200)
+e+f
+ggsave("hormones_t2hipp_dissertation2.png", dpi=1200)
+```
+
+
+
+# DSP
+
+```{r}
+#Avg T1 and wayfinding success
+data_t1_dsp <- data_t1 %>% 
+  filter(dsp_useable == "Yes") 
+
+
+#Plot
+a <- ggplot(data = data_t1_dsp, aes(x = avg_t1_hipp,
+                            y = dsp_success_pct)) +
+  
+  #Define scatter, change size and alpha
+  geom_point(#color = "mediumpurple3",
+             aes(color = sex),
+             size = 3, alpha = 0.8, show.legend = FALSE) +
+  
+  #Add LM line
+  geom_smooth(
+    method = lm, se = FALSE,
+    color = "grey50") +
+  
+   #Change colors
+  scale_color_manual(values = c("mediumpurple3", "mediumseagreen")) +
+  
+  #Change labels
+  labs(x = expression(paste(bold("Average Volume "),
+                            bold("(mm"^3),
+                            bold(")"))),
+       y = "Wayfinding Success (%)",
+       title = "Total Hippocampus (T1)",
+       tag = "A") +
+  
+  theme_classic() +
+  
+  #Customize theme
+  theme(axis.title = element_text(size = 13.5, face = "bold"), 
+        axis.title.x = element_text(vjust = -0.5),
+        axis.text = element_text(size= 13),
+        plot.title = element_text(size = 14, face ="bold", hjust = 0.5))
+
+
+#Avg ERC
+b <- ggplot(data = data_dsp, aes(x = avg_erc,
+                            y = dsp_success_pct)) +
+  
+  #Define scatter, change size and alpha
+  geom_point(#color = "royalblue1",
+             aes(color = sex),
+             size = 3, alpha = 0.8, show.legend = FALSE) +
+  
+  #Add LM line
+  geom_smooth(
+    method = lm, se = FALSE,
+    color = "grey50") +
+  
+   #Change colors
+  scale_color_manual(values = c("mediumpurple3", "mediumseagreen")) +
+  
+  #Change labels
+  labs(x = expression(paste(bold("Average Volume "),
+                            bold("(mm"^3),
+                            bold(")"))),
+       y = "Wayfinding Success (%)",
+       title = "Entorhinal Cortex",
+       tag = "B") +
+  
+  theme_classic() +
+  
+  #Customize theme
+  theme(axis.title = element_text(size = 13.5, face = "bold"), 
+        axis.title.x = element_text(vjust = -0.5),
+        axis.text = element_text(size= 13),
+        plot.title = element_text(size = 14, face ="bold", hjust = 0.5))
+
+
+
+#Plot
+b+a
+#ggsave("dsp_t1hipp_erc_dissertation2.png", dpi=1200)
+```
+
+
+
+```{r }
+
+#Avg DG
+c <- ggplot(data = data_dsp, aes(x = avg_dg,
+                            y = dsp_si_true_pct)) +
+  
+  #Define scatter, change size and alpha
+  geom_point(#color = "royalblue1",
+             aes(color = sex),
+             size = 3, alpha = 0.8, show.legend = TRUE) +
+  
+  #Add LM line
+  geom_smooth(
+    method = lm, se = FALSE,
+    color = "grey50") +
+  
+   #Change colors
+  scale_color_manual(values = c("mediumpurple3", "mediumseagreen")) +
+  
+  #Change labels
+  labs(x = expression(paste(bold("Average Volume "),
+                            bold("(mm"^3),
+                            bold(")"))),
+       y = "Solution Index (%)",
+       title = "Dentate Gyrus",
+       tag = "C") +
+  
+  theme_classic() +
+  
+  #Customize theme
+  theme(axis.title = element_text(size = 13.5, face = "bold"), 
+        axis.title.x = element_text(vjust = -0.5),
+        axis.text = element_text(size= 13),
+        plot.title = element_text(size = 14, face ="bold", hjust = 0.5),
+        
+  
+        #Legend
+        #legend.title = element_text(face = "bold"),
+        legend.title = element_text(size = 12),
+        legend.text = element_text(size = 11),
+        legend.position = "right"
+        
+        )
+
+#Combine
+combined <- b + c & theme(legend.position = "top")
+combined + plot_layout(guides = "collect")
+
+#Plot
+b+c
+# ggsave("dsp_t2hipp_sex_dissertation.png", dpi=1200)
+# 
+# c+b
+# ggsave("dsp_t2hipp_sex_dissertation2.png", dpi=1200)
+```
+
+
+# LOOP
+
+
+```{r}
+#Total hipp T2
+ggplot(data = data_loop, aes(x = avg_total_hipp,
+                            y = loop_de_rad3_degree)) +
+  
+  #Define scatter, change size and alpha
+  geom_point(#color = "royalblue1",
+             aes(color = sex),
+             size = 3, alpha = 0.8, show.legend = FALSE) +
+  
+  #Add LM line
+  geom_smooth(
+    method = lm, se = FALSE,
+    color = "grey50") +
+  
+  #Add dashed line at 360
+  geom_hline(yintercept= 360, size = 1.8,
+             linetype="dashed", color = "grey") +
+  
+  #Change colors
+  scale_color_manual(values = c("mediumpurple3", "mediumseagreen")) +
+  
+  #Change labels
+  labs(x = expression(paste(bold("Average Volume "),
+                            bold("(mm"^3),
+                            bold(")"))),
+       y = expression(paste(bold("Degrees Traveled ("),
+                            bold(degree),
+                            bold(")"))),
+       title = "Total Hippocampus (T2)",
+       #tag = "A"
+       ) +
+  
+  theme_classic() +
+  
+  #Customize theme
+  theme(axis.title = element_text(size = 13.5, face = "bold"), 
+        axis.title.x = element_text(vjust = -0.5),
+        axis.text = element_text(size= 13),
+        plot.title = element_text(size = 14, face ="bold", hjust = 0.5))
+
+
+ggsave("loop_t2hipp_total_dissertation.png", dpi=1200)
+
+
+#T2 hipp for women
+ggplot(data = data_loop_women, aes(x = avg_total_hipp,
+                            y = loop_de_rad3_degree)) +
+  
+  #Define scatter, change size and alpha
+  geom_point(color = "mediumpurple3",
+             #aes(color = sex),
+             size = 3, alpha = 0.8, show.legend = FALSE) +
+  
+  #Add LM line
+  geom_smooth(
+    method = lm, se = FALSE,
+    color = "grey50") +
+  
+  #Add dashed line at 360
+  geom_hline(yintercept= 360, size = 1.8,
+             linetype="dashed", color = "grey") +
+  
+  #Change colors
+  #scale_color_manual(values = c("mediumpurple3", "mediumseagreen")) +
+  
+  #Change labels
+  labs(x = expression(paste(bold("Average Volume "),
+                            bold("(mm"^3),
+                            bold(")"))),
+       y = expression(paste(bold("Degrees Traveled ("),
+                            bold(degree),
+                            bold(")"))),
+       title = "Total Hippocampus (T2)",
+       tag = "B") +
+  
+  theme_classic() +
+  
+  #Customize theme
+  theme(axis.title = element_text(size = 13.5, face = "bold"), 
+        axis.title.x = element_text(vjust = -0.5),
+        axis.text = element_text(size= 13),
+        plot.title = element_text(size = 14, face ="bold", hjust = 0.5))
+
+
+
+#T2 hipp for men
+ggplot(data = data_loop_men, aes(x = avg_total_hipp,
+                            y = loop_de_rad3_degree)) +
+  
+  #Define scatter, change size and alpha
+  geom_point(color = "mediumseagreen",
+             #aes(color = sex),
+             size = 3, alpha = 0.8, show.legend = FALSE) +
+  
+  #Add LM line
+  geom_smooth(
+    method = lm, se = FALSE,
+    color = "grey50") +
+  
+  #Add dashed line at 360
+  geom_hline(yintercept= 360, size = 1.8,
+             linetype="dashed", color = "grey") +
+  
+  #Change colors
+  #scale_color_manual(values = c("mediumpurple3", "mediumseagreen")) +
+  
+  #Change labels
+  labs(x = expression(paste(bold("Average Volume "),
+                            bold("(mm"^3),
+                            bold(")"))),
+       y = expression(paste(bold("Degrees Traveled ("),
+                            bold(degree),
+                            bold(")"))),
+       title = "Total Hippocampus (T2)",
+       tag = "C") +
+  
+  theme_classic() +
+  
+  #Customize theme
+  theme(axis.title = element_text(size = 13.5, face = "bold"), 
+        axis.title.x = element_text(vjust = -0.5),
+        axis.text = element_text(size= 13),
+        plot.title = element_text(size = 14, face ="bold", hjust = 0.5))
+```
+
+
+```{r}
+#Avg CA1
+a <- ggplot(data = data_loop, aes(x = avg_ca1,
+                            y = loop_de_rad3_degree)) +
+  
+  #Define scatter, change size and alpha
+  geom_point(#color = "royalblue1",
+              aes(color = sex),
+             size = 3, alpha = 0.8, show.legend = FALSE) +
+  
+  #Add LM line
+  geom_smooth(
+    method = lm, se = FALSE,
+    color = "grey50") +
+  
+  #Add dashed line at 360
+  geom_hline(yintercept= 360, size = 1.8,
+             linetype="dashed", color = "grey") +
+  
+  #Change colors
+  scale_color_manual(values = c("mediumpurple3", "mediumseagreen")) +
+  
+  #Change labels
+  labs(x = expression(paste(bold("Average Volume "),
+                            bold("(mm"^3),
+                            bold(")"))),
+       y = expression(paste(bold("Degrees Traveled ("),
+                            bold(degree),
+                            bold(")"))),
+       title = "CA1",
+       tag = "A") +
+  
+  theme_classic() +
+  
+  #Customize theme
+  theme(axis.title = element_text(size = 13.5, face = "bold"), 
+        axis.title.x = element_text(vjust = -0.5),
+        axis.text = element_text(size= 13),
+        plot.title = element_text(size = 14, face ="bold", hjust = 0.5))
+
+#Avg CA2/3
+b <- ggplot(data = data_loop, aes(x = avg_ca23,
+                            y = loop_de_rad3_degree)) +
+  
+  #Define scatter, change size and alpha
+  geom_point(#color = "royalblue1",
+             aes(color = sex),
+             size = 3, alpha = 0.8, show.legend = FALSE) +
+  
+  #Add LM line
+  geom_smooth(
+    method = lm, se = FALSE,
+    color = "grey50") +
+  
+  #Add dashed line at 360
+  geom_hline(yintercept= 360, size = 1.8,
+             linetype="dashed", color = "grey") +
+  
+  #Change colors
+  scale_color_manual(values = c("mediumpurple3", "mediumseagreen")) +
+  
+  #Change labels
+  labs(x = expression(paste(bold("Average Volume "),
+                            bold("(mm"^3),
+                            bold(")"))),
+       y = expression(paste(bold("Degrees Traveled ("),
+                            bold(degree),
+                            bold(")"))),
+       title = "CA2/3",
+       tag = "B") +
+  
+  theme_classic() +
+  
+  #Customize theme
+  theme(axis.title = element_text(size = 13.5, face = "bold"), 
+        axis.title.x = element_text(vjust = -0.5),
+        axis.text = element_text(size= 13),
+        plot.title = element_text(size = 14, face ="bold", hjust = 0.5))
+
+
+#Avg DG
+c <- ggplot(data = data_loop, aes(x = avg_dg,
+                            y = loop_de_rad3_degree)) +
+  
+  #Define scatter, change size and alpha
+  geom_point(#color = "royalblue1",
+             aes(color = sex),
+             size = 3, alpha = 0.8, show.legend = FALSE) +
+  
+  #Add LM line
+  geom_smooth(
+    method = lm, se = FALSE,
+    color = "grey50") +
+  
+  #Add dashed line at 360
+  geom_hline(yintercept= 360, size = 1.8,
+             linetype="dashed", color = "grey") +
+  
+  #Change colors
+  scale_color_manual(values = c("mediumpurple3", "mediumseagreen")) +
+  
+  #Change labels
+  labs(x = expression(paste(bold("Average Volume "),
+                            bold("(mm"^3),
+                            bold(")"))),
+       y = expression(paste(bold("Degrees Traveled ("),
+                            bold(degree),
+                            bold(")"))),
+       title = "Dentate Gyrus",
+       tag = "C") +
+  
+  theme_classic() +
+  
+  #Customize theme
+  theme(axis.title = element_text(size = 13.5, face = "bold"), 
+        axis.title.x = element_text(vjust = -0.5),
+        axis.text = element_text(size= 13),
+        plot.title = element_text(size = 14, face ="bold", hjust = 0.5))
+
+
+d <- ggplot(data = data_loop, aes(x = avg_sub,
+                            y = loop_de_rad3_degree)) +
+  
+  #Define scatter, change size and alpha
+  geom_point(#color = "royalblue1",
+             aes(color = sex),
+             size = 3, alpha = 0.8, show.legend = FALSE) +
+  
+  #Add LM line
+  geom_smooth(
+    method = lm, se = FALSE,
+    color = "grey50") +
+  
+  #Add dashed line at 360
+  geom_hline(yintercept= 360, size = 1.8,
+             linetype="dashed", color = "grey") +
+  
+  #Change colors
+  scale_color_manual(values = c("mediumpurple3", "mediumseagreen")) +
+  
+  #Change labels
+  labs(x = expression(paste(bold("Average Volume "),
+                            bold("(mm"^3),
+                            bold(")"))),
+       y = expression(paste(bold("Degrees Traveled ("),
+                            bold(degree),
+                            bold(")"))),
+       title = "Subiculum",
+       tag = "D") +
+  
+  theme_classic() +
+  
+  #Customize theme
+  theme(axis.title = element_text(size = 13.5, face = "bold"), 
+        axis.title.x = element_text(vjust = -0.5),
+        axis.text = element_text(size= 13),
+        plot.title = element_text(size = 14, face ="bold", hjust = 0.5))
+
+#Plot
+a+b
+#ggsave("loop_t2hipp_dissertation.png", dpi=1200)
+
+c+d
+#ggsave("loop_t2hipp_dissertation2.png", dpi=1200)
+```
+
+
+
+

@@ -28,7 +28,7 @@ library(purrr)
 
 # Overview
 
-This report provides exploratory and preliminary correlation analyses between sex hormones and T2 *unretouched*, raw hippocampal subfield data from the Healthy Aging Study sample (subjects 333 - 437). 
+This report provides preliminary correlation analyses between sex hormones and T2 *retouched*, raw hippocampal subfield data from the Healthy Aging Study sample (subjects 333 - 437). 
 
 **Cleaning data steps included (T2 subfields):**
 

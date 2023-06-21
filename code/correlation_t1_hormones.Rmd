@@ -376,7 +376,6 @@ ANOVA results comparing T1 hipp GMV by reproductive status was not significant.
 #T-test of GMV by sex
 ttest <- t.test(avg_t1_hipp ~ sex, data = data)
 ttest
-tidy_ttest <- tidy(ttest)
 ```
 
 
@@ -3056,6 +3055,106 @@ All correlations were Pearson except for women (Spearman)
 ## {-}
 
 # {-}
+
+
+# P-value corrections
+
+## T1
+
+```{r}
+#T1 and E, FSH, T
+p = c(0.77, 0.82, 0.29)
+p.adjust(p, 
+         method = "BH")
+```
+
+```{r}
+#T1 and DSP success overall, women, men
+p = c(0.016, 0.84, 0.055)
+p.adjust(p, 
+         method = "BH")
+```
+
+# T2 HC
+
+```{r}
+#T2 and DSP solution index overall, women, men
+p = c(0.35, 0.71, 0.052)
+p.adjust(p, 
+         method = "BH")
+```
+
+```{r}
+#T2 and LOOP degrees overall, women, men
+p = c(0.0017, 0.034, 0.097)
+p.adjust(p, 
+         method = "BH")
+```
+
+## Subfield
+
+
+
+## Hormones
+
+```{r}
+#E for CA1, ...SUB
+p = c(0.62, 0.32, 0.39, 0.94, 0.12, 0.37, 0.35)
+p.adjust(p, 
+         method = "BH")
+```
+
+```{r}
+#FSH for CA1, ...SUB
+p = c(0.61, 0.91, 0.59, 0.79, 0.72, 0.44, 0.29)
+p.adjust(p, 
+         method = "BH")
+```
+```{r}
+#T for CA1, ...SUB
+p = c(0.066, 0.64, 0.63, 0.96, 0.95, 0.57, 0.4)
+p.adjust(p, 
+         method = "BH")
+```
+
+## DSP
+
+```{r}
+#wayfinding overall
+p = c(0.98, 0.98, 0.66, 0.045, 0.57, 0.32, 0.45)
+p.adjust(p, 
+         method = "BH")
+```
+
+```{r}
+#SI overall
+p = c(0.75, 0.41, 0.073, 0.69, 0.68, 0.71, 0.43)
+p.adjust(p, 
+         method = "BH")
+```
+
+```{r}
+#MAZE
+p = c(0.74, 0.81, 0.59, 0.43, 0.54, 0.35, 0.33)
+p.adjust(p, 
+         method = "BH")
+```
+
+```{r}
+#LOO degrees traveled
+p = c(0.00032, 0.0023, 0.012, 0.61, 0.75, 0.81, 0.0066)
+p.adjust(p, 
+         method = "BH")
+```
+
+
+```{r}
+#LOOP position error
+p = c(0.67, 0.61, 0.71, 0.43, 0.075, 0.82, 0.62)
+p.adjust(p, 
+         method = "BH")
+```
+
 
 # Summary
 

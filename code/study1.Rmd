@@ -2291,6 +2291,29 @@ No significant correlations for position error or degrees traveled using two-tai
 
 For Table 1 in the Google Doc, I want to check if there are any sex differences between men and women for the different navigation variables.
 
+Generate a separate study for each task
+
+```{r}
+#sample size of only people who attempted SNAG 
+aim1 %>% filter(is.na(dsp_useable) != TRUE) %>% count()
+```
+
+
+```{r post-dsp}
+### DSP ###
+t.test(aim1_men_dsp$dsp_success_pct,
+       aim1_women_dsp$dsp_success_pct, conf.level = 0.95) #p = 0.028
+
+#After checking differences in table for men vs women
+#both non-normal so use Wilcoxon rank sum
+wilcox.test(aim1_men_dsp$dsp_si_true_pct,
+            aim1_women_dsp$dsp_si_true_pct, 
+            paired=FALSE, exact=FALSE, conf.int=TRUE, conf.level = 0.95) #p=0.135
+median(aim1_men_dsp$dsp_si_true_pct) #0.1818182
+median(aim1_women_dsp$dsp_si_true_pct) #0.25
+```
+
+
 ```{r post-analyses, include=FALSE}
 ######### Sex differences
 
@@ -2328,17 +2351,7 @@ wilcox.test(aim1_men_maze$maze_moves,
             paired=FALSE, exact=FALSE, conf.int=TRUE, conf.level = 0.95) #p=0.09023
 
 
-### DSP ###
-t.test(aim1_men_dsp$dsp_success_pct,
-       aim1_women_dsp$dsp_success_pct, conf.level = 0.95) #p = 0.028
 
-#After checking differences in table for men vs women
-#both non-normal so use Wilcoxon rank sum
-wilcox.test(aim1_men_dsp$dsp_si_true_pct,
-            aim1_women_dsp$dsp_si_true_pct, 
-            paired=FALSE, exact=FALSE, conf.int=TRUE, conf.level = 0.95) #p=0.135
-median(aim1_men_dsp$dsp_si_true_pct) #0.1818182
-median(aim1_women_dsp$dsp_si_true_pct) #0.25
 ```
 
 
