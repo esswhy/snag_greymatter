@@ -30,6 +30,7 @@ library(outliers)
 library(rstatix)
 library(coin) #for eff size of wilcoxon rank tests
 library(ppcor)
+library(nptest)
 ```
 
 
@@ -656,12 +657,12 @@ a <- ggplot(data = aim1_women, aes(x = age_spatial_years,
   scale_color_manual(values = c("cadetblue4", "mediumvioletred", "darkorange")) +
   
   #Change theme
-  theme_classic() +
+  theme_minimal() +
   
   #Customize theme
-  theme(axis.title = element_text(size = 13.5, face = "bold"), 
+  theme(axis.title = element_text(size = 13, face = "bold"), 
         axis.text.y = element_text(size = 11),
-        axis.text.x = element_text(size= 9)) 
+        axis.text.x = element_text(size= 11)) 
 
 
 
@@ -674,27 +675,28 @@ b <- ggplot(data = aim1_women, aes(x = age_spatial_years,
 
   #Define scatter, change size and alpha
   geom_point(aes(color = repo_status),
-             size = 3, alpha = 0.6, show.legend=FALSE) +
+             size = 3, alpha = 0.6, show.legend = FALSE) +
   
   #Change labels
   labs(x = "Age (years)",
-       y = "FSH (mIU/mL)") +
+       y = "FSH (mIU/mL)",
+       color = "Reproductive\nStatus") +
   
   #Change color of boxplot
   scale_color_manual(values = c("cadetblue4", "mediumvioletred", "darkorange")) +
   
   #Change theme
-  theme_classic() +
+  theme_minimal() +
   
   #Customize theme
-  theme(axis.title = element_text(size = 13.5, face = "bold"), 
+  theme(axis.title = element_text(size = 13, face = "bold"), 
         axis.text.y = element_text(size = 11),
-        axis.text.x = element_text(size= 9)) 
+        axis.text.x = element_text(size= 11)) 
 
 
 #plot
 a+b
-
+ggsave("study1_hormone_age.jpg", dpi=1200)
 ```
 
 
@@ -1386,10 +1388,11 @@ cor.test(aim1_women_dsp$fsh_spatial_miu_ml,
          aim1_women_dsp$dsp_path_efficiency_grid_weighted,
          conf.level = 0.95,
          method = "spearman")
+```
 
 
-
-############# Partial correlation
+```{r dsp-women-partial-cor}
+############# Estradiol
 
 #Calculate the correlation between estradiol and SI while controlling the variable age
 pcor.test(aim1_women_dsp$estradiol_spatial_pg_ml,
@@ -1397,6 +1400,41 @@ pcor.test(aim1_women_dsp$estradiol_spatial_pg_ml,
           aim1_women_dsp$age_spatial_years, 
           method = "spearman") #p-value=0.02876795
 
+#One-tailed
+x <- aim1_women_dsp$estradiol_spatial_pg_ml
+y <- aim1_women_dsp$dsp_si_true_pct
+z <- aim1_women_dsp$age_spatial_years
+cor.test(lm(x ~ z)$residuals,
+         lm(y ~ z)$residuals,
+         alternative = "greater",
+         conf.level = 0.95,
+         method = "spearman") #p-value=0.02852
+
+
+#Remove two outliers for Estradiol: 355 and 415
+aim1_women_outlier_e <- aim1_women_dsp %>% 
+  filter(!subject_id %in% c(
+    "415"))
+  
+#Regular non-partial corr
+cor.test(aim1_women_outlier_e$estradiol_spatial_pg_ml,
+         aim1_women_outlier_e$dsp_si_true_pct,
+         alternative = "greater",
+         conf.level = 0.95,
+         method = "spearman") #p-value:0.003529
+
+#Partial correlation
+x <- aim1_women_outlier_e$estradiol_spatial_pg_ml
+y <- aim1_women_outlier_e$dsp_si_true_pct
+z <- aim1_women_outlier_e$age_spatial_years
+cor.test(lm(x ~ z)$residuals,
+         lm(y ~ z)$residuals,
+         alternative = "greater",
+         conf.level = 0.95,
+         method = "spearman") #p-value=0.04934
+
+
+############# FSH
 
 #Calculate the correlation between FSH and SI while controlling the variable age
 pcor_dsp_fsh <- aim1_women_dsp %>% 
@@ -1406,7 +1444,61 @@ pcor.test(pcor_dsp_fsh$fsh_spatial_miu_ml,
           pcor_dsp_fsh$dsp_si_true_pct,
           pcor_dsp_fsh$age_spatial_years, 
           method = "spearman") #p-value=0.414744
+
+#One-tailed
+x <- pcor_dsp_fsh$fsh_spatial_miu_ml
+y <- pcor_dsp_fsh$dsp_si_true_pct
+z <- pcor_dsp_fsh$age_spatial_years
+cor.test(lm(x ~ z)$residuals,
+         lm(y ~ z)$residuals,
+         alternative = "less",
+         conf.level = 0.95,
+         method = "spearman") #p-value=0.05638
+
+#E:FSH ratio
+pcor_dsp_fsh <- pcor_dsp_fsh %>% 
+  mutate(e_fsh_ratio = estradiol_spatial_pg_ml/fsh_spatial_miu_ml)
+
+x <- pcor_dsp_fsh$e_fsh_ratio
+y <- pcor_dsp_fsh$dsp_si_true_pct
+z <- pcor_dsp_fsh$age_spatial_years
+cor.test(lm(x ~ z)$residuals,
+         lm(y ~ z)$residuals,
+         conf.level = 0.95,
+         method = "spearman") #p-value=0.283
+
+
+
+############# Progesterone
+pcor_dsp_p <- aim1_women_dsp %>% 
+  filter(is.na(progesterone_spatial_ng_ml) != TRUE)
+
+pcor.test(pcor_dsp_p$progesterone_spatial_ng_ml,
+          pcor_dsp_p$dsp_si_true_pct,
+          pcor_dsp_p$age_spatial_years, 
+          method = "spearman") #p-value=0.8096318
+
+#E:P ratio?
+pcor_dsp_p <- pcor_dsp_p %>% 
+  mutate(e_p_ratio = estradiol_spatial_pg_ml/progesterone_spatial_ng_ml)
+
+pcor.test(pcor_dsp_p$e_p_ratio,
+          pcor_dsp_p$dsp_si_true_pct,
+          pcor_dsp_p$age_spatial_years, 
+          method = "spearman") #p-value = 0.1140327
+
+
+
+############# Testosterone
+pcor_dsp_t <- aim1_women_dsp %>% 
+  filter(is.na(testosterone_spatial_ng_dl) != TRUE)
+
+pcor.test(pcor_dsp_t$testosterone_spatial_ng_dl,
+          pcor_dsp_t$dsp_si_true_pct,
+          pcor_dsp_t$age_spatial_years, 
+          method = "spearman") #p-value=0.3994875
 ```
+
 
 
 ```{r dsp-women-si-ci}
