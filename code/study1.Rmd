@@ -317,10 +317,10 @@ Spearman rank correlations were used for LOOP degrees at radius 3.0m, MAZE accur
 ```{r dsp-men}
 #Filter for men with dsp and testosterone
 aim1_men_dsp <- aim1_men %>% 
-  dplyr::select(subject_id, dsp_useable, 
-                dsp_success_pct, dsp_si_true_pct, 
-                dsp_path_efficiency_grid_weighted,
-                testosterone_spatial_ng_dl) %>% 
+  # dplyr::select(subject_id, dsp_useable, 
+  #               dsp_success_pct, dsp_si_true_pct, 
+  #               dsp_path_efficiency_grid_weighted,
+  #               testosterone_spatial_ng_dl) %>% 
     filter(dsp_useable == "Yes")
            #is.na(testosterone_spatial_ng_dl) != TRUE)
 #n=29 without removing missing T
@@ -328,6 +328,21 @@ aim1_men_dsp <- aim1_men %>%
 
 aim1_men_dsp %>%  #group_by(repo_status) %>% 
   summarize(count = n(),
+            mean_age = mean(age_spatial_years, na.rm=TRUE),
+            sd_age = sd(age_spatial_years, na.rm=TRUE),
+            min_age = min(age_spatial_years),
+            max_age = max(age_spatial_years),
+            mean_viq = mean(viq, na.rm = TRUE),
+            sd_viq = sd(viq, na.rm = TRUE),
+            min_viq = min(viq, na.rm = TRUE),
+            max_viq = max(viq, na.rm = TRUE),
+            mean_edu = mean(education_years, na.rm = TRUE),
+            sd_edu = sd(education_years, na.rm = TRUE),
+            min_edu = min(education_years, na.rm = TRUE),
+            max_edu = max(education_years, na.rm = TRUE),
+            total_white = sum(ethnicity == "White", na.rm=TRUE),
+            perc_white = total_white/n(),
+            
             avg_succ = mean(dsp_success_pct),
             sd_succ = sd(dsp_success_pct),
             avg_si = mean(dsp_si_true_pct),
@@ -361,6 +376,50 @@ cor.test(aim1_men$testosterone_spatial_ng_dl,
          method = "pearson")
 ```
 
+
+```{r dsp-men-partial}
+########## pearson for wayfinding success
+pcor_dsp_t <- aim1_men_dsp %>% 
+  filter(is.na(testosterone_spatial_ng_dl) != TRUE)
+
+
+pcor.test(pcor_dsp_t$testosterone_spatial_ng_dl,
+          pcor_dsp_t$dsp_success_pct,
+          pcor_dsp_t$age_spatial_years, 
+          method = "pearson") #p-value=0.823401
+
+#One-tailed
+x <- pcor_dsp_t$testosterone_spatial_ng_dl
+y <- pcor_dsp_t$dsp_success_pct
+z <- pcor_dsp_t$age_spatial_years
+cor.test(lm(x ~ z)$residuals,
+         lm(y ~ z)$residuals,
+         alternative = "greater",
+         conf.level = 0.95,
+         method = "spearman") #p-value=0.7128
+
+
+########## spearman for si
+
+
+pcor.test(pcor_dsp_t$testosterone_spatial_ng_dl,
+          pcor_dsp_t$dsp_si_true_pct,
+          pcor_dsp_t$age_spatial_years, 
+          method = "spearman") #p-value=0.4440199
+
+#One-tailed
+x <- pcor_dsp_t$testosterone_spatial_ng_dl
+y <- pcor_dsp_t$dsp_si_true_pct
+z <- pcor_dsp_t$age_spatial_years
+cor.test(lm(x ~ z)$residuals,
+         lm(y ~ z)$residuals,
+         alternative = "greater",
+         conf.level = 0.95,
+         method = "spearman") #p-value=0.8507
+
+```
+
+
 ```{r dsp-men-si-ci}
 #Get CI for rho testosterone
 DescTools::SpearmanRho(aim1_men$testosterone_spatial_ng_dl,
@@ -380,14 +439,29 @@ No significant correlations for wayfinding success or solution index.
 ```{r maze-men}
 #Filter for men with maze and testosterone
 aim1_men_maze <- aim1_men %>% 
-  dplyr::select(subject_id, maze_useable, 
-                maze_accuracy_pct, maze_moves, maze_path_efficiency,
-                testosterone_spatial_ng_dl) %>% 
+  # dplyr::select(subject_id, maze_useable, 
+  #               maze_accuracy_pct, maze_moves, maze_path_efficiency,
+  #               testosterone_spatial_ng_dl) %>% 
   filter(maze_useable == "Yes")
          #is.na(testosterone_spatial_ng_dl) != TRUE)
 #n=23
 aim1_men_maze %>% #group_by(repo_status) %>% 
   summarize(count = n(),
+            mean_age = mean(age_spatial_years, na.rm=TRUE),
+            sd_age = sd(age_spatial_years, na.rm=TRUE),
+            min_age = min(age_spatial_years),
+            max_age = max(age_spatial_years),
+            mean_viq = mean(viq, na.rm = TRUE),
+            sd_viq = sd(viq, na.rm = TRUE),
+            min_viq = min(viq, na.rm = TRUE),
+            max_viq = max(viq, na.rm = TRUE),
+            mean_edu = mean(education_years, na.rm = TRUE),
+            sd_edu = sd(education_years, na.rm = TRUE),
+            min_edu = min(education_years, na.rm = TRUE),
+            max_edu = max(education_years, na.rm = TRUE),
+            total_white = sum(ethnicity == "White", na.rm=TRUE),
+            perc_white = total_white/n(),
+            
             mean_succ = mean(maze_accuracy_pct),
             sd_succ = sd(maze_accuracy_pct),
             mean_moves = mean(maze_moves),
@@ -421,6 +495,50 @@ cor.test(aim1_men_maze$testosterone_spatial_ng_dl,
          method = "pearson")
 ```
 
+
+```{r maze-men-partial}
+########## spearman for wayfinding success
+pcor_maze_t <- aim1_men_maze %>% 
+  filter(is.na(testosterone_spatial_ng_dl) != TRUE)
+
+
+pcor.test(pcor_maze_t$testosterone_spatial_ng_dl,
+          pcor_maze_t$maze_accuracy_pct,
+          pcor_maze_t$age_spatial_years, 
+          method = "spearman") #p-value=0.5105994	
+
+#One-tailed
+x <- pcor_maze_t$testosterone_spatial_ng_dl
+y <- pcor_maze_t$maze_accuracy_pct
+z <- pcor_maze_t$age_spatial_years
+cor.test(lm(x ~ z)$residuals,
+         lm(y ~ z)$residuals,
+         alternative = "greater",
+         conf.level = 0.95,
+         method = "spearman") #p-value=0.5637
+
+
+########## pearson for moves
+
+
+pcor.test(pcor_maze_t$testosterone_spatial_ng_dl,
+          pcor_maze_t$maze_moves,
+          pcor_maze_t$age_spatial_years, 
+          method = "pearson") #p-value=0.8465817
+
+#One-tailed
+x <- pcor_maze_t$testosterone_spatial_ng_dl
+y <- pcor_maze_t$maze_moves
+z <- pcor_maze_t$age_spatial_years
+cor.test(lm(x ~ z)$residuals,
+         lm(y ~ z)$residuals,
+         alternative = "greater",
+         conf.level = 0.95,
+         method = "pearson") #p-value=0.5786
+
+```
+
+
 Testosterone sample size: Men: *n* = 23
 
 
@@ -432,11 +550,11 @@ No significant correlations for accuracy or number of moves.
 ```{r loop-men}
 #Filter for men with loop and testosterone
 aim1_men_loop <- aim1_men %>% 
-  dplyr::select(subject_id, loop_useable, 
-                loop_pe_rad3_m, 
-                loop_de_rad3_degree, loop_de_avg_degree,
-                loop_ae_rad3_degree, loop_ae_avg_degree,
-                testosterone_spatial_ng_dl) %>% 
+  # dplyr::select(subject_id, loop_useable, 
+  #               loop_pe_rad3_m, 
+  #               loop_de_rad3_degree, loop_de_avg_degree,
+  #               loop_ae_rad3_degree, loop_ae_avg_degree,
+  #               testosterone_spatial_ng_dl) %>% 
   filter(loop_useable == "Yes",
          is.na(loop_pe_rad3_m) != TRUE,
          is.na(loop_de_rad3_degree) != TRUE)
@@ -446,6 +564,21 @@ aim1_men_loop <- aim1_men %>%
 
 aim1_men_loop %>% #group_by(repo_status) %>% 
   summarize(count = n(),
+            mean_age = mean(age_spatial_years, na.rm=TRUE),
+            sd_age = sd(age_spatial_years, na.rm=TRUE),
+            min_age = min(age_spatial_years),
+            max_age = max(age_spatial_years),
+            mean_viq = mean(viq, na.rm = TRUE),
+            sd_viq = sd(viq, na.rm = TRUE),
+            min_viq = min(viq, na.rm = TRUE),
+            max_viq = max(viq, na.rm = TRUE),
+            mean_edu = mean(education_years, na.rm = TRUE),
+            sd_edu = sd(education_years, na.rm = TRUE),
+            min_edu = min(education_years, na.rm = TRUE),
+            max_edu = max(education_years, na.rm = TRUE),
+            total_white = sum(ethnicity == "White", na.rm=TRUE),
+            perc_white = total_white/n(),
+            
             mean_pe3 = mean(loop_pe_rad3_m, na.rm=T),
             sd_pe3 = sd(loop_pe_rad3_m, na.rm=T),
             mean_de3 = mean(loop_de_rad3_degree, na.rm=T),
@@ -498,6 +631,50 @@ cor.test(aim1_men_loop$testosterone_spatial_ng_dl,
          conf.level = 0.95,
          method = "pearson")
 ```
+
+```{r loop-men-partial}
+######### pearson for PE 3.0m
+
+pcor_loop_t <- aim1_men_loop %>% 
+  filter(is.na(testosterone_spatial_ng_dl) != TRUE)
+
+
+pcor.test(pcor_loop_t$testosterone_spatial_ng_dl,
+          pcor_loop_t$loop_pe_rad3_m,
+          pcor_loop_t$age_spatial_years, 
+          method = "pearson") #p-value=0.6612109	
+
+#One-tailed
+x <- pcor_loop_t$testosterone_spatial_ng_dl
+y <- pcor_loop_t$loop_pe_rad3_m
+z <- pcor_loop_t$age_spatial_years
+cor.test(lm(x ~ z)$residuals,
+         lm(y ~ z)$residuals,
+         alternative = "greater",
+         conf.level = 0.95,
+         method = "pearson") #p-value=0.6748
+
+
+########## spearman for DE
+
+
+pcor.test(pcor_loop_t$testosterone_spatial_ng_dl,
+          pcor_loop_t$loop_de_rad3_degree,
+          pcor_loop_t$age_spatial_years, 
+          method = "spearman") #p-value=0.05318446
+
+#One-tailed
+x <- pcor_loop_t$testosterone_spatial_ng_dl
+y <- pcor_loop_t$loop_de_rad3_degree
+z <- pcor_loop_t$age_spatial_years
+cor.test(lm(x ~ z)$residuals,
+         lm(y ~ z)$residuals,
+         alternative = "greater",
+         conf.level = 0.95,
+         method = "pearson") #p-value=0.992
+
+```
+
 
 ```{r loop-men-de-ci}
 #Get CI for rho
@@ -1268,20 +1445,35 @@ Hormones were skewed despite log transformations, thus Spearman rank correlation
 ```{r dsp-women}
 #Filter for women with dsp and hormones
 aim1_women_dsp <- aim1_women %>% 
-  dplyr::select(subject_id, age_spatial_years,
-                repo_status, dsp_useable, 
-                dsp_success_pct, dsp_si_true_pct, 
-                dsp_path_efficiency_grid_weighted,
-                estradiol_spatial_pg_ml,
-                progesterone_spatial_ng_ml,
-                fsh_spatial_miu_ml,
-                testosterone_spatial_ng_dl) %>% 
+  # dplyr::select(subject_id, age_spatial_years,
+  #               repo_status, dsp_useable, 
+  #               dsp_success_pct, dsp_si_true_pct, 
+  #               dsp_path_efficiency_grid_weighted,
+  #               estradiol_spatial_pg_ml,
+  #               progesterone_spatial_ng_ml,
+  #               fsh_spatial_miu_ml,
+  #               testosterone_spatial_ng_dl) %>% 
   filter(dsp_useable == "Yes")
 #n=47
 
 #Group by repo status
-aim1_women_dsp %>%  #group_by(repo_status) %>% 
+aim1_women_dsp %>%  group_by(repo_status) %>% 
   summarize(count = n(),
+            mean_age = mean(age_spatial_years, na.rm=TRUE),
+            sd_age = sd(age_spatial_years, na.rm=TRUE),
+            min_age = min(age_spatial_years),
+            max_age = max(age_spatial_years),
+            mean_viq = mean(viq, na.rm = TRUE),
+            sd_viq = sd(viq, na.rm = TRUE),
+            min_viq = min(viq, na.rm = TRUE),
+            max_viq = max(viq, na.rm = TRUE),
+            mean_edu = mean(education_years, na.rm = TRUE),
+            sd_edu = sd(education_years, na.rm = TRUE),
+            min_edu = min(education_years, na.rm = TRUE),
+            max_edu = max(education_years, na.rm = TRUE),
+            total_white = sum(ethnicity == "White", na.rm=TRUE),
+            perc_white = total_white/n(),
+            
             avg_succ = mean(dsp_success_pct),
             sd_succ = sd(dsp_success_pct),
             avg_si = mean(dsp_si_true_pct),
@@ -1391,7 +1583,7 @@ cor.test(aim1_women_dsp$fsh_spatial_miu_ml,
 ```
 
 
-```{r dsp-women-partial-cor}
+```{r dsp-women-partial-si}
 ############# Estradiol
 
 #Calculate the correlation between estradiol and SI while controlling the variable age
@@ -1399,6 +1591,11 @@ pcor.test(aim1_women_dsp$estradiol_spatial_pg_ml,
           aim1_women_dsp$dsp_si_true_pct,
           aim1_women_dsp$age_spatial_years, 
           method = "spearman") #p-value=0.02876795
+
+pcor.test(aim1_women_dsp$estradiol_spatial_pg_ml,
+          aim1_women_dsp$dsp_success_pct,
+          aim1_women_dsp$age_spatial_years, 
+          method = "spearman") #p-value=0.4694946
 
 #One-tailed
 x <- aim1_women_dsp$estradiol_spatial_pg_ml
@@ -1409,6 +1606,15 @@ cor.test(lm(x ~ z)$residuals,
          alternative = "greater",
          conf.level = 0.95,
          method = "spearman") #p-value=0.02852
+
+x <- aim1_women_dsp$estradiol_spatial_pg_ml
+y <- aim1_women_dsp$dsp_success_pct
+z <- aim1_women_dsp$age_spatial_years
+cor.test(lm(x ~ z)$residuals,
+         lm(y ~ z)$residuals,
+         alternative = "greater",
+         conf.level = 0.95,
+         method = "spearman") #p-value=0.7301
 
 
 #Remove two outliers for Estradiol: 355 and 415
@@ -1455,6 +1661,15 @@ cor.test(lm(x ~ z)$residuals,
          conf.level = 0.95,
          method = "spearman") #p-value=0.05638
 
+x <- pcor_dsp_fsh$fsh_spatial_miu_ml
+y <- pcor_dsp_fsh$dsp_success_pct
+z <- pcor_dsp_fsh$age_spatial_years
+cor.test(lm(x ~ z)$residuals,
+         lm(y ~ z)$residuals,
+         alternative = "less",
+         conf.level = 0.95,
+         method = "spearman") #p-value=0.05638
+
 #E:FSH ratio
 pcor_dsp_fsh <- pcor_dsp_fsh %>% 
   mutate(e_fsh_ratio = estradiol_spatial_pg_ml/fsh_spatial_miu_ml)
@@ -1478,6 +1693,11 @@ pcor.test(pcor_dsp_p$progesterone_spatial_ng_ml,
           pcor_dsp_p$age_spatial_years, 
           method = "spearman") #p-value=0.8096318
 
+pcor.test(pcor_dsp_p$progesterone_spatial_ng_ml,
+          pcor_dsp_p$dsp_success_pct,
+          pcor_dsp_p$age_spatial_years, 
+          method = "spearman") #p-value=0.600354
+
 #E:P ratio?
 pcor_dsp_p <- pcor_dsp_p %>% 
   mutate(e_p_ratio = estradiol_spatial_pg_ml/progesterone_spatial_ng_ml)
@@ -1495,6 +1715,11 @@ pcor_dsp_t <- aim1_women_dsp %>%
 
 pcor.test(pcor_dsp_t$testosterone_spatial_ng_dl,
           pcor_dsp_t$dsp_si_true_pct,
+          pcor_dsp_t$age_spatial_years, 
+          method = "spearman") #p-value=0.3994875
+
+pcor.test(pcor_dsp_t$testosterone_spatial_ng_dl,
+          pcor_dsp_t$dsp_success_pct,
           pcor_dsp_t$age_spatial_years, 
           method = "spearman") #p-value=0.3994875
 ```
@@ -2156,17 +2381,32 @@ Even if we restrict the analysis to a one-tailed test, the correlation between F
 ```{r maze-women}
 #Filter for women with maze and hormones
 aim1_women_maze <- aim1_women %>% 
-  dplyr::select(subject_id, repo_status, maze_useable, 
-                maze_accuracy_pct, maze_moves, maze_path_efficiency,
-                estradiol_spatial_pg_ml,
-                progesterone_spatial_ng_ml,
-                fsh_spatial_miu_ml) %>% 
+  # dplyr::select(subject_id, repo_status, maze_useable, 
+  #               maze_accuracy_pct, maze_moves, maze_path_efficiency,
+  #               estradiol_spatial_pg_ml,
+  #               progesterone_spatial_ng_ml,
+  #               fsh_spatial_miu_ml) %>% 
   filter(maze_useable == "Yes")
 #n=64
 
 #Group by repo status
-aim1_women_maze %>% #group_by(repo_status) %>% 
+aim1_women_maze %>% group_by(repo_status) %>% 
   summarize(count = n(),
+            mean_age = mean(age_spatial_years, na.rm=TRUE),
+            sd_age = sd(age_spatial_years, na.rm=TRUE),
+            min_age = min(age_spatial_years),
+            max_age = max(age_spatial_years),
+            mean_viq = mean(viq, na.rm = TRUE),
+            sd_viq = sd(viq, na.rm = TRUE),
+            min_viq = min(viq, na.rm = TRUE),
+            max_viq = max(viq, na.rm = TRUE),
+            mean_edu = mean(education_years, na.rm = TRUE),
+            sd_edu = sd(education_years, na.rm = TRUE),
+            min_edu = min(education_years, na.rm = TRUE),
+            max_edu = max(education_years, na.rm = TRUE),
+            total_white = sum(ethnicity == "White", na.rm=TRUE),
+            perc_white = total_white/n(),
+            
             mean_succ = mean(maze_accuracy_pct),
             sd_succ = sd(maze_accuracy_pct),
             mean_moves = mean(maze_moves),
@@ -2319,21 +2559,37 @@ No correlations for accuracy or number of moves using two-tailed or one-tailed t
 ```{r loop-women}
 #Filter for women with loop and hormones
 aim1_women_loop <- aim1_women %>% 
-  dplyr::select(subject_id, repo_status, loop_useable, 
-                loop_pe_rad3_m, 
-                loop_de_rad3_degree, loop_de_avg_degree,
-                loop_ae_rad3_degree, loop_ae_avg_degree,
-                estradiol_spatial_pg_ml,
-                progesterone_spatial_ng_ml,
-                fsh_spatial_miu_ml) %>% 
+  # dplyr::select(subject_id, repo_status, loop_useable, 
+  #               loop_pe_rad3_m, 
+  #               loop_de_rad3_degree, loop_de_avg_degree,
+  #               loop_ae_rad3_degree, loop_ae_avg_degree,
+  #               estradiol_spatial_pg_ml,
+  #               progesterone_spatial_ng_ml,
+  #               fsh_spatial_miu_ml) %>% 
   filter(loop_useable == "Yes",
          is.na(loop_pe_rad3_m) != TRUE,
          is.na(loop_de_rad3_degree) != TRUE)
 #n=32, but 1 without 3.0m so n=31
 
 #N by repo status
-aim1_women_loop %>% #group_by(repo_status) %>% 
+aim1_women_loop %>% group_by(repo_status) %>% 
   summarize(count = n(),
+            mean_age = mean(age_spatial_years, na.rm=TRUE),
+            sd_age = sd(age_spatial_years, na.rm=TRUE),
+            min_age = min(age_spatial_years),
+            max_age = max(age_spatial_years),
+            mean_viq = mean(viq, na.rm = TRUE),
+            sd_viq = sd(viq, na.rm = TRUE),
+            min_viq = min(viq, na.rm = TRUE),
+            max_viq = max(viq, na.rm = TRUE),
+            mean_edu = mean(education_years, na.rm = TRUE),
+            sd_edu = sd(education_years, na.rm = TRUE),
+            min_edu = min(education_years, na.rm = TRUE),
+            max_edu = max(education_years, na.rm = TRUE),
+            total_white = sum(ethnicity == "White", na.rm=TRUE),
+            perc_white = total_white/n(),
+            
+            
             mean_pe3 = mean(loop_pe_rad3_m, na.rm=T),
             sd_pe3 = sd(loop_pe_rad3_m, na.rm=T),
             mean_de3 = mean(loop_de_rad3_degree, na.rm=T),
