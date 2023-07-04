@@ -1583,7 +1583,7 @@ cor.test(aim1_women_dsp$fsh_spatial_miu_ml,
 ```
 
 
-```{r dsp-women-partial-si}
+```{r dsp-women-partial}
 ############# Estradiol
 
 #Calculate the correlation between estradiol and SI while controlling the variable age
@@ -2784,6 +2784,92 @@ cor.test(aim1_women_loop$fsh_spatial_miu_ml,
          conf.level = 0.95,
          method = "spearman")
 ```
+
+```{r loop-women-partial}
+######### Estradiol
+#One-tailed
+x <- aim1_women_loop$estradiol_spatial_pg_ml
+y <- aim1_women_loop$loop_pe_rad3_m
+z <- aim1_women_loop$age_spatial_years
+cor.test(lm(x ~ z)$residuals,
+         lm(y ~ z)$residuals,
+         alternative = "greater",
+         conf.level = 0.95,
+         method = "spearman") #p-value=0.547
+
+x <- aim1_women_loop$estradiol_spatial_pg_ml
+y <- aim1_women_loop$loop_de_rad3_degree
+z <- aim1_women_loop$age_spatial_years
+cor.test(lm(x ~ z)$residuals,
+         lm(y ~ z)$residuals,
+         alternative = "greater",
+         conf.level = 0.95,
+         method = "spearman") #p-value=0.463
+
+######### FSH
+pcor_loop_fsh <- aim1_women_loop %>% 
+  filter(is.na(fsh_spatial_miu_ml) != TRUE)
+
+x <- pcor_loop_fsh$fsh_spatial_miu_ml
+y <- pcor_loop_fsh$loop_pe_rad3_m
+z <- pcor_loop_fsh$age_spatial_years
+cor.test(lm(x ~ z)$residuals,
+         lm(y ~ z)$residuals,
+         alternative = "less",
+         conf.level = 0.95,
+         method = "spearman") #p-value=0.3061
+
+x <- pcor_loop_fsh$fsh_spatial_miu_ml
+y <- pcor_loop_fsh$loop_de_rad3_degree
+z <- pcor_loop_fsh$age_spatial_years
+cor.test(lm(x ~ z)$residuals,
+         lm(y ~ z)$residuals,
+         alternative = "less",
+         conf.level = 0.95,
+         method = "spearman") #p-value=0.6728
+
+
+######### Progesterone
+pcor_loop_p <- aim1_women_loop %>% 
+  filter(is.na(progesterone_spatial_ng_ml) != TRUE)
+
+x <- pcor_loop_p$progesterone_spatial_ng_ml
+y <- pcor_loop_p$loop_pe_rad3_m
+z <- pcor_loop_p$age_spatial_years
+cor.test(lm(x ~ z)$residuals,
+         lm(y ~ z)$residuals,
+         conf.level = 0.95,
+         method = "spearman") #p-value=0.9796
+
+x <- pcor_loop_p$progesterone_spatial_ng_ml
+y <- pcor_loop_p$loop_de_rad3_degree
+z <- pcor_loop_p$age_spatial_years
+cor.test(lm(x ~ z)$residuals,
+         lm(y ~ z)$residuals,
+         conf.level = 0.95,
+         method = "spearman") #p-value=0.06177, rho=0.378919 
+
+######### Testosterone
+pcor_loop_t <- aim1_women_loop %>% 
+  filter(is.na(testosterone_spatial_ng_dl) != TRUE)
+
+x <- pcor_loop_t$testosterone_spatial_ng_dl
+y <- pcor_loop_t$loop_pe_rad3_m
+z <- pcor_loop_t$age_spatial_years
+cor.test(lm(x ~ z)$residuals,
+         lm(y ~ z)$residuals,
+         conf.level = 0.95,
+         method = "spearman") #p-value=0.6818
+
+x <- pcor_loop_t$testosterone_spatial_ng_dl
+y <- pcor_loop_t$loop_de_rad3_degree
+z <- pcor_loop_t$age_spatial_years
+cor.test(lm(x ~ z)$residuals,
+         lm(y ~ z)$residuals,
+         conf.level = 0.95,
+         method = "spearman") #p-value=
+```
+
 
 ```{r loop-women-one-tail}
 ########## Spearman for position error 3.0m
