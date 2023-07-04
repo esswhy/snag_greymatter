@@ -2494,6 +2494,98 @@ cor.test(aim1_women_maze$fsh_spatial_miu_ml,
          method = "spearman")
 ```
 
+```{r maze-women-partial}
+##### ALL spearman
+
+#### Estradiol
+x <- aim1_women_maze$estradiol_spatial_pg_ml
+y <- aim1_women_maze$maze_accuracy_pct
+z <- aim1_women_maze$age_spatial_years
+cor.test(lm(x ~ z)$residuals,
+         lm(y ~ z)$residuals,
+         alternative = "greater",
+         conf.level = 0.95,
+         method = "spearman") #p=0.4192
+
+x <- aim1_women_maze$estradiol_spatial_pg_ml
+y <- aim1_women_maze$maze_moves
+z <- aim1_women_maze$age_spatial_years
+cor.test(lm(x ~ z)$residuals,
+         lm(y ~ z)$residuals,
+         alternative = "greater",
+         conf.level = 0.95,
+         method = "spearman") #p=0.5849
+
+
+#### FSH
+pcor_maze_fsh <- aim1_women_maze %>% 
+  filter(is.na(fsh_spatial_miu_ml) != TRUE)
+
+#One-tailed
+x <- pcor_maze_fsh$fsh_spatial_miu_ml
+y <- pcor_maze_fsh$maze_accuracy_pct
+z <- pcor_maze_fsh$age_spatial_years
+cor.test(lm(x ~ z)$residuals,
+         lm(y ~ z)$residuals,
+         alternative = "less",
+         conf.level = 0.95,
+         method = "spearman") #p-value=0.4085
+
+#One-tailed
+x <- pcor_maze_fsh$fsh_spatial_miu_ml
+y <- pcor_maze_fsh$maze_moves
+z <- pcor_maze_fsh$age_spatial_years
+cor.test(lm(x ~ z)$residuals,
+         lm(y ~ z)$residuals,
+         alternative = "less",
+         conf.level = 0.95,
+         method = "spearman") #p-value=0.6586
+
+#### Progesterone
+pcor_maze_p <- aim1_women_maze %>% 
+  filter(is.na(progesterone_spatial_ng_ml) != TRUE)
+
+x <- pcor_maze_p$progesterone_spatial_ng_ml
+y <- pcor_maze_p$maze_accuracy_pct
+z <- pcor_maze_p$age_spatial_years
+cor.test(lm(x ~ z)$residuals,
+         lm(y ~ z)$residuals,
+         conf.level = 0.95,
+         method = "spearman") #p-value=0.9287
+
+x <- pcor_maze_p$progesterone_spatial_ng_ml
+y <- pcor_maze_p$maze_moves
+z <- pcor_maze_p$age_spatial_years
+cor.test(lm(x ~ z)$residuals,
+         lm(y ~ z)$residuals,
+         conf.level = 0.95,
+         method = "spearman") #p-value=0.4291
+
+
+#### Testosterone
+pcor_maze_t <- aim1_women_maze %>% 
+  filter(is.na(testosterone_spatial_ng_dl) != TRUE)
+
+
+x <- pcor_maze_t$testosterone_spatial_ng_dl
+y <- pcor_maze_t$maze_accuracy_pct
+z <- pcor_maze_t$age_spatial_years
+cor.test(lm(x ~ z)$residuals,
+         lm(y ~ z)$residuals,
+         conf.level = 0.95,
+         method = "spearman") #p-value=0.06934, rho=-0.2341405 
+
+
+x <- pcor_maze_t$testosterone_spatial_ng_dl
+y <- pcor_maze_t$maze_moves
+z <- pcor_maze_t$age_spatial_years
+cor.test(lm(x ~ z)$residuals,
+         lm(y ~ z)$residuals,
+         conf.level = 0.95,
+         method = "spearman") #p-value=0.4821
+```
+
+
 
 ```{r maze-women-one-tail}
 ########## Spearman for wayfinding success
