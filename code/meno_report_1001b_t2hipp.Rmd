@@ -1,0 +1,849 @@
+---
+title: "Subject 1001B: T2 Hippocampal Subfields"
+author: "Shuying Yu"
+date: "07/10/2023"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 4
+    theme: journal
+---
+
+```{r setup, include = FALSE, warning = FALSE, message = FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE, fig.align = "center")
+
+#Attach libraries
+library(tidyverse)
+library(here)
+library(janitor)
+library(ggpubr)
+library(patchwork)
+library(readxl)
+library(knitr)
+library(broom)
+library(purrr)
+```
+
+
+# Overview
+
+This report provides descriptive statistics for T2 hippocampal subfield data (raw from ASHS, to make comparisons with 1001B) from the Healthy Aging Study sample (subjects 333 - 437, with 1001B appended). 
+
+Black diamond points are the group means. Highlighted in purple triangle point and purple line is subject 1001B.
+
+
+*Sample size:*
+
+- Men = 24
+
+- Women = 63 (24 pre, 20 peri, 19 post)
+
+
+```{r data_wrangling}
+########## Data 
+
+#Read in the data
+df <- read_xlsx(here("data", "HASHippDenoise_ASHS_raw.xlsx"))
+
+#Add in 438 age and sex
+df[106, 2] <- 64
+df[106, 3] <- "Female"
+df[106, 4] <- "Post"
+
+#Clean columns and rest of data
+#Remove rows after 438, rename x1 to subject_id as index
+df <- clean_names(df) %>% 
+  rename(subject_id = x1,
+         repo_status = pre_peri_post) %>% 
+  mutate(sex = recode(sex, 
+                      "F" = "Female",
+                      "M" = "Male")) %>% 
+  drop_na(age, sex) %>% 
+  slice(-c(108:113))
+
+
+########## Correct using TIV, then average left and right
+
+
+##### T2hipp
+
+#Convert rca1 to numeric
+df$rca1 <- as.numeric(df$rca1)
+
+#Create function for apply to variables
+dividebyTIV <- function(x, na.rm = FALSE) (x/df$tiv)
+
+#Apply function to variables
+df_avg <- df %>% 
+  
+  #Correct using TIV from SPM
+  #CA1, CA23, DG, ERC,PHC, PRC, SUB
+  mutate_at(vars(lca1:rsub),
+            dividebyTIV) %>% 
+  
+  #Average left and right regions
+  mutate(avg_ca1 = (lca1 + rca1)/2,
+         avg_ca23 = (lca23 + rca23)/2,
+         avg_dg = (ldg + rdg)/2,
+         avg_erc = (lerc + rerc)/2,
+         avg_phc = (lphc + rphc)/2,
+         avg_prc = (lprc + rprc)/2,
+         avg_sub = (lsub + rsub)/2)
+
+
+#Save 438 as own df and clean the rest without her
+df_1001b <- df_avg[89,]
+df_clean <- df_avg[-88:-89,]
+
+#Subset for women by repo status
+df_clean_repo <- df_clean %>% 
+  filter(sex == "Female") %>% 
+  mutate(repo_status = fct_relevel(repo_status, 
+                                    c("Pre", "Peri", "Post")))
+```
+
+
+
+```{r include = FALSE}
+### Repo stage: all histograms right-skewed, so apply transformation
+h1 <- ggplot(data = df_clean_repo, aes(x = estradiol_pg_m_l)) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Estradiol (pg/mL)",
+       y = "Count",
+       title = "Raw")
+h1a <- ggplot(data = df_clean_repo, aes(x = log(estradiol_pg_m_l))) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Log Estradiol (pg/mL)",
+       y = "Count",
+       title = "Log Transformed")
+h2 <- ggplot(data = df_clean_repo, aes(x = progesterone_ng_m_l)) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Progesterone (ng/mL)",
+       y = "Count",
+       title = "Raw")
+h2a <- ggplot(data = df_clean_repo, aes(x = log(progesterone_ng_m_l))) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Log Progesterone (ng/mL)",
+       y = "Count",
+       title = "Log Transformed")
+h3 <- ggplot(data = df_clean_repo, aes(x = fsh_m_iu_m_l)) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "FSH (mIU/mL)",
+       y = "Count",
+       title = "Raw")
+h3a <- ggplot(data = df_clean_repo, aes(x = log(fsh_m_iu_m_l))) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Log FSH (mIU/mL)",
+       y = "Count",
+       title = "Log Transformed")
+h4 <- ggplot(data = df_clean_repo, aes(x = dhea_s_ug_d_l)) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "DHEAS (ug/dL)",
+       y = "Count",
+       title = "Raw")
+h4a <- ggplot(data = df_clean_repo, aes(x = log(dhea_s_ug_d_l))) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Log DHEAS (ug/dL)",
+       y = "Count",
+       title = "Log Transformed")
+h5 <- ggplot(data = df_clean_repo, aes(x = shbg_nmol_l)) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "SHBG (nmol/L)",
+       y = "Count",
+       title = "Raw")
+h5a <- ggplot(data = df_clean_repo, aes(x = log(shbg_nmol_l))) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Log SHBG (nmol/L)",
+       y = "Count",
+       title = "Log Transformed")
+h6 <- ggplot(data = df_clean_repo, aes(x = total_testosterone_ng_d_l)) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Testosterone (ng/dL)",
+       y = "Count",
+       title = "Raw")
+h6a <- ggplot(data = df_clean_repo, aes(x = log(total_testosterone_ng_d_l))) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Log Testosterone (ng/dL)",
+       y = "Count",
+       title = "Log Transformed")
+
+(h1+h1a)/(h2+h2a)
+(h3+h3a)/(h4+h4a)
+(h5+h5a)/(h6+h6a)
+
+
+#For women, hormones will be log transformed to allow for Pearson correlations to run in the subsequent analyses (by reproductive stage)
+
+```
+
+
+
+
+
+```{r include = FALSE}
+### Men and women: all right skewed, so transform
+h4 <- ggplot(data = df_clean, aes(x = dhea_s_ug_d_l)) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "DHEAS (ug/dL)",
+       y = "Count",
+       title = "Raw")
+h4a <- ggplot(data = df_clean, aes(x = log(dhea_s_ug_d_l))) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Log DHEAS (ug/dL)",
+       y = "Count",
+       title = "Log Transformed")
+h5 <- ggplot(data = df_clean, aes(x = shbg_nmol_l)) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "SHBG (nmol/L)",
+       y = "Count",
+       title = "Raw")
+h5a <- ggplot(data = df_clean, aes(x = log(shbg_nmol_l))) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Log SHBG (nmol/L)",
+       y = "Count",
+       title = "Log Transformed")
+h6 <- ggplot(data = df_clean, aes(x = total_testosterone_ng_d_l)) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Testosterone (ng/dL)",
+       y = "Count",
+       title = "Raw")
+h6a <- ggplot(data = df_clean, aes(x = log(total_testosterone_ng_d_l))) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Log Testosterone (ng/dL)",
+       y = "Count",
+       title = "Log Transformed")
+
+h4+h4a
+h5+h5a
+h6+h6a
+
+#For any correlation analyses between women and men, hormones will also be log transformed for Pearson correlations.
+```
+
+
+
+
+
+```{r include = FALSE}
+### Men: DHEAS was normal, but allow all to be log transformed too
+df_clean_men <- df_clean %>% 
+  filter(sex == "Male")
+
+h4 <- ggplot(data = df_clean_men, aes(x = dhea_s_ug_d_l)) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "DHEAS (ug/dL)",
+       y = "Count",
+       title = "Raw")
+h4a <- ggplot(data = df_clean_men, aes(x = log(dhea_s_ug_d_l))) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Log DHEAS (ug/dL)",
+       y = "Count",
+       title = "Log Transformed")
+h5 <- ggplot(data = df_clean_men, aes(x = shbg_nmol_l)) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "SHBG (nmol/L)",
+       y = "Count",
+       title = "Raw")
+h5a <- ggplot(data = df_clean_men, aes(x = log(shbg_nmol_l))) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Log SHBG (nmol/L)",
+       y = "Count",
+       title = "Log Transformed")
+h6 <- ggplot(data = df_clean_men, aes(x = total_testosterone_ng_d_l)) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Testosterone (ng/dL)",
+       y = "Count",
+       title = "Raw")
+h6a <- ggplot(data = df_clean_men, aes(x = log(total_testosterone_ng_d_l))) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity") +
+  labs(x = "Log Testosterone (ng/dL)",
+       y = "Count",
+       title = "Log Transformed")
+
+h4+h4a
+h5+h5a
+h6+h6a
+
+
+#For just men, log transformation will also be applied in the following Pearson correlations
+```
+
+
+
+
+```{r log-transform}
+#Transform hormones so the hormone correlations would run with Pearson
+df_clean_repo <- df_clean_repo %>% 
+  mutate_at(vars(estradiol_pg_m_l:total_testosterone_ng_d_l), log)
+
+df_clean <- df_clean %>% 
+  mutate_at(vars(estradiol_pg_m_l:total_testosterone_ng_d_l), log)
+
+df_1001b <- df_1001b %>% 
+  mutate_at(vars(estradiol_pg_m_l:total_testosterone_ng_d_l), log)
+```
+
+
+
+# {-}
+
+# T2 Subfield Volume {.tabset}
+
+## CA1 
+
+Subject 1001B: average volume of 0.4954585
+
+### Structural Comparison
+
+```{r}
+#Reproductive status
+p1 <- ggplot(data = df_clean_repo, aes(y = avg_ca1,
+                                 x = repo_status,
+                                 fill = repo_status,
+                                 color = repo_status)) + 
+  geom_boxplot(alpha = 0.5,show.legend = FALSE) +
+  geom_jitter(width = 0.1, show.legend = FALSE) +
+  stat_summary(fun.y=mean, geom="point",
+               shape=20, size=3, color="black", fill="black") +
+  labs(x = "Reproductive Status",
+       y = "Averaged CA1 \nSubfield Volume",
+       title = "Reproductive Status") + 
+  theme(legend.position = "none") +
+   #Add 1001b
+  geom_point(aes(x = factor("Post"), y= df_1001b$avg_ca1),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
+
+#Sex
+p2 <- ggplot(data = df_clean, aes(y = avg_ca1,
+                                 x = sex,
+                                 fill = sex,
+                                 color = sex)) + 
+  geom_boxplot(alpha = 0.5,show.legend = FALSE) +
+  geom_jitter(width = 0.1, show.legend = FALSE) +
+  stat_summary(fun.y=mean, geom="point",
+               shape=20, size=3, color="black", fill="black") +
+  labs(x = "Sex",
+       y = "Averaged CA1 \nSubfield Volume",
+       title = "Sex") + 
+  theme(legend.position = "none") +
+      #Add 1001b
+  geom_point(aes(x = factor("Female"), y= df_1001b$avg_ca1),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
+
+
+#Total
+p3 <- ggplot(data = df_clean, aes(x = avg_ca1)) + 
+  geom_histogram(alpha = 0.5, position = "identity",
+                 show.legend = FALSE) +
+  labs(x = "Average CA1 Subfield Volume",
+       y = "Count",
+       title = "Total") +
+  #Add 1001b
+  geom_vline(aes(xintercept = df_1001b$avg_ca1), color = "purple", size = 1.5)
+
+
+#Combine
+(p1+p2)/p3
+```
+
+
+```{r}
+#ANOVA of subfield by repo stage
+aov <- aov(avg_ca1 ~ repo_status, data = df_clean_repo)
+summary_aov <- summary(aov)
+kable(summary_aov[[1]])
+```
+
+ANOVA results comparing CA1 subfield by reproductive status was not significant.
+
+```{r}
+#T-test of subfield by sex
+ttest <- t.test(avg_ca1 ~ sex, data = df_clean)
+ttest
+```
+
+
+T-test results comparing CA1 subfield by sex was significant.
+
+## CA2/3
+
+Subject 1001B: average volume of 0.1919011
+
+### Structural Comparison
+
+```{r}
+#Reproductive status
+p1 <- ggplot(data = df_clean_repo, aes(y = avg_ca23,
+                                 x = repo_status,
+                                 fill = repo_status,
+                                 color = repo_status)) + 
+  geom_boxplot(alpha = 0.5,show.legend = FALSE) +
+  geom_jitter(width = 0.1, show.legend = FALSE) +
+  stat_summary(fun.y=mean, geom="point",
+               shape=20, size=3, color="black", fill="black") +
+  labs(x = "Reproductive Status",
+       y = "Averaged CA23 \nSubfield Volume",
+       title = "Reproductive Status") + 
+  theme(legend.position = "none") +
+   #Add 1001b
+  geom_point(aes(x = factor("Post"), y= df_1001b$avg_ca23),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
+
+#Sex
+p2 <- ggplot(data = df_clean, aes(y = avg_ca23,
+                                 x = sex,
+                                 fill = sex,
+                                 color = sex)) + 
+  geom_boxplot(alpha = 0.5,show.legend = FALSE) +
+  geom_jitter(width = 0.1, show.legend = FALSE) +
+  stat_summary(fun.y=mean, geom="point",
+               shape=20, size=3, color="black", fill="black") +
+  labs(x = "Sex",
+       y = "Averaged CA23 \nSubfield Volume",
+       title = "Sex") + 
+  theme(legend.position = "none") +
+      #Add 1001b
+  geom_point(aes(x = factor("Female"), y= df_1001b$avg_ca23),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
+
+
+#Total
+p3 <- ggplot(data = df_clean, aes(x = avg_ca23)) + 
+  geom_histogram(alpha = 0.5, position = "identity",
+                 show.legend = FALSE) +
+  labs(x = "Average CA23 Subfield Volume",
+       y = "Count",
+       title = "Total") +
+  #Add 1001B
+  geom_vline(aes(xintercept = df_1001b$avg_ca23), color = "purple", size = 1.5)
+
+
+#Combine
+(p1+p2)/p3
+```
+
+
+```{r}
+#ANOVA of subfield by repo stage
+aov <- aov(avg_ca23 ~ repo_status, data = df_clean_repo)
+summary_aov <- summary(aov)
+kable(summary_aov[[1]])
+```
+
+ANOVA results comparing CA23 subfield by reproductive status was not significant.
+
+```{r}
+#T-test of subfield by sex
+ttest <- t.test(avg_ca23 ~ sex, data = df_clean)
+ttest
+```
+
+T-test results comparing CA23 subfield by sex was significant.
+
+
+## DG
+
+Subject 1001B: average volume of 0.4619523
+
+### Structural Comparison
+
+```{r}
+#Reproductive status
+p1 <- ggplot(data = df_clean_repo, aes(y = avg_dg,
+                                 x = repo_status,
+                                 fill = repo_status,
+                                 color = repo_status)) + 
+  geom_boxplot(alpha = 0.5,show.legend = FALSE) +
+  geom_jitter(width = 0.1, show.legend = FALSE) +
+  stat_summary(fun.y=mean, geom="point",
+               shape=20, size=3, color="black", fill="black") +
+  labs(x = "Reproductive Status",
+       y = "Averaged DG \nSubfield Volume",
+       title = "Reproductive Status") + 
+  theme(legend.position = "none") +
+   #Add 1001b
+  geom_point(aes(x = factor("Post"), y= df_1001b$avg_dg),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
+
+#Sex
+p2 <- ggplot(data = df_clean, aes(y = avg_dg,
+                                 x = sex,
+                                 fill = sex,
+                                 color = sex)) + 
+  geom_boxplot(alpha = 0.5,show.legend = FALSE) +
+  geom_jitter(width = 0.1, show.legend = FALSE) +
+  stat_summary(fun.y=mean, geom="point",
+               shape=20, size=3, color="black", fill="black") +
+  labs(x = "Sex",
+       y = "Averaged DG \nSubfield Volume",
+       title = "Sex") + 
+  theme(legend.position = "none") +
+      #Add 1001b
+  geom_point(aes(x = factor("Female"), y= df_1001b$avg_dg),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
+
+
+#Total
+p3 <- ggplot(data = df_clean, aes(x = avg_dg)) + 
+  geom_histogram(alpha = 0.5, position = "identity",
+                 show.legend = FALSE) +
+  labs(x = "Average DG Subfield Volume",
+       y = "Count",
+       title = "Total") +
+  #Add 1001b
+  geom_vline(aes(xintercept = df_1001b$avg_dg), color = "purple", size = 1.5)
+
+
+#Combine
+(p1+p2)/p3
+```
+
+```{r}
+#ANOVA of subfield by repo stage
+aov <- aov(avg_dg ~ repo_status, data = df_clean_repo)
+summary_aov <- summary(aov)
+kable(summary_aov[[1]])
+```
+
+ANOVA results comparing DG subfield by reproductive status was not significant.
+
+```{r}
+#T-test of subfield by sex
+ttest <- t.test(avg_dg ~ sex, data = df_clean)
+ttest
+```
+
+T-test results comparing DG subfield by sex was significant.
+
+
+
+## ERC
+
+Subject 1001B: average volume of 0.3473447
+
+### Structural Comparison
+
+```{r}
+#Reproductive status
+p1 <- ggplot(data = df_clean_repo, aes(y = avg_erc,
+                                 x = repo_status,
+                                 fill = repo_status,
+                                 color = repo_status)) + 
+  geom_boxplot(alpha = 0.5,show.legend = FALSE) +
+  geom_jitter(width = 0.1, show.legend = FALSE) +
+  stat_summary(fun.y=mean, geom="point",
+               shape=20, size=3, color="black", fill="black") +
+  labs(x = "Reproductive Status",
+       y = "Averaged ERC \nSubfield Volume",
+       title = "Reproductive Status") + 
+  theme(legend.position = "none") +
+   #Add 1001b
+  geom_point(aes(x = factor("Post"), y= df_1001b$avg_erc),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
+
+#Sex
+p2 <- ggplot(data = df_clean, aes(y = avg_erc,
+                                 x = sex,
+                                 fill = sex,
+                                 color = sex)) + 
+  geom_boxplot(alpha = 0.5,show.legend = FALSE) +
+  geom_jitter(width = 0.1, show.legend = FALSE) +
+  stat_summary(fun.y=mean, geom="point",
+               shape=20, size=3, color="black", fill="black") +
+  labs(x = "Sex",
+       y = "Averaged ERC \nSubfield Volume",
+       title = "Sex") + 
+  theme(legend.position = "none") +
+      #Add 1001b
+  geom_point(aes(x = factor("Female"), y= df_1001b$avg_erc),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
+
+
+#Total
+p3 <- ggplot(data = df_clean, aes(x = avg_erc)) + 
+  geom_histogram(alpha = 0.5, position = "identity",
+                 show.legend = FALSE) +
+  labs(x = "Average ERC Subfield Volume",
+       y = "Count",
+       title = "Total") +
+  #Add 1001b
+  geom_vline(aes(xintercept = df_1001b$avg_erc), color = "purple", size = 1.5)
+
+
+#Combine
+(p1+p2)/p3
+```
+
+```{r}
+#ANOVA of subfield by repo stage
+aov <- aov(avg_erc ~ repo_status, data = df_clean_repo)
+summary_aov <- summary(aov)
+kable(summary_aov[[1]])
+```
+
+ANOVA results comparing ERC subfield by reproductive status was significant.
+
+```{r}
+#T-test of subfield by sex
+ttest <- t.test(avg_erc ~ sex, data = df_clean)
+ttest
+```
+
+T-test results comparing ERC subfield by sex was significant.
+
+
+
+## PHC
+
+Subject 1001B: average volume of 1.535398
+
+### Structural Comparison
+
+```{r}
+#Reproductive status
+p1 <- ggplot(data = df_clean_repo, aes(y = avg_phc,
+                                 x = repo_status,
+                                 fill = repo_status,
+                                 color = repo_status)) + 
+  geom_boxplot(alpha = 0.5,show.legend = FALSE) +
+  geom_jitter(width = 0.1, show.legend = FALSE) +
+  stat_summary(fun.y=mean, geom="point",
+               shape=20, size=3, color="black", fill="black") +
+  labs(x = "Reproductive Status",
+       y = "Averaged PHC \nSubfield Volume",
+       title = "Reproductive Status") + 
+  theme(legend.position = "none") +
+   #Add 1001b
+  geom_point(aes(x = factor("Post"), y= df_1001b$avg_phc),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
+
+#Sex
+p2 <- ggplot(data = df_clean, aes(y = avg_phc,
+                                 x = sex,
+                                 fill = sex,
+                                 color = sex)) + 
+  geom_boxplot(alpha = 0.5,show.legend = FALSE) +
+  geom_jitter(width = 0.1, show.legend = FALSE) +
+  stat_summary(fun.y=mean, geom="point",
+               shape=20, size=3, color="black", fill="black") +
+  labs(x = "Sex",
+       y = "Averaged PHC \nSubfield Volume",
+       title = "Sex") + 
+  theme(legend.position = "none") +
+      #Add 1001b
+  geom_point(aes(x = factor("Female"), y= df_1001b$avg_phc),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
+
+
+#Total
+p3 <- ggplot(data = df_clean, aes(x = avg_phc)) + 
+  geom_histogram(alpha = 0.5, position = "identity",
+                 show.legend = FALSE) +
+  labs(x = "Average PHC Subfield Volume",
+       y = "Count",
+       title = "Total") +
+  #Add 1001b 
+  geom_vline(aes(xintercept = df_1001b$avg_phc), color = "purple", size = 1.5)
+
+
+#Combine
+(p1+p2)/p3
+```
+
+```{r}
+#ANOVA of subfield by repo stage
+aov <- aov(avg_phc ~ repo_status, data = df_clean_repo)
+summary_aov <- summary(aov)
+kable(summary_aov[[1]])
+```
+
+ANOVA results comparing PHC subfield by reproductive status was not significant.
+
+```{r}
+#T-test of subfield by sex
+ttest <- t.test(avg_phc ~ sex, data = df_clean)
+ttest
+```
+
+T-test results comparing PHC subfield by sex was significant.
+
+
+
+## PRC
+
+Subject 1001B: average volume of 1.191195
+
+### Structural Comparison
+
+```{r}
+#Reproductive status
+p1 <- ggplot(data = df_clean_repo, aes(y = avg_prc,
+                                 x = repo_status,
+                                 fill = repo_status,
+                                 color = repo_status)) + 
+  geom_boxplot(alpha = 0.5,show.legend = FALSE) +
+  geom_jitter(width = 0.1, show.legend = FALSE) +
+  stat_summary(fun.y=mean, geom="point",
+               shape=20, size=3, color="black", fill="black") +
+  labs(x = "Reproductive Status",
+       y = "Averaged PRC Subfield Volume",
+       title = "Reproductive Status") + 
+  theme(legend.position = "none") +
+   #Add 1001b
+  geom_point(aes(x = factor("Post"), y= df_1001b$avg_prc),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
+
+#Sex
+p2 <- ggplot(data = df_clean, aes(y = avg_prc,
+                                 x = sex,
+                                 fill = sex,
+                                 color = sex)) + 
+  geom_boxplot(alpha = 0.5,show.legend = FALSE) +
+  geom_jitter(width = 0.1, show.legend = FALSE) +
+  stat_summary(fun.y=mean, geom="point",
+               shape=20, size=3, color="black", fill="black") +
+  labs(x = "Sex",
+       y = "Averaged PRC Subfield Volume",
+       title = "Sex") + 
+  theme(legend.position = "none") +
+      #Add 1001b
+  geom_point(aes(x = factor("Female"), y= df_1001b$avg_prc),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
+
+
+#Total
+p3 <- ggplot(data = df_clean, aes(x = avg_prc)) + 
+  geom_histogram(alpha = 0.5, position = "identity",
+                 show.legend = FALSE) +
+  labs(x = "Average PRC Subfield Volume",
+       y = "Count",
+       title = "Total") +
+  #Add 1001b
+  geom_vline(aes(xintercept = df_1001b$avg_prc), color = "purple", size = 1.5)
+
+
+#Combine
+(p1+p2)/p3
+```
+```{r}
+#ANOVA of subfield by repo stage
+aov <- aov(avg_prc ~ repo_status, data = df_clean_repo)
+summary_aov <- summary(aov)
+kable(summary_aov[[1]])
+```
+
+ANOVA results comparing PRC subfield by reproductive status was not significant.
+
+```{r}
+#T-test of subfield by sex
+ttest <- t.test(avg_prc ~ sex, data = df_clean)
+ttest
+```
+
+T-test results comparing PRC subfield by sex was not significant.
+
+
+## SUB
+
+Subject 1001B: average volume of 0.2863284
+
+### Structural Comparison
+
+```{r}
+#Reproductive status
+p1 <- ggplot(data = df_clean_repo, aes(y = avg_sub,
+                                 x = repo_status,
+                                 fill = repo_status,
+                                 color = repo_status)) + 
+  geom_boxplot(alpha = 0.5,show.legend = FALSE) +
+  geom_jitter(width = 0.1, show.legend = FALSE) +
+  stat_summary(fun.y=mean, geom="point",
+               shape=20, size=3, color="black", fill="black") +
+  labs(x = "Reproductive Status",
+       y = "Averaged SUB \nSubfield Volume",
+       title = "Reproductive Status") + 
+  theme(legend.position = "none") +
+   #Add 1001b
+  geom_point(aes(x = factor("Post"), y= df_1001b$avg_sub),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
+
+#Sex
+p2 <- ggplot(data = df_clean, aes(y = avg_sub,
+                                 x = sex,
+                                 fill = sex,
+                                 color = sex)) + 
+  geom_boxplot(alpha = 0.5,show.legend = FALSE) +
+  geom_jitter(width = 0.1, show.legend = FALSE) +
+  stat_summary(fun.y=mean, geom="point",
+               shape=20, size=3, color="black", fill="black") +
+  labs(x = "Sex",
+       y = "Averaged SUB \nSubfield Volume",
+       title = "Sex") + 
+  theme(legend.position = "none") +
+      #Add 1001b
+  geom_point(aes(x = factor("Female"), y= df_1001b$avg_sub),
+             color = "purple", shape = 17, size = 3,
+             show.legend = FALSE)
+
+
+#Total
+p3 <- ggplot(data = df_clean, aes(x = avg_sub)) + 
+  geom_histogram(alpha = 0.5, position = "identity",
+                 show.legend = FALSE) +
+  labs(x = "Average SUB Subfield Volume",
+       y = "Count",
+       title = "Total") +
+  #Add 1001b
+  geom_vline(aes(xintercept = df_1001b$avg_sub), color = "purple", size = 1.5)
+
+
+#Combine
+(p1+p2)/p3
+```
+
+```{r}
+#ANOVA of subfield by repo stage
+aov <- aov(avg_sub ~ repo_status, data = df_clean_repo)
+summary_aov <- summary(aov)
+kable(summary_aov[[1]])
+```
+
+ANOVA results comparing SUB subfield by reproductive status was not significant.
+
+```{r}
+#T-test of subfield by sex
+ttest <- t.test(avg_sub ~ sex, data = df_clean)
+ttest
+```
+
+T-test results comparing SUB subfield by sex was significant.
+
+
+
+## {-}
+
+
+# Summary
+
+- Comparisons were using *raw* ASHS hippocampal subfield data in order to include subject 1001B.
+
+- Subregion volumes for women and men were generally normally distributed. There appears to be two women whose SUB volumes appear to be outliers.
+
+- ANOVA results comparing subfields by reproductive stage were not significant for almost all subfields. ANOVA results for ERC was significant by reproductive stage (*p* < 0.05).
+
+- T-test results comparing subfields by sex were all significant (at least *p* < 0.05) except for PRC.
+
