@@ -1273,6 +1273,12 @@ kruskal.test(fsh_spatial_miu_ml ~ repo_status,
 pairwise.wilcox.test(aim1_women$fsh_spatial_miu_ml, 
                      aim1_women$repo_status,
                  p.adjust.method = "BH") # all p < 0.001
+
+
+### Testosterone
+kruskal.test(testosterone_spatial_ng_dl ~ repo_status,
+      data = aim1_women) #p = 0.0886
+#Check pairwise comparisons using Wilcoxon rank sum test
 ```
 
 Kruskal-Wallis rank sum test was used for non-normal comparison between reproductive groups for estradiol, progesterone, and FSH dependent variables. If significant, pairwise comparisons were made using Wilcoxon rank sum test with Benjamini, Hochberg, and Yekutieli *p*-adjustments to control the false discovery rate.
@@ -2908,6 +2914,48 @@ cor.test(aim1_women_loop$fsh_spatial_miu_ml,
          method = "spearman")
 ```
 
+
+
+```{r loop-women-degrees-testosterone-plot}
+#Testosterone and degrees traveled for women
+#Controlling for age
+
+ggplot(data = aim1_women_loop, aes(x = testosterone_spatial_ng_dl,
+                                   y = loop_de_rad3_degree)) +
+  
+  #Define scatter, change size and alpha
+  geom_point(aes(color = repo_status),
+             size = 3, alpha = 0.6, 
+             show.legend = TRUE) +
+  
+  #Add LM line
+  geom_smooth(
+    method = lm, 
+    #formula = y ~ poly(x, 2),
+    #method = "gam", formula = y ~ s(x, bs = "cs"),
+              se = FALSE,
+              color = "grey50") +
+  
+  #Change labels
+  labs(x = "Testosterone (ng/dL)",
+       y = "Degrees Traveled at 3.0 m\n",
+       color = "Reproductive Status") +
+  
+  #Change color of points
+  scale_color_manual(values = c("cadetblue4", "mediumvioletred", "darkorange")) +
+  
+  #Add dashed line at 360 degrees
+  geom_line(y = 360, color = "grey", size = 1.3,
+            linetype = "dashed") +
+  
+  theme_minimal() +
+  
+  #Customize theme
+  theme(axis.title = element_text(size = 13.5, face = "bold"), 
+        axis.title.x = element_text(vjust = -0.5),
+        axis.text = element_text(size= 13),
+        legend.position = "top")
+```
 
 
 Estradiol sample size: Women: *n* = 31 (Pre: *n* = 13; Peri: *n* = 10; Post: *n* = 9)
