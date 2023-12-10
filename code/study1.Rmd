@@ -2955,7 +2955,18 @@ ggplot(data = aim1_women_loop, aes(x = testosterone_spatial_ng_dl,
         axis.title.x = element_text(vjust = -0.5),
         axis.text = element_text(size= 13),
         legend.position = "top")
+
+#Save figure
+#ggsave("testosterone_degrees_women.jpg", dpi=1200)
 ```
+
+```{r}
+#Check number of women in testosterone and loop corr
+aim1_women_loop %>% #group_by(repo_status) %>% 
+  filter(is.na(progesterone_spatial_ng_ml) != TRUE) %>% 
+  summarize(count = n())
+```
+
 
 
 Estradiol sample size: Women: *n* = 31 (Pre: *n* = 13; Peri: *n* = 10; Post: *n* = 9)
@@ -3019,6 +3030,9 @@ t.test(men_loop_no354$loop_de_rad3_degree,
 wilcox.test(aim1_men_maze$maze_accuracy_pct,
             aim1_women_maze$maze_accuracy_pct, 
             paired=FALSE, exact=FALSE, conf.int=TRUE, conf.level = 0.95) #p=0.1231
+
+median(aim1_men_maze$maze_accuracy_pct, na.rm=TRUE) #0.125
+median(aim1_women_maze$maze_accuracy_pct, na.rm=TRUE) #0.125
 
 #Moves
 wilcox.test(aim1_men_maze$maze_moves,
